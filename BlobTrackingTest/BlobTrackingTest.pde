@@ -14,6 +14,9 @@ Capture cam;
 /** The color to look for blobs of (white by default) */
 private color trackColor;
 private int error;
+private long lastTime;
+
+private byte[] outputData = new byte[2];
 /** 
  * Value determines how different a color can be from the 
  * track color and still be considered part of the same blob
@@ -37,6 +40,7 @@ void setup() {
   /** Setup the camera object */
   cam = new Capture(this,160,120);
   cam.start();
+  lastTime = System.currentTimeMillis();
 }
 
 /** This method gets called everytime you click the mouse */
@@ -115,6 +119,29 @@ void draw(){
     
     error = (int)crosshairX - cam.width/2;
     text(error, cam.width/2, cam.height/2);
+    outputData[0] = (byte)error;
+    outputData[1] = 0;
+    if (System.currentTimeMillis() - lastTime > 50){
+      server.write(outputData);
+      lastTime = System.currentTimeMillis();
+    }
+    
+    //by fabio :33333 xxXXXDDDDDDDDDDDDDDDD C: C: C: c:C::C: <3 <3 <3 owo 0w0 OwO 8w8 oowoo o o w o o
+    
+    //cell division 101
+    //o
+    //O
+    //0
+    //8
+    //oo
+    //OO
+    //00
+    //88
+    //oooo
+    //OOOO
+    //0000
+    //8888
+    //oooooooo
 }
 
 /**
