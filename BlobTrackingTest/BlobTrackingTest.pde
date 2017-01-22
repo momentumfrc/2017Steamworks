@@ -7,11 +7,13 @@
  */
 
 import processing.video.*;
+import processing.net.*;
 
+Server server;
 Capture cam;
 /** The color to look for blobs of (white by default) */
 private color trackColor;
-Float error;
+private int error;
 /** 
  * Value determines how different a color can be from the 
  * track color and still be considered part of the same blob
@@ -19,9 +21,10 @@ Float error;
 private float colorThresh = 5;
 
 // Croshairs
-
 private float crosshairX;
 private float crosshairY;
+
+
 
 /** Dynamically sized array that stores every blob */
 private ArrayList<Blob> blobList = new ArrayList<Blob>();
@@ -29,7 +32,8 @@ private ArrayList<Blob> blobList = new ArrayList<Blob>();
 void setup() {
   //error = cam.width/2 - crosshairX;
   size(160,120);
-   trackColor = color(0xFFFFFFFF);
+   trackColor = color(#ffffff);
+   server = new Server(this, 5810);
   /** Setup the camera object */
   cam = new Capture(this,160,120);
   cam.start();
@@ -94,17 +98,23 @@ void draw(){
     // With every blob size change, this code will run and re-find the center. This is to save processing by not running the croshair code every frame. Just when the size of a blob changes. 
     for (int i=0; i<blobList.size(); i++){
     Blob currentBlob = blobList.get(i);
-    // Getting The Current Blob to then get the center. **I know, this might not be the most efficient way to do this, but it worked for me.**
-     crosshairX += (currentBlob.centerX() - crosshairX); // Processing Said To Do That. Not Sure Why
+      // Getting The Current Blob to then get the center. **I know, this might not be the most efficient way to do this, but it worked for me.**
+      crosshairX += (currentBlob.centerX() - crosshairX); // Processing Said To Do That. Not Sure Why
       crosshairY += (currentBlob.centerY() - crosshairY); // Processing Said To Do That. Not Sure Why
-      // ERROR is unused right now. Im just stroing a seperate error for something i want to try later today.
-      error = (currentBlob.centerX() - crosshairX) + (currentBlob.centerY() - crosshairY); 
     }
-     //drawing crosshairs
-      stroke(255,0,0);
-      line(crosshairX, cam.height, crosshairX, 0);
-      line(0, crosshairY, cam.width, crosshairY);
-      println(crosshairX / cam.width + ", " + crosshairY / cam.width);
+    //drawing crosshairs
+    stroke(255,0,0);
+    line(crosshairX, cam.height, crosshairX, 0);
+    line(0, crosshairY, cam.width, crosshairY);
+    
+    //center lines
+    stroke(0,0,0);
+    line(cam.width/2, cam.height, cam.width/2, 0);
+    line(0, cam.height/2, cam.width, cam.height/2);
+    println(crosshairX / cam.width + ", " + crosshairY / cam.width);
+    
+    error = (int)crosshairX - cam.width/2;
+    text(error, cam.width/2, cam.height/2);
 }
 
 /**
