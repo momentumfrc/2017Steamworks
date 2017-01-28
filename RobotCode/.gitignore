@@ -1,7 +1,10 @@
-.classpath
-.project
-build.xml
-build
-build.properties
-sysProps.xml
-bin
+RobotCode/.classpath
+RobotCode/.project
+RobotCode/build.xml
+RobotCode/build
+RobotCode/build.properties
+RobotCode/sysProps.xml
+RobotCode/bin
+.DS_Store
+.metadata
+.recommenders
