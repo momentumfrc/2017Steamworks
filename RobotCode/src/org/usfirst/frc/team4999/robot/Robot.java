@@ -36,7 +36,7 @@ public class Robot extends IterativeRobot {
     }
 
     public void autonomousPeriodic() {
-	 	
+	 
     }
 
     public void teleopPeriodic() {
@@ -48,6 +48,14 @@ public class Robot extends IterativeRobot {
     }
     
     public void testPeriodic() {
+    	
+    }
+    
+    private double map(double input, double maxIn, double minIn, double maxOut, double minOut) {
+    		
+    }
+    
+    private double proportionalOutput(double input, double setpoint) {
     	
     }
     
