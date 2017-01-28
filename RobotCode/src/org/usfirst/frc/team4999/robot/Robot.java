@@ -15,33 +15,63 @@ import edu.wpi.first.wpilibj.VictorSP;
  * directory.
  */
 public class Robot extends IterativeRobot {
-    VictorSP left1, left2, right1, right2;
+	 Joystick flightStick;
+    VictorSP leftFront, leftBack, rightFront, rightBack;
+    CamServer server;
 	
     public void robotInit() {
-        right1 = new VictorSP(0);
-        right2 = new VictorSP(1);
-        left1 = new VictorSP(2);
-        left2 = new VictorSP(3);
+        rightFront = new VictorSP(0);
+        rightBack = new VictorSP(1);
+        leftFront = new VictorSP(2);
+        leftBack = new VictorSP(3);
+        server = new CamServer("10.49.99.12", 5810);
+        flightStick = new Joystick(0);
     }
-    
 
     public void autonomousInit() {
     	
     }
 
     public void autonomousPeriodic() {
-
+	 	
     }
 
     public void teleopPeriodic() {
-        left1.set(0.25);
-        left2.set(0.25);
-        right1.set(0.25);
-        right2.set(0.25);
+        double moveRequest = deadzone(-stick.getY());
+        double turnRequest = deadzone(stick.getTwist());
+        double speedLimiter = (-stick.getThrottle + 1) / 2;
+        
+        arcadeDrive(moveRequest, turnRequest, speedLimiter);
+        
     }
     
     public void testPeriodic() {
+    	
+    }
     
+    private void arcadeDrive(double moveRequest, double turnRequest, double speedLimiter) {
+    	double leftDrive = speedLimiter * (moveRequest + turnRequest);
+    	double rightDrive = speedLimiter * (moveRequest - turnRequest);
+    	
+    	leftFront.set(leftDrive);
+    	leftBack.set(leftDrive);
+    	rightFront.set(rightDrive);
+    	rightBack.set(rightDrive);
+    }
+    
+    private double deadzone(double input) {
+    	double zone = 0.1;
+    	if(input < zone && input > -zone)
+    		return 0;
+    	else
+    		return input;	
+    }
+    
+    private double deadzone(double input, double zone) {
+    	if(input < zone && 	input > -zone)
+    		return 0;
+    	else
+    		return input;
     }
     
 }
