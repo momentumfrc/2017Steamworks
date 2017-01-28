@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.VictorSP;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -18,6 +19,7 @@ public class Robot extends IterativeRobot {
     final String customAuto = "My Auto";
     String autoSelected;
     SendableChooser chooser;
+    VictorSP left1, left2, right1, right2;
 	
     /**
      * This function is run when the robot is first started up and should be
@@ -28,6 +30,10 @@ public class Robot extends IterativeRobot {
         chooser.addDefault("Default Auto", defaultAuto);
         chooser.addObject("My Auto", customAuto);
         SmartDashboard.putData("Auto choices", chooser);
+        right1 = new VictorSP(0);
+        right2 = new VictorSP(1);
+        left1 = new VictorSP(2);
+        left2 = new VictorSP(3);
     }
     
 	/**
@@ -64,7 +70,10 @@ public class Robot extends IterativeRobot {
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
-        
+        left1.set(0.25);
+        left2.set(0.25);
+        right1.set(0.25);
+        right2.set(0.25);
     }
     
     /**
