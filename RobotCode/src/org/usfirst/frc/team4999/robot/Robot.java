@@ -40,8 +40,8 @@ public class Robot extends IterativeRobot {
     }
 
     public void teleopPeriodic() {
-        double moveRequest = deadzone(-flightStick.getY(),.15);
-        double turnRequest = deadzone(flightStick.getTwist(),.20);
+        double moveRequest = deadzone(-flightStick.getY(), 0.15);
+        double turnRequest = deadzone(flightStick.getTwist(), 0.20);
         double speedLimiter = (-flightStick.getThrottle() + 1) / 2;
         
         arcadeDrive(moveRequest, turnRequest, speedLimiter);
