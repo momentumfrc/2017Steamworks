@@ -1,10 +1,10 @@
 package org.usfirst.frc.team4999.robot;
 
 import java.io.IOException;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.net.UnknownHostException;
 import java.net.Socket;
-import java.net.DataInputStream;
-import java.net.DataOutputStream;
 
 public class CamServer {
 
@@ -17,8 +17,8 @@ public class CamServer {
 			buffer = new byte[2];
 			try {
 				socket = new Socket(ip, port);
-				inputStream = socket.getInputStream();
-				outputStream = socket.getOutputStream();
+				inputStream = new DataInputStream(socket.getInputStream());
+				outputStream = new DataOutputStream(socket.getOutputStream());
 			} catch (UnknownHostException e) {
 				e.printStackTrace();	
 			} catch (IOException e) {
@@ -37,14 +37,11 @@ public class CamServer {
 	}
 	
 	public int getXError() {
-		return (int) byte[0];
+		return (int) buffer[0];
 	}
 	
 	public int getYError() {
-		return (int) byte[1];
+		return (int) buffer[1];
 	}
-	
-	public void terminateConnection() {
-		socket.close();	
-	}
+
 }

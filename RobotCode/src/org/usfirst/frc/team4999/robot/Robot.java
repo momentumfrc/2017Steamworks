@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.VictorSP;
+import edu.wpi.first.wpilibj.Joystick;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -17,14 +18,16 @@ import edu.wpi.first.wpilibj.VictorSP;
 public class Robot extends IterativeRobot {
 	 Joystick flightStick;
     VictorSP leftFront, leftBack, rightFront, rightBack;
-    CamServer server;
+    //CamServer server;
 	
     public void robotInit() {
         rightFront = new VictorSP(0);
         rightBack = new VictorSP(1);
         leftFront = new VictorSP(2);
         leftBack = new VictorSP(3);
-        server = new CamServer("10.49.99.12", 5810);
+        rightFront.setInverted(true);
+        rightBack.setInverted(true);
+        //server = new CamServer("10.49.99.12", 5810);
         flightStick = new Joystick(0);
     }
 
@@ -37,12 +40,11 @@ public class Robot extends IterativeRobot {
     }
 
     public void teleopPeriodic() {
-        double moveRequest = deadzone(-stick.getY());
-        double turnRequest = deadzone(stick.getTwist());
-        double speedLimiter = (-stick.getThrottle + 1) / 2;
+        double moveRequest = deadzone(-flightStick.getY(),.15);
+        double turnRequest = deadzone(flightStick.getTwist(),.20);
+        double speedLimiter = (-flightStick.getThrottle() + 1) / 2;
         
         arcadeDrive(moveRequest, turnRequest, speedLimiter);
-        
     }
     
     public void testPeriodic() {
@@ -68,7 +70,7 @@ public class Robot extends IterativeRobot {
     }
     
     private double deadzone(double input, double zone) {
-    	if(input < zone && 	input > -zone)
+    	if(input < zone && input > -zone)
     		return 0;
     	else
     		return input;
