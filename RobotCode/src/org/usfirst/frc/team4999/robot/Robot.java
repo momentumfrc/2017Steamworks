@@ -15,21 +15,9 @@ import edu.wpi.first.wpilibj.VictorSP;
  * directory.
  */
 public class Robot extends IterativeRobot {
-    final String defaultAuto = "Default";
-    final String customAuto = "My Auto";
-    String autoSelected;
-    SendableChooser chooser;
     VictorSP left1, left2, right1, right2;
 	
-    /**
-     * This function is run when the robot is first started up and should be
-     * used for any initialization code.
-     */
     public void robotInit() {
-        chooser = new SendableChooser();
-        chooser.addDefault("Default Auto", defaultAuto);
-        chooser.addObject("My Auto", customAuto);
-        SmartDashboard.putData("Auto choices", chooser);
         right1 = new VictorSP(0);
         right2 = new VictorSP(1);
         left1 = new VictorSP(2);
@@ -38,29 +26,13 @@ public class Robot extends IterativeRobot {
     
 
     public void autonomousInit() {
-    	autoSelected = (String) chooser.getSelected();
-//		autoSelected = SmartDashboard.getString("Auto Selector", defaultAuto);
-		System.out.println("Auto selected: " + autoSelected);
+    	
     }
 
-    /**
-     * This function is called periodically during autonomous
-     */
     public void autonomousPeriodic() {
-    	switch(autoSelected) {
-    	case customAuto:
-        //Put custom auto code here   
-            break;
-    	case defaultAuto:
-    	default:
-    	//Put default auto code here
-            break;
-    	}
+
     }
 
-    /**
-     * This function is called periodically during operator control
-     */
     public void teleopPeriodic() {
         left1.set(0.25);
         left2.set(0.25);
@@ -68,9 +40,6 @@ public class Robot extends IterativeRobot {
         right2.set(0.25);
     }
     
-    /**
-     * This function is called periodically during test mode
-     */
     public void testPeriodic() {
     
     }
