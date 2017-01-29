@@ -100,7 +100,7 @@ public class Robot extends IterativeRobot {
 	 * @param maxOut The upper bound of the output's range.
 	 * @return The input value mapped to the given range.
 	 */
-	public static double map(double input, double minIn, double maxIn, double minOut double maxOut) {
+	public static double map(double input, double minIn, double maxIn, double minOut, double maxOut) {
 		return minOut + (maxOut - minOut) * ((input - minIn) / (maxIn - minIn));
 	}
 	
