@@ -18,12 +18,10 @@ Float error;
  */
 private float colorThresh = 5;
 
-
 // Croshairs
 
 private float crosshairX;
 private float crosshairY;
-
 
 /** Dynamically sized array that stores every blob */
 private ArrayList<Blob> blobList = new ArrayList<Blob>();
@@ -51,9 +49,7 @@ void draw(){
   /** Load the pixel data into the cam.pixels array for later access */
   cam.loadPixels();
   image(cam, 0, 0);
-  
-  
-  
+
   /** Empty the list of blobs with each new frame */
   blobList.clear();
   
@@ -61,18 +57,14 @@ void draw(){
   for(int x = 0; x < cam.width; x++){
     for(int y = 0; y < cam.height; y++){
       color currentColor = cam.pixels[x + (y * cam.width)];
-      
       float currentRed = red(currentColor);
       float currentGreen = green(currentColor);
       float currentBlue = blue(currentColor);
-      
       float trackRed = red(trackColor);
       float trackGreen = green(trackColor);
       float trackBlue = blue(trackColor);
-      
       /** Calculates how different the current pixel is from the color we are looking for */
       float colorDiff = quadrance(currentRed,currentGreen,currentBlue, trackRed, trackGreen, trackBlue);
-      
       /** 
        * If it is the right color, either add it to an existing blob
        * if it is close enough, otherwise, make a new one
@@ -99,10 +91,13 @@ void draw(){
   /** Draw the green rectangle for each blob */
   for(Blob blob : blobList)
     blob.show();
+    // With every blob size change, this code will run and re-find the center. This is to save processing by not running the croshair code every frame. Just when the size of a blob changes. 
     for (int i=0; i<blobList.size(); i++){
     Blob currentBlob = blobList.get(i);
-     crosshairX += (currentBlob.centerX() - crosshairX)*0.3;
-      crosshairY += (currentBlob.centerY() - crosshairY)*0.3;
+    // Getting The Current Blob to then get the center. **I know, this might not be the most efficient way to do this, but it worked for me.**
+     crosshairX += (currentBlob.centerX() - crosshairX); // Processing Said To Do That. Not Sure Why
+      crosshairY += (currentBlob.centerY() - crosshairY); // Processing Said To Do That. Not Sure Why
+      // ERROR is unused right now. Im just stroing a seperate error for something i want to try later today.
       error = (currentBlob.centerX() - crosshairX) + (currentBlob.centerY() - crosshairY); 
     }
      //drawing crosshairs
@@ -111,8 +106,6 @@ void draw(){
       line(0, crosshairY, cam.width, crosshairY);
       println(crosshairX / cam.width + ", " + crosshairY / cam.width);
 }
-
-
 
 /**
  * Quadrance is distance squared. We can think of colors as coordinates in a 3Dimensional space.
