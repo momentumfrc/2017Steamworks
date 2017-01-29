@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj.Joystick;
 public class Robot extends IterativeRobot {
 	Joystick flightStick;
 	VictorSP leftFront, leftBack, rightFront, rightBack;
-	//CamServer server;
+	CamServer server;
 	
 	/**
 	 * This method is run once when the robot is turned on.
@@ -30,7 +30,7 @@ public class Robot extends IterativeRobot {
 		leftBack = new VictorSP(3);
 		rightFront.setInverted(true);
 		rightBack.setInverted(true);
-		//server = new CamServer("10.49.99.12", 5810);
+		server = new CamServer("10.49.99.12", 5810);
 		flightStick = new Joystick(0);
 	}
 	
@@ -45,16 +45,22 @@ public class Robot extends IterativeRobot {
 	 * This method runs in a loop during autonomous mode.
 	 */
 	public void autonomousPeriodic() {
-	
+		final int xErr = server.getXError();
+		final int yErr = server.getYError();
+		
+		// Our image width is 160, so the error must be within -80 and 80 pixels.
+		final double turnRequest = map(xErr, -80, 80, -1, 1);
+		
+		arcadeDrive(0, turnRequest, 0.25);
 	}
 	
 	/**
 	 * This method runs in a loop during teleop mode.
 	 */
 	public void teleopPeriodic() {
-		double moveRequest = deadzone(-flightStick.getY(), 0.15);
-		double turnRequest = deadzone(flightStick.getTwist(), 0.20);
-		double speedLimiter = (-flightStick.getThrottle() + 1) / 2;
+		final double moveRequest = deadzone(-flightStick.getY(), 0.15);
+		final double turnRequest = deadzone(flightStick.getTwist(), 0.20);
+		final double speedLimiter = (-flightStick.getThrottle() + 1) / 2;
 		
 		arcadeDrive(moveRequest, turnRequest, speedLimiter);
 	}
@@ -64,20 +70,6 @@ public class Robot extends IterativeRobot {
 	 */
 	public void testPeriodic() {
 	
-	}
-	
-	/**
-	 * Maps a number from one range to another range.
-	 *
-	 * @param input The incoming value to convert into the proper range.
-	 * @param minIn The lower bound of the input value's range.
-	 * @param maxIn The upper bound of the input value's range.
-	 * @param minOut The lower bound of the output's range.
-	 * @param maxOut The upper bound of the output's range.
-	 * @return The input value mapped to the given range.
-	 */
-	private static double map(double input, double minIn, double maxIn, double minOut double maxOut) {
-		return minOut + (maxOut - minOut) * ((input - minIn) / (maxIn - minIn));
 	}
 	
 	/**
@@ -99,12 +91,43 @@ public class Robot extends IterativeRobot {
 	}
 	
 	/**
+	 * Maps a number from one range to another range.
+	 *
+	 * @param input The incoming value to convert into the proper range.
+	 * @param minIn The lower bound of the input value's range.
+	 * @param maxIn The upper bound of the input value's range.
+	 * @param minOut The lower bound of the output's range.
+	 * @param maxOut The upper bound of the output's range.
+	 * @return The input value mapped to the given range.
+	 */
+	public static double map(double input, double minIn, double maxIn, double minOut double maxOut) {
+		return minOut + (maxOut - minOut) * ((input - minIn) / (maxIn - minIn));
+	}
+	
+	/**
+	 * Clips a value to be within a given range.
+	 *
+	 * @param input The value to clip.
+	 * @param max The maximum possible value for the output.
+	 * @param min The minimum possible value for the output.
+	 * @return The input value, clipped to be within the given max and min range.
+	 */
+	public static double clip(double input, double max, double min) {
+		if(input > max)
+			return max;
+		else if(input < min)
+			return min;
+		else
+			return input;	
+	}
+	
+	/**
 	 * Takes the output value of a joystick axis, and applies a deadzone if it is within -0.1 and 0.1
 	 *
 	 * @param input The output value of the joystick axis.
 	 * @return The joystick axis value, or 0 if the input value is within the deadzone.
 	 */
-	private double deadzone(double input) {
+	public static double deadzone(double input) {
 		double zone = 0.1;
 		if(input < zone && input > -zone)
 			return 0;
@@ -119,7 +142,7 @@ public class Robot extends IterativeRobot {
 	 * @param zone The size of the deadzone.
 	 * @return The joystick axis value, or 0 if the input value is within the deadzone.
 	 */
-	private double deadzone(double input, double zone) {
+	public static double deadzone(double input, double zone) {
 		if(input < zone && input > -zone)
 			return 0;
 		else
