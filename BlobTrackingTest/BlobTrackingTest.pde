@@ -109,6 +109,7 @@ void draw(){
       stroke(255,0,0);
       line(crosshairX, cam.height, crosshairX, 0);
       line(0, crosshairY, cam.width, crosshairY);
+      println(crosshairX + ", " + crosshairY);
 }
 
 public void getCenter(){
