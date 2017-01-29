@@ -1,5 +1,5 @@
 /**
- * @author Fabio Colacio
+ * @author Fabio Colacio & Nate McConnell
  *
  * This  code looks for the color white in an image, and draws rectangles
  * around blobs which are white. If you click on part of the image, it

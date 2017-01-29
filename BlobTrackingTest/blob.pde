@@ -1,5 +1,5 @@
 /**
- * @author Fabio Colacio
+ * @author Fabio Colacio & Nate McConnell
  *
  * This is the code for a blob. It is simply two sets of coordinates
  * defining a rectangle, with a means to expand itself to include extra pixels. 
