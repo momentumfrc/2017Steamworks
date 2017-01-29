@@ -51,12 +51,12 @@ public class Robot extends IterativeRobot {
 	
 	}
 	
-	private double map(double input, double maxIn, double minIn, double maxOut, double minOut) {
-	
+	private static double map(double input, double minIn, double maxIn, double minOut double maxOut) {
+		return minOut + (maxOut - minOut) * ((input - minIn) / (maxIn - minIn));
 	}
 	
-	private double proportionalOutput(double input, double setpoint) {
-	
+	private static double proportionalOutput(double input, double setpoint) {
+		
 	}
 	
 	private void arcadeDrive(double moveRequest, double turnRequest, double speedLimiter) {
