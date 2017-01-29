@@ -109,14 +109,10 @@ void draw(){
       stroke(255,0,0);
       line(crosshairX, cam.height, crosshairX, 0);
       line(0, crosshairY, cam.width, crosshairY);
-      println(crosshairX + ", " + crosshairY);
+      println(crosshairX / cam.width + ", " + crosshairY / cam.width);
 }
 
-public void getCenter(){
-  stroke(0,0,0);
-  line(cam.width/2, cam.height, cam.width/2, 0);
-  line(0, cam.height/2, cam.width, cam.height/2);
-}
+
 
 /**
  * Quadrance is distance squared. We can think of colors as coordinates in a 3Dimensional space.
