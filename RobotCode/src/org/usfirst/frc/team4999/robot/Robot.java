@@ -24,12 +24,18 @@ public class Robot extends IterativeRobot {
 	 * This method is run once when the robot is turned on.
 	 */
 	public void robotInit() {
-		rightFront = new VictorSP(0);
-		rightBack = new VictorSP(1);
-		leftFront = new VictorSP(2);
-		leftBack = new VictorSP(3);
-		rightFront.setInverted(true);
-		rightBack.setInverted(true);
+// 		rightFront = new VictorSP(0);
+// 		rightBack = new VictorSP(1);
+// 		leftFront = new VictorSP(2);
+// 		leftBack = new VictorSP(3);
+// 		rightFront.setInverted(true);
+// 		rightBack.setInverted(true);
+
+		leftFront = new VictorSP(0);
+		rightFront = new VictorSP(1);
+		leftBack = new VictorSP(2);
+		rightBack = new VictorSP(3);
+		
 		server = new CamServer("10.49.99.12", 5810);
 		flightStick = new Joystick(0);
 	}
@@ -38,19 +44,25 @@ public class Robot extends IterativeRobot {
 	 * This method is run once at the beginning of the autonomous period.
 	 */
 	public void autonomousInit() {
+		server = new CamServer("10.49.99.12", 5810);
+	}
 	
+	public void disabledInit() {
+		server = new CamServer("10.49.99.12", 5810);
 	}
 	
 	/**
 	 * This method runs in a loop during autonomous mode.
 	 */
 	public void autonomousPeriodic() {
+		server.refresh();
 		final int xErr = server.getXError();
 		final int yErr = server.getYError();
 		
 		// Our image width is 160, so the error must be within -80 and 80 pixels.
+		System.out.println(xErr);
 		final double turnRequest = map(xErr, -80, 80, -1, 1);
-		
+		System.out.println(turnRequest);
 		arcadeDrive(0, turnRequest, 0.25);
 	}
 	
