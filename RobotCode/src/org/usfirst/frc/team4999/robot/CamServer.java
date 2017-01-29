@@ -12,18 +12,18 @@ public class CamServer {
 	private DataInputStream inputStream;
 	private DataOutputStream outputStream;
 	private byte[] buffer;
-
+	
 	public CamServer(String ip, int port) {
-			buffer = new byte[2];
-			try {
-				socket = new Socket(ip, port);
-				inputStream = new DataInputStream(socket.getInputStream());
-				outputStream = new DataOutputStream(socket.getOutputStream());
-			} catch (UnknownHostException e) {
-				e.printStackTrace();	
-			} catch (IOException e) {
-				e.printStackTrace();	
-			}
+		buffer = new byte[2];
+		try {
+			socket = new Socket(ip, port);
+			inputStream = new DataInputStream(socket.getInputStream());
+			outputStream = new DataOutputStream(socket.getOutputStream());
+		} catch (UnknownHostException e) {
+			e.printStackTrace();	
+		} catch (IOException e) {
+			e.printStackTrace();	
+		}
 	}
 	
 	public void refresh() {
