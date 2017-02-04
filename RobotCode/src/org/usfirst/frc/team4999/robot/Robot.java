@@ -16,10 +16,12 @@ import org.usfirst.frc.analog.adis16448.ADIS16448_IMU;
 * directory.
 */
 public class Robot extends IterativeRobot {
-	Joystick flightStick;
-	VictorSP leftFront, leftBack, rightFront, rightBack;
-	CamServer server;
-	ADIS16448_IMU adis;
+	private Joystick flightStick;
+	private VictorSP leftFront, leftBack, rightFront, rightBack;
+	private CamServer server;
+	private ADIS16448_IMU adis;
+	public static final String SERVER_IP = "10.49.99.12";
+	public static  final int SERVER_PORT = 5810;
 	
 	/**
 	 * This method is run once when the robot is turned on.
@@ -35,7 +37,7 @@ public class Robot extends IterativeRobot {
 		adis.calibrate();
 		adis.updateTable();
 		
-		server = new CamServer("10.49.99.12", 5810);
+		server = new CamServer(SERVER_IP, SERVER_PORT);
 		flightStick = new Joystick(0);
 	}
 	
@@ -43,11 +45,11 @@ public class Robot extends IterativeRobot {
 	 * This method is run once at the beginning of the autonomous period.
 	 */
 	public void autonomousInit() {
-		server = new CamServer("10.49.99.12", 5810);
+		server = new CamServer(SERVER_IP, SERVER_PORT);
 	}
 	
 	public void disabledInit() {
-		server = new CamServer("10.49.99.12", 5810);
+		server = new CamServer(SERVER_IP, SERVER_PORT);
 	}
 	
 	/**
