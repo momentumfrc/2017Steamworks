@@ -31,8 +31,9 @@ public class Robot extends IterativeRobot {
 		leftBack = new VictorSP(2);
 		rightBack = new VictorSP(3);
 		
-		adis = new ADIS16448_IMU();
+		adis = new ADIS16448_IMU(ADIS16448_IMU.Axis.kX);
 		adis.calibrate();
+		adis.updateTable();
 		
 		server = new CamServer("10.49.99.12", 5810);
 		flightStick = new Joystick(0);
@@ -71,16 +72,26 @@ public class Robot extends IterativeRobot {
 		final double moveRequest = deadzone(-flightStick.getY(), 0.15);
 		final double turnRequest = deadzone(flightStick.getTwist(), 0.20);
 		final double speedLimiter = (-flightStick.getThrottle() + 1) / 2;
+		final double rateX = Math.abs(adis.getRateX());
+		final double turnRateRequest = turnRequest * 90;
+		final double xRotationError = turnRateRequest - rateX;
+
+		System.out.println("moveRequest: " + moveRequest);
+		System.out.println("turnRequest: " + turnRequest);
+		System.out.println("speedLimiter: " + speedLimiter);
+		System.out.println("rateX: " + rateX);
+		System.out.println("turnRateRequest: " + turnRateRequest);
+		System.out.println("xRotationError: " + xRotationError);
+
+		arcadeDrive(moveRequest, xRotationError, speedLimiter);
 		
-		arcadeDrive(moveRequest, turnRequest, speedLimiter);
 	}
 	
 	/**
 	 * This method runs in a loop during test mode.
 	 */
 	public void testPeriodic() {
-		System.out.println(adis.getAngleX());
-		SmartDashboard.putData("IMU", adis);
+		 
 	}
 	
 	/**
