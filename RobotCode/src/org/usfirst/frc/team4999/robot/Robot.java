@@ -3,10 +3,10 @@ package org.usfirst.frc.team4999.robot;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.Joystick;
+import org.usfirst.frc.analog.adis16448.ADIS16448_IMU;
 
 /**
 * The VM is configured to automatically run this class, and to call the
@@ -19,22 +19,20 @@ public class Robot extends IterativeRobot {
 	Joystick flightStick;
 	VictorSP leftFront, leftBack, rightFront, rightBack;
 	CamServer server;
+	ADIS16448_IMU adis;
 	
 	/**
 	 * This method is run once when the robot is turned on.
 	 */
 	public void robotInit() {
-// 		rightFront = new VictorSP(0);
-// 		rightBack = new VictorSP(1);
-// 		leftFront = new VictorSP(2);
-// 		leftBack = new VictorSP(3);
-// 		rightFront.setInverted(true);
-// 		rightBack.setInverted(true);
-
+		
 		leftFront = new VictorSP(0);
 		rightFront = new VictorSP(1);
 		leftBack = new VictorSP(2);
 		rightBack = new VictorSP(3);
+		
+		adis = new ADIS16448_IMU();
+		adis.calibrate();
 		
 		server = new CamServer("10.49.99.12", 5810);
 		flightStick = new Joystick(0);
@@ -81,7 +79,8 @@ public class Robot extends IterativeRobot {
 	 * This method runs in a loop during test mode.
 	 */
 	public void testPeriodic() {
-	
+		System.out.println(adis.getAngleX());
+		SmartDashboard.putData("IMU", adis);
 	}
 	
 	/**
