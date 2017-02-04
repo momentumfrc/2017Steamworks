@@ -61,22 +61,24 @@ public class Robot extends IterativeRobot {
 		final int yErr = server.getYError();
 		
 		// Our image width is 160, so the error must be within -80 and 80 pixels.
-		System.out.println(xErr);
 		final double turnRequest = map(xErr, -80, 80, -1, 1);
-		System.out.println(turnRequest);
+		
+		System.out.println("blobXError: " + xErr);
+		System.out.println("turnRequest: " + turnRequest);
+		
 		arcadeDrive(0, turnRequest, 0.25);
 	}
 	
 	/**
 	 * This method runs in a loop during teleop mode.
 	 */
-	public void teleopPeriodic() {
+	public void teleopPeriodic() {		
 		final double moveRequest = deadzone(-flightStick.getY(), 0.15);
 		final double turnRequest = deadzone(flightStick.getTwist(), 0.20);
+		final double turnRateRequest = turnRequest * 45;
 		final double speedLimiter = (-flightStick.getThrottle() + 1) / 2;
-		final double rateX = Math.abs(adis.getRateX());
-		final double turnRateRequest = turnRequest * 90;
-		final double xRotationError = turnRateRequest - rateX;
+		final double rateX = -adis.getRateX();
+		final double xRotationError = map(turnRateRequest - rateX, -45, 45, -1, 1);
 
 		System.out.println("moveRequest: " + moveRequest);
 		System.out.println("turnRequest: " + turnRequest);
