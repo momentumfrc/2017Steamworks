@@ -34,8 +34,9 @@ public class Robot extends IterativeRobot {
 		rightBack = new VictorSP(3);
 		
 		adis = new ADIS16448_IMU(ADIS16448_IMU.Axis.kX);
-		adis.calibrate();
+		adis.reset();
 		adis.updateTable();
+		
 		
 		server = new CamServer(SERVER_IP, SERVER_PORT);
 		flightStick = new Joystick(0);
@@ -50,6 +51,7 @@ public class Robot extends IterativeRobot {
 	
 	public void disabledInit() {
 		server = new CamServer(SERVER_IP, SERVER_PORT);
+		adis.reset();
 	}
 	
 	/**
@@ -78,7 +80,14 @@ public class Robot extends IterativeRobot {
 		final double turnRateRequest = turnRequest * 45;
 		final double speedLimiter = (-flightStick.getThrottle() + 1) / 2;
 		final double rateX = -adis.getRateX();
+		final double angleY = -adis.getAngleY();
+		final double angleZ = -adis.getAngleZ();
 		final double xRotationError = map(turnRateRequest - rateX, -45, 45, -1, 1);
+		final double getYaw = adis.getYaw();
+		final double getRoll = adis.getRoll();
+		final double xAcceleration = adis.getAccelX();
+		final long = System.currentTimeMillis();
+		//final double antiTipError = map(angleY,)
 
 		System.out.println("moveRequest: " + moveRequest);
 		System.out.println("turnRequest: " + turnRequest);
@@ -86,6 +95,12 @@ public class Robot extends IterativeRobot {
 		System.out.println("rateX: " + rateX);
 		System.out.println("turnRateRequest: " + turnRateRequest);
 		System.out.println("xRotationError: " + xRotationError);
+		System.out.println("===================================");
+		System.out.println("Y: " + angleY);
+		System.out.println("------");
+		System.out.println("Yaw: " + angleY);
+		System.out.println("Y accel:" + adis.getAccelY());
+		System.out.println(xAcceleration);
 
 		arcadeDrive(moveRequest, xRotationError, speedLimiter);
 		
