@@ -113,7 +113,10 @@ public class Robot extends IterativeRobot {
 	 * This method runs in a loop during test mode.
 	 */
 	public void testPeriodic() {
-		 
+		 // Code to write to the smart dashboard
+		SmartDashboard.putNumber("X Acceleration", adis.getAccelX());
+		SmartDashboard.putNumber("Y Acceleration", adis.getAccelY());
+		SmartDashboard.putNumber("Z Acceleration", adis.getAccelZ());
 	}
 	
 	/**
