@@ -15,6 +15,10 @@ import org.usfirst.frc.analog.adis16448.ADIS16448_IMU;
 * creating this project, you must also update the manifest file in the resource
 * directory.
 */
+
+/**This is a test comment*/
+/** TEST THIS IS A TEST OF THE GIT */
+
 public class Robot extends IterativeRobot {
 	private Joystick flightStick;
 	private VictorSP leftFront, leftBack, rightFront, rightBack;
@@ -86,7 +90,6 @@ public class Robot extends IterativeRobot {
 		final double getYaw = adis.getYaw();
 		final double getRoll = adis.getRoll();
 		final double xAcceleration = adis.getAccelX();
-		final long = System.currentTimeMillis();
 		//final double antiTipError = map(angleY,)
 
 		System.out.println("moveRequest: " + moveRequest);
