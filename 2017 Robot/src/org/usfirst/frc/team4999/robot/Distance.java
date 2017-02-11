@@ -12,10 +12,11 @@ public class Distance {
 	Accelerometer ADXL362 = new ADXL362(Accelerometer.Range.k8G);
 	ADIS16448_IMU adis = new ADIS16448_IMU();
 	int count = 0;
-	Vector2D accel = new Vector2D(0,0);
-	Vector2D vel = new Vector2D(0,0);
-	Vector2D dist = new Vector2D(0,0);
 	long time = System.currentTimeMillis();
+	
+	public Vector2D accel = new Vector2D(0,0);
+	public Vector2D vel = new Vector2D(0,0);
+	public Vector2D dist = new Vector2D(0,0);
 	
 	public void Distance() {
 		accelsX = new double[9];
@@ -42,5 +43,6 @@ public class Distance {
 		long timeChange = System.currentTimeMillis() - time;
 		time = System.currentTimeMillis();
 		vel.addVectorWithTime(accel, timeChange);
+		dist.addVectorWithTime(vel, timeChange);
 	}
 }
