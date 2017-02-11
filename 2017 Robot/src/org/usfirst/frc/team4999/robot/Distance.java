@@ -12,14 +12,17 @@ public class Distance {
 	Accelerometer ADXL362 = new ADXL362(Accelerometer.Range.k8G);
 	ADIS16448_IMU adis = new ADIS16448_IMU();
 	int count = 0;
+	Vector2D accel = new Vector2D(0,0);
+	Vector2D vel = new Vector2D(0,0);
+	Vector2D dist = new Vector2D(0,0);
+	long time = System.currentTimeMillis();
 	
 	public void Distance() {
 		accelsX = new double[9];
 		accelsY = new double[9];
-		accelsZ = new double[9];
 	}
 	
-	void updateDistance() {
+	public void updateDistance() {
 		for(int i = 0; i < 9; i += 3) {
 			accelsX[i] = builtIn.getX();
 			accelsX[i+1] = ADXL362.getX();
@@ -27,10 +30,17 @@ public class Distance {
 			accelsY[i] = builtIn.getY();
 			accelsY[i+1] = ADXL362.getY();
 			accelsY[i+2] = adis.getAccelY();
-			accelsZ[i] = builtIn.getZ();
-			accelsZ[i+1] = ADXL362.getZ();
-			accelsZ[i+2] = adis.getAccelZ();
 		}
-		
+		double[] averageAccels = new double[2];
+		for(int i=0; i < 9; i++) {
+			averageAccels[0] += accelsX[i];
+			averageAccels[1] += accelsY[i];
+		}
+		averageAccels[0] = averageAccels[0] / 9;
+		averageAccels[1] = averageAccels[1] / 9;
+		accel.addToXY(averageAccels[0], averageAccels[1]);
+		long timeChange = System.currentTimeMillis() - time;
+		time = System.currentTimeMillis();
+		vel.addVectorWithTime(accel, timeChange);
 	}
 }

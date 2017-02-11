@@ -42,4 +42,12 @@ public class Vector2D {
 	public double getMagnitude(){
 		return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
 	}
+	public void addToXY(double x, double y) {
+		this.x += x;
+		this.y += y;
+	}
+	public void addVectorWithTime(Vector2D otherVector, long t) {
+		this.x += otherVector.getX() * t;
+		this.y += otherVector.getY() * t;
+	}
 }
