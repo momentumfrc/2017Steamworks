@@ -16,9 +16,6 @@ import org.usfirst.frc.analog.adis16448.ADIS16448_IMU;
 * directory.
 */
 
-/**This is a test comment*/
-/** TEST THIS IS A TEST OF THE GIT */
-
 public class Robot extends IterativeRobot {
 	private Joystick flightStick;
 	private VictorSP leftFront, leftBack, rightFront, rightBack;

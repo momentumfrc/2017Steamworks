@@ -4,6 +4,8 @@ import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.interfaces.Accelerometer;
 import org.usfirst.frc.analog.adis16448.*;
 
+import Vector.Vector2D;
+
 public class Distance {
 	double[] accelsX;
 	double[] accelsY;
