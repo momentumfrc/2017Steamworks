@@ -1,10 +1,12 @@
 
 package org.usfirst.frc.team4999.robot;
 
+import edu.wpi.first.wpilibj.ADXL362;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.VictorSP;
+import edu.wpi.first.wpilibj.interfaces.Accelerometer;
 import edu.wpi.first.wpilibj.Joystick;
 import org.usfirst.frc.analog.adis16448.ADIS16448_IMU;
 
@@ -24,6 +26,7 @@ public class Robot extends IterativeRobot {
 	public static final String SERVER_IP = "10.49.99.12";
 	public static  final int SERVER_PORT = 5810;
 	Distance trackDistance = new Distance();
+	Accelerometer ADXL362 = new ADXL362(Accelerometer.Range.k8G);
 	
 	/**
 	 * This method is run once when the robot is turned on.
@@ -111,11 +114,14 @@ public class Robot extends IterativeRobot {
 	 * This method runs in a loop during test mode.
 	 */
 	public void testPeriodic() {
-		trackDistance.updateDistance();
+		
+		System.out.println(ADXL362.getX());
+		
+		/*trackDistance.updateDistance();
 		 // Code to write to the smart dashboard
 		SmartDashboard.putNumber("X Acceleration", adis.getAccelX());
 		SmartDashboard.putNumber("Y Acceleration", adis.getAccelY());
-		SmartDashboard.putNumber("Z Acceleration", adis.getAccelZ());
+		SmartDashboard.putNumber("Z Acceleration", adis.getAccelZ());*/
 	}
 	
 	/**
