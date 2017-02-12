@@ -35,7 +35,7 @@ public class Robot extends IterativeRobot {
 	final String left = "Left Side";
 	final String middle = "Middle Side";
 	Command autonomusCommand;
-	SendableChooser autonomusChooser;
+	SendableChooser<String> autonomusChooser;
 	
 	/**
 	 * This method is run once when the robot is turned on.
