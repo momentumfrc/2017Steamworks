@@ -32,16 +32,16 @@ public class Robot extends IterativeRobot {
 	private ADIS16448_IMU adis;
 	public static final String SERVER_IP = "10.49.99.12";
 	public static  final int SERVER_PORT = 5810;
-	Distance trackDistance = new Distance();
-	Accelerometer ADXL362 = new ADXL362(Accelerometer.Range.k8G);
+	Distance trackDistance;
+	Accelerometer ADXL362;
 	final String right = "Right Side";
 	final String left = "Left Side";
 	final String middle = "Middle Side";
 	Command autonomusCommand;
 	SendableChooser<String> autonomusChooser;
-	DigitalInput input = new DigitalInput(0);
-	DigitalOutput output = new DigitalOutput(1);
-	Ultrasonic ultrasonic = new Ultrasonic(0,1);
+	//DigitalInput input = new DigitalInput(0);
+	//DigitalOutput output = new DigitalOutput(1);
+	//Ultrasonic ultrasonic = new Ultrasonic(0,1);
 	long timer = 0;
 	
 	
@@ -50,7 +50,8 @@ public class Robot extends IterativeRobot {
 	 * This method is run once when the robot is turned on.
 	 */
 	public void robotInit() {
-		
+		ADXL362 =  new ADXL362(Accelerometer.Range.k8G);
+		trackDistance = new Distance();
 		leftFront = new VictorSP(0);
 		rightFront = new VictorSP(1);
 		leftBack = new VictorSP(2);
@@ -93,7 +94,7 @@ public class Robot extends IterativeRobot {
 		
 		// Our image width is 160, so the error must be within -80 and 80 pixels.
 		final double turnRequest = map(xErr, -80, 80, -1, 1);
-		final double gearForwardErr = map(ultrasonic.getRangeInches(), 1, 4, -1, 1);
+		//final double gearForwardErr = map(ultrasonic.getRangeInches(), 1, 4, -1, 1);
 		
 		System.out.println("blobXError: " + xErr);
 		System.out.println("turnRequest: " + turnRequest);
@@ -105,7 +106,7 @@ public class Robot extends IterativeRobot {
 		case left:
 			// Add the code to turn the robot to the right then keep on going!
 			// Code for the ultrasonic to stop the robot if we are too close.
-			if(ultrasonic.getRangeInches() > 4){
+			 /*if(ultrasonic.getRangeInches() > 4){
 				timer = System.currentTimeMillis();
 				leftFront.set(0);
 				leftBack.set(0);
@@ -124,11 +125,12 @@ public class Robot extends IterativeRobot {
 					}
 				}
 			}
+			*/
 			break;
 		case middle:
 			// Add the code to make the robot continue on a straight vector then do the things it needs to do
 			// Code for the ultrasonic to stop the robot if we are too close.
-			if(ultrasonic.getRangeInches() > 4){
+			/*if(ultrasonic.getRangeInches() > 4){
 							timer = System.currentTimeMillis();
 							leftFront.set(0);
 							leftBack.set(0);
@@ -147,11 +149,12 @@ public class Robot extends IterativeRobot {
 						}
 					}
 				}
+				*/
 			break;
 		case right:
 			// Add the code to make the robot turn to the left then do the things it needs to do.
 			// Code for the ultrasonic to stop the robot if we are too close.
-				if(ultrasonic.getRangeInches() > 4){
+				/*if(ultrasonic.getRangeInches() > 4){
 							timer = System.currentTimeMillis();
 							leftFront.set(0);
 							leftBack.set(0);
@@ -170,6 +173,7 @@ public class Robot extends IterativeRobot {
 						}
 					}
 				}
+				*/
 			break;
 		}
 	}
