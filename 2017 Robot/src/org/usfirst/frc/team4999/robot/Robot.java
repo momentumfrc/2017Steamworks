@@ -43,6 +43,7 @@ public class Robot extends IterativeRobot {
 	SendableChooser autonomusChooser;
 	DigitalInput input;
 	DigitalOutput output;
+	DoubleSolenoid piston;
 	Ultrasonic ultrasonic;
 	
 	// test
@@ -67,7 +68,7 @@ public class Robot extends IterativeRobot {
 		input = new DigitalInput(0);
 		output = new DigitalOutput(1);
 		ultrasonic = new Ultrasonic(0,1);
-		
+		piston = new DoubleSolenoid(0,1);
 		server = new CamServer(SERVER_IP, SERVER_PORT);
 		flightStick = new Joystick(0);
 		
@@ -224,7 +225,12 @@ public class Robot extends IterativeRobot {
 	public void testPeriodic() {
 		
 		System.out.println(ADXL362.getX());
-		
+		// Piston Code
+		if(flightStick.getRawButton(1)){
+			piston.set(DoubleSolenoid.Value.kForward);		
+		}else{
+			piston.set(DoubleSolenoid.Value.kOff);
+		}
 		
 		
 		
