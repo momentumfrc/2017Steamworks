@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.interfaces.Accelerometer;
 import edu.wpi.first.wpilibj.Joystick;
 import org.usfirst.frc.analog.adis16448.ADIS16448_IMU;
 
+
 /**
 * The VM is configured to automatically run this class, and to call the
 * functions corresponding to each mode, as described in the IterativeRobot
@@ -42,6 +43,8 @@ public class Robot extends IterativeRobot {
 	//DigitalInput input = new DigitalInput(0);
 	//DigitalOutput output = new DigitalOutput(1);
 	//Ultrasonic ultrasonic = new Ultrasonic(0,1);
+	
+	// test
 	long timer = 0;
 	
 	
