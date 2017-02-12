@@ -61,7 +61,6 @@ public class Robot extends IterativeRobot {
 		rightFront = new VictorSP(1);
 		leftBack = new VictorSP(2);
 		rightBack = new VictorSP(3);
-		DoubleSolenoid piston = new DoubleSolenoid(0,1);
 		adis = new ADIS16448_IMU(ADIS16448_IMU.Axis.kX);
 		adis.reset();
 		adis.updateTable();
