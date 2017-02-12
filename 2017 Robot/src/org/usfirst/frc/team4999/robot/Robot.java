@@ -4,8 +4,11 @@ package org.usfirst.frc.team4999.robot;
 import edu.wpi.first.wpilibj.ADXL362;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.VictorSP;
+import edu.wpi.first.wpilibj.command.Command;
+import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.interfaces.Accelerometer;
 import edu.wpi.first.wpilibj.Joystick;
 import org.usfirst.frc.analog.adis16448.ADIS16448_IMU;
@@ -22,11 +25,17 @@ public class Robot extends IterativeRobot {
 	private Joystick flightStick;
 	private VictorSP leftFront, leftBack, rightFront, rightBack;
 	private CamServer server;
+	String autoSelected;
 	private ADIS16448_IMU adis;
 	public static final String SERVER_IP = "10.49.99.12";
 	public static  final int SERVER_PORT = 5810;
 	Distance trackDistance = new Distance();
 	Accelerometer ADXL362 = new ADXL362(Accelerometer.Range.k8G);
+	final String right = "Right Side";
+	final String left = "Left Side";
+	final String middle = "Middle Side";
+	Command autonomusCommand;
+	SendableChooser autonomusChooser;
 	
 	/**
 	 * This method is run once when the robot is turned on.
@@ -45,6 +54,12 @@ public class Robot extends IterativeRobot {
 		
 		server = new CamServer(SERVER_IP, SERVER_PORT);
 		flightStick = new Joystick(0);
+		
+		autonomusChooser.addObject("Right Side Of The Field", right);
+		autonomusChooser.addObject("Left Side Of The Field", left);
+		autonomusChooser.addObject("Middle Of The Field", middle);
+		SmartDashboard.putData("Autonomus Mode Selector", autonomusChooser);
+
 	}
 	
 	/**
@@ -74,6 +89,19 @@ public class Robot extends IterativeRobot {
 		System.out.println("turnRequest: " + turnRequest);
 		
 		arcadeDrive(0, turnRequest, 0.25);
+		
+		Scheduler.getInstance().run();
+		switch (autoSelected) {
+		case left:
+			
+			break;
+		case middle:
+			//
+			break;
+		case right:
+			//
+			break;
+		}
 	}
 	
 	/**
