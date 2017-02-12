@@ -93,6 +93,7 @@ public class Robot extends IterativeRobot {
 		
 		// Our image width is 160, so the error must be within -80 and 80 pixels.
 		final double turnRequest = map(xErr, -80, 80, -1, 1);
+		final double gearForwardErr = map(ultrasonic.getRangeInches(), 1, 4, -1, 1);
 		
 		System.out.println("blobXError: " + xErr);
 		System.out.println("turnRequest: " + turnRequest);
@@ -113,6 +114,7 @@ public class Robot extends IterativeRobot {
 				if(timer > 250){
 					if(ultrasonic.getRangeInches() < 4){
 						arcadeDrive(1, 0, 0.25);
+						timer = 0;
 					}else{
 						timer = System.currentTimeMillis();
 						leftFront.set(0);
