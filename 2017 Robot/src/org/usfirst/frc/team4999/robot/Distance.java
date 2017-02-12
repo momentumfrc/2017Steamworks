@@ -13,7 +13,6 @@ public class Distance {
 	Accelerometer builtIn = new BuiltInAccelerometer();
 	Accelerometer ADXL362 = new ADXL362(Accelerometer.Range.k8G);
 	ADIS16448_IMU adis = new ADIS16448_IMU();
-	int count = 0;
 	long time = System.currentTimeMillis();
 	
 	public Vector2D accel = new Vector2D(0,0);
