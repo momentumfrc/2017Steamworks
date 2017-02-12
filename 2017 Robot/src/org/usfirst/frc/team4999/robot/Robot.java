@@ -136,6 +136,7 @@ public class Robot extends IterativeRobot {
 							rightBack.set(0);
 				if(timer > 250){
 					if(ultrasonic.getRangeInches() < 4){
+						timer = 0;
 						arcadeDrive(1, 0, 0.25);
 						}else{
 							timer = System.currentTimeMillis();
@@ -158,6 +159,7 @@ public class Robot extends IterativeRobot {
 							rightBack.set(0);
 					if(timer > 250){
 						if(ultrasonic.getRangeInches() < 4){
+							timer = 0;
 							arcadeDrive(1, 0, 0.25);
 						}else{
 							timer = System.currentTimeMillis();
