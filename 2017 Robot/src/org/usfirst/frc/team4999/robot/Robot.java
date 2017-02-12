@@ -93,13 +93,13 @@ public class Robot extends IterativeRobot {
 		Scheduler.getInstance().run();
 		switch (autoSelected) {
 		case left:
-			
+			// Add the code to turn the robot to the right then keep on going!
 			break;
 		case middle:
-			//
+			// Add the code to make the robot continue on a straight vector then do the things it needs to do
 			break;
 		case right:
-			//
+			// Add the code to make the robot turn to the left then do the things it needs to do.
 			break;
 		}
 	}
