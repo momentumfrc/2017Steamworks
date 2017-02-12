@@ -2,8 +2,11 @@
 package org.usfirst.frc.team4999.robot;
 
 import edu.wpi.first.wpilibj.ADXL362;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.VictorSP;
@@ -36,6 +39,12 @@ public class Robot extends IterativeRobot {
 	final String middle = "Middle Side";
 	Command autonomusCommand;
 	SendableChooser<String> autonomusChooser;
+	DigitalInput input = new DigitalInput(0);
+	DigitalOutput output = new DigitalOutput(1);
+	Ultrasonic ultrasonic = new Ultrasonic(0,1);
+	long timer = 0;
+	
+	
 	
 	/**
 	 * This method is run once when the robot is turned on.
@@ -88,18 +97,75 @@ public class Robot extends IterativeRobot {
 		System.out.println("blobXError: " + xErr);
 		System.out.println("turnRequest: " + turnRequest);
 		
-		arcadeDrive(0, turnRequest, 0.25);
+		arcadeDrive(1, turnRequest, 0.25);
 		
 		Scheduler.getInstance().run();
 		switch (autoSelected) {
 		case left:
 			// Add the code to turn the robot to the right then keep on going!
+			// Code for the ultrasonic to stop the robot if we are too close.
+			if(ultrasonic.getRangeInches() > 4){
+				timer = System.currentTimeMillis();
+				leftFront.set(0);
+				leftBack.set(0);
+				rightFront.set(0);
+				rightBack.set(0);
+				if(timer > 250){
+					if(ultrasonic.getRangeInches() < 4){
+						arcadeDrive(1, 0, 0.25);
+					}else{
+						timer = System.currentTimeMillis();
+						leftFront.set(0);
+						leftBack.set(0);
+						rightFront.set(0);
+						rightBack.set(0);
+					}
+				}
+			}
 			break;
 		case middle:
 			// Add the code to make the robot continue on a straight vector then do the things it needs to do
+			// Code for the ultrasonic to stop the robot if we are too close.
+			if(ultrasonic.getRangeInches() > 4){
+							timer = System.currentTimeMillis();
+							leftFront.set(0);
+							leftBack.set(0);
+							rightFront.set(0);
+							rightBack.set(0);
+				if(timer > 250){
+					if(ultrasonic.getRangeInches() < 4){
+						arcadeDrive(1, 0, 0.25);
+						}else{
+							timer = System.currentTimeMillis();
+							leftFront.set(0);
+							leftBack.set(0);
+							rightFront.set(0);
+							rightBack.set(0);
+						}
+					}
+				}
 			break;
 		case right:
 			// Add the code to make the robot turn to the left then do the things it needs to do.
+			// Code for the ultrasonic to stop the robot if we are too close.
+				if(ultrasonic.getRangeInches() > 4){
+							timer = System.currentTimeMillis();
+							leftFront.set(0);
+							leftBack.set(0);
+							rightFront.set(0);
+							rightBack.set(0);
+					if(timer > 250){
+						if(ultrasonic.getRangeInches() < 4){
+							arcadeDrive(1, 0, 0.25);
+						}else{
+							timer = System.currentTimeMillis();
+							leftFront.set(0);
+							leftBack.set(0);
+							rightFront.set(0);
+							rightBack.set(0);
+						}
+					}
+				}
 			break;
 		}
 	}
