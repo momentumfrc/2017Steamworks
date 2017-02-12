@@ -28,7 +28,8 @@ import org.usfirst.frc.analog.adis16448.ADIS16448_IMU;
 
 public class Robot extends IterativeRobot {
 	private Joystick flightStick;
-	private VictorSP leftFront, leftBack, rightFront, rightBack;
+	private Joystick xboxController;
+	private VictorSP leftFront, leftBack, rightFront, rightBack, shooter, intake, helix, winch;
 	private CamServer server;
 	String autoSelected;
 	private ADIS16448_IMU adis;
@@ -61,6 +62,11 @@ public class Robot extends IterativeRobot {
 		rightFront = new VictorSP(1);
 		leftBack = new VictorSP(2);
 		rightBack = new VictorSP(3);
+		shooter = new VictorSP(4);
+		helix = new VictorSP(5);
+		intakeIn = new VictorSP(6);
+		intakeOut = new VictorSP(7);
+		winch = new VictorSP(8);
 		adis = new ADIS16448_IMU(ADIS16448_IMU.Axis.kX);
 		adis.reset();
 		adis.updateTable();
@@ -201,6 +207,8 @@ public class Robot extends IterativeRobot {
 		final double getRoll = adis.getRoll();
 		final double xAcceleration = adis.getAccelX();
 		//final double antiTipError = map(angleY,)
+		
+
 
 		System.out.println("moveRequest: " + moveRequest);
 		System.out.println("turnRequest: " + turnRequest);
@@ -217,6 +225,31 @@ public class Robot extends IterativeRobot {
 
 		arcadeDrive(moveRequest, xRotationError, speedLimiter);
 		
+		if(xboxController.getRawAxis(3) == 1){
+			shooter.set(.5);
+		}
+		if(xboxController.getRawAxis(2) == 1){
+			intake.set(1);
+		}
+		if(xboxController.getRawButton(4)){
+			intake.set(-1);
+		}
+		if(xboxController.getRawAxis(6) == -1){
+			helix.set(-1);
+		}
+		if(xboxController.getRawAxis(6) == 1){
+			helix.set(1);
+		}
+		if(xboxController.getRawAxis(1) == 1){
+			winch.set(1);
+		}
+		if(flightStick.getRawButton(1)){
+			if(flightStick.getRawButton(7) || flightStick.getRawButton(8)){
+				piston.set(DoubleSolenoid.Value.kForward);
+			}else{
+				piston.set(DoubleSolenoid.Value.kReverse);
+			}
+		}
 	}
 	
 	/**
