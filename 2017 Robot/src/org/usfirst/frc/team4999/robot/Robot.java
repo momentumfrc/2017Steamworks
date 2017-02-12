@@ -45,7 +45,7 @@ public class Robot extends IterativeRobot {
 	DigitalOutput output;
 	DoubleSolenoid piston;
 	Ultrasonic ultrasonic;
-	
+	Distance distance;
 	// test
 	long timer = 0;
 	
@@ -67,6 +67,7 @@ public class Robot extends IterativeRobot {
 		adis.updateTable();
 		input = new DigitalInput(0);
 		output = new DigitalOutput(1);
+		distance = new Distance();
 		ultrasonic = new Ultrasonic(0,1);
 		piston = new DoubleSolenoid(0,1);
 		server = new CamServer(SERVER_IP, SERVER_PORT);
@@ -223,7 +224,8 @@ public class Robot extends IterativeRobot {
 	 * This method runs in a loop during test mode.
 	 */
 	public void testPeriodic() {
-		
+		distance.updateDistance();
+		System.out.println("Get Distance: " + distance.getDist());
 		System.out.println(ADXL362.getX());
 		// Piston Code
 		if(flightStick.getRawButton(1)){
@@ -231,6 +233,8 @@ public class Robot extends IterativeRobot {
 		}else{
 			piston.set(DoubleSolenoid.Value.kOff);
 		}
+		
+		
 		
 		
 		
