@@ -4,6 +4,7 @@ package org.usfirst.frc.team4999.robot;
 import edu.wpi.first.wpilibj.ADXL362;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DigitalOutput;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Ultrasonic;
@@ -39,10 +40,10 @@ public class Robot extends IterativeRobot {
 	final String left = "Left Side";
 	final String middle = "Middle Side";
 	Command autonomusCommand;
-	SendableChooser<String> autonomusChooser;
-	//DigitalInput input = new DigitalInput(0);
-	//DigitalOutput output = new DigitalOutput(1);
-	//Ultrasonic ultrasonic = new Ultrasonic(0,1);
+	SendableChooser autonomusChooser;
+	DigitalInput input;
+	DigitalOutput output;
+	Ultrasonic ultrasonic;
 	
 	// test
 	long timer = 0;
@@ -59,11 +60,13 @@ public class Robot extends IterativeRobot {
 		rightFront = new VictorSP(1);
 		leftBack = new VictorSP(2);
 		rightBack = new VictorSP(3);
-		
+		DoubleSolenoid piston = new DoubleSolenoid(0,1);
 		adis = new ADIS16448_IMU(ADIS16448_IMU.Axis.kX);
 		adis.reset();
 		adis.updateTable();
-		
+		input = new DigitalInput(0);
+		output = new DigitalOutput(1);
+		ultrasonic = new Ultrasonic(0,1);
 		
 		server = new CamServer(SERVER_IP, SERVER_PORT);
 		flightStick = new Joystick(0);
@@ -221,6 +224,9 @@ public class Robot extends IterativeRobot {
 	public void testPeriodic() {
 		
 		System.out.println(ADXL362.getX());
+		
+		
+		
 		
 		/*trackDistance.updateDistance();
 		 // Code to write to the smart dashboard
