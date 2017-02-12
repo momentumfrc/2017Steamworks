@@ -64,9 +64,8 @@ public class Robot extends IterativeRobot {
 		rightBack = new VictorSP(3);
 		shooter = new VictorSP(4);
 		helix = new VictorSP(5);
-		intakeIn = new VictorSP(6);
-		intakeOut = new VictorSP(7);
-		winch = new VictorSP(8);
+		intake = new VictorSP(6);
+		winch = new VictorSP(7);
 		adis = new ADIS16448_IMU(ADIS16448_IMU.Axis.kX);
 		adis.reset();
 		adis.updateTable();
