@@ -15,15 +15,46 @@ public class Distance {
 	ADIS16448_IMU adis = new ADIS16448_IMU();
 	long time = System.currentTimeMillis();
 	
-	public Vector2D accel = new Vector2D(0,0);
-	public Vector2D vel = new Vector2D(0,0);
-	public Vector2D dist = new Vector2D(0,0);
+	private Vector2D accel = new Vector2D(0,0);
+	private Vector2D vel = new Vector2D(0,0);
+	private Vector2D dist = new Vector2D(0,0);
 	
-	public void Distance() {
+	/**
+	 * Creates a new Distance object.
+	 */
+	public Distance() {
 		accelsX = new double[9];
 		accelsY = new double[9];
 	}
-	
+	/**
+	 * Returns the acceleration in a Vector2D object
+	 */
+	public Vector2D getAccel(){
+		return accel;
+	}
+	/**
+	 * Returns the velocity in a Vector2D object
+	 */
+	public Vector2D getVel(){
+		return vel;
+	}
+	/**
+	 * Returns the distance in a Vector2D object
+	 */
+	public Vector2D getDist(){
+		return dist;
+	}
+	/**
+	 * Resets acceleration, velocity, and distance to (0,0).
+	 */
+	public void zero(){
+		accel = new Vector2D(0,0);
+		vel = new Vector2D(0,0);
+		dist = new Vector2D(0,0);
+	}
+	/**
+	 * Updates acceleration, velocity, and distance properties.
+	 */
 	public void updateDistance() {
 		for(int i = 0; i < 9; i += 3) {
 			accelsX[i] = builtIn.getX();
