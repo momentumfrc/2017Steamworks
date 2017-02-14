@@ -39,10 +39,7 @@ public class Robot extends IterativeRobot {
 	final String left = "Left Side";
 	final String middle = "Middle Side";
 	Command autonomusCommand;
-	SendableChooser<String> autonomusChooser;
-	//DigitalInput input = new DigitalInput(0);
-	//DigitalOutput output = new DigitalOutput(1);
-	//Ultrasonic ultrasonic = new Ultrasonic(0,1);
+	SendableChooser autonomusChooser;
 	
 	// test
 	long timer = 0;
