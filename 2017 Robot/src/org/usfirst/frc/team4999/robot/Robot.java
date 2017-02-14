@@ -35,6 +35,7 @@ public class Robot extends IterativeRobot {
 	private ADIS16448_IMU adis;
 	public static final String SERVER_IP = "10.49.99.12";
 	public static  final int SERVER_PORT = 5810;
+	boolean isInverted = false;
 	Distance trackDistance;
 	Accelerometer ADXL362;
 	final String right = "Right Side";
@@ -241,6 +242,15 @@ public class Robot extends IterativeRobot {
 		}
 		if(xboxController.getRawAxis(1) == 1){
 			winch.set(1);
+		}
+		if(flightStick.getRawButton(3)){
+			isInverted =! isInverted;
+		}
+		if(isInverted){
+			rightFront.setInverted(true);
+			rightBack.setInverted(true);
+			leftFront.setInverted(true);
+			leftBack.setInverted(true);
 		}
 		if(flightStick.getRawButton(1)){
 			if(flightStick.getRawButton(7) || flightStick.getRawButton(8)){
