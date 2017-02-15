@@ -72,8 +72,8 @@ public class Robot extends IterativeRobot {
 		winch = new VictorSP(7);
 		adis.reset();
 		adis.updateTable();
-		input = new DigitalInput(0);
-		output = new DigitalOutput(1);
+		/**input = new DigitalInput(0);
+		output = new DigitalOutput(1);*/
 		ultrasonic = new Ultrasonic(0,1);
 		piston = new DoubleSolenoid(0,1);
 		server = new CamServer(SERVER_IP, SERVER_PORT);
