@@ -35,9 +35,11 @@ public class Robot extends IterativeRobot {
 	private VictorSP leftFront, leftBack, rightFront, rightBack, shooter, intake, helix, winch;
 	private CamServer server;
 	String autoSelected;
+	// <Accelerometers>
 	private ADIS16448_IMU adis = new ADIS16448_IMU(ADIS16448_IMU.Axis.kX);
-	private ADXL362 ADXL =  new ADXL362(Accelerometer.Range.k8G);
 	private Accelerometer builtIn = new BuiltInAccelerometer();
+	//private ADXL362 ADXL =  new ADXL362(Accelerometer.Range.k8G); //commented out until we get it working
+	//</Accelerometers>
 	public static final String SERVER_IP = "10.49.99.12";
 	public static  final int SERVER_PORT = 5810;
 	boolean isInverted = false;
@@ -61,7 +63,7 @@ public class Robot extends IterativeRobot {
 	 * This method is run once when the robot is turned on.
 	 */
 	public void robotInit() {
-		trackDistance = new Distance(builtIn, ADXL, adis);
+		trackDistance = new Distance(builtIn, adis);
 		leftFront = new VictorSP(0);
 		rightFront = new VictorSP(1);
 		leftBack = new VictorSP(2);
@@ -268,7 +270,7 @@ public class Robot extends IterativeRobot {
 	 */
 	public void testPeriodic() {
 		trackDistance.updateDistance();
-		System.out.println("Get Distance: " + trackDistance.getDist());
+		System.out.println("Get Distance: X:" + trackDistance.getDist().getX() + " Z: " + trackDistance.getDist().getY() /** Y is being misused on the vector class to hold Z*/ );
 		System.out.println("");
 		//System.out.println(ADXL362.getX());
 		// Piston Code
