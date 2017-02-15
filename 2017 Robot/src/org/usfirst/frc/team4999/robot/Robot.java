@@ -57,7 +57,7 @@ public class Robot extends IterativeRobot {
 	 * This method is run once when the robot is turned on.
 	 */
 	public void robotInit() {
-		ADXL362 =  new ADXL362(Accelerometer.Range.k8G);
+		//ADXL362 =  new ADXL362(Accelerometer.Range.k8G);
 		trackDistance = new Distance();
 		leftFront = new VictorSP(0);
 		rightFront = new VictorSP(1);
