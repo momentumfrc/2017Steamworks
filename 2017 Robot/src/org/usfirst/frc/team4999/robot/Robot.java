@@ -16,6 +16,8 @@ import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.interfaces.Accelerometer;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.SPI;
+
 import org.usfirst.frc.analog.adis16448.ADIS16448_IMU;
 
 
@@ -33,12 +35,13 @@ public class Robot extends IterativeRobot {
 	private VictorSP leftFront, leftBack, rightFront, rightBack, shooter, intake, helix, winch;
 	private CamServer server;
 	String autoSelected;
-	private ADIS16448_IMU adis;
+	private ADIS16448_IMU adis = new ADIS16448_IMU(ADIS16448_IMU.Axis.kX);
+	private ADXL362 ADXL =  new ADXL362(Accelerometer.Range.k8G);
+	private Accelerometer builtIn = new BuiltInAccelerometer();
 	public static final String SERVER_IP = "10.49.99.12";
 	public static  final int SERVER_PORT = 5810;
 	boolean isInverted = false;
 	Distance trackDistance;
-	Accelerometer ADXL362;
 	final String right = "Right Side";
 	final String left = "Left Side";
 	final String middle = "Middle Side";
@@ -58,10 +61,7 @@ public class Robot extends IterativeRobot {
 	 * This method is run once when the robot is turned on.
 	 */
 	public void robotInit() {
-		ADXL362 ADXL362 =  new ADXL362(Accelerometer.Range.k8G);
-		ADIS16448_IMU adis = new ADIS16448_IMU(ADIS16448_IMU.Axis.kX);
-		Accelerometer builtIn = new BuiltInAccelerometer();
-		trackDistance = new Distance(builtIn, ADXL362, adis);
+		trackDistance = new Distance(builtIn, ADXL, adis);
 		leftFront = new VictorSP(0);
 		rightFront = new VictorSP(1);
 		leftBack = new VictorSP(2);
@@ -75,10 +75,11 @@ public class Robot extends IterativeRobot {
 		/**input = new DigitalInput(0);
 		output = new DigitalOutput(1);*/
 		ultrasonic = new Ultrasonic(0,1);
-		piston = new DoubleSolenoid(0,1);
+		//piston = new DoubleSolenoid(0,1);
 		server = new CamServer(SERVER_IP, SERVER_PORT);
 		flightStick = new Joystick(0);
 		timer = 0;
+		autonomusChooser = new SendableChooser();
 		autonomusChooser.addObject("Right Side Of The Field", right);
 		autonomusChooser.addObject("Left Side Of The Field", left);
 		autonomusChooser.addObject("Middle Of The Field", middle);
@@ -253,28 +254,29 @@ public class Robot extends IterativeRobot {
 			leftFront.setInverted(true);
 			leftBack.setInverted(true);
 		}
-		if(flightStick.getRawButton(1)){
+		/**if(flightStick.getRawButton(1)){
 			if(flightStick.getRawButton(7) || flightStick.getRawButton(8)){
 				piston.set(DoubleSolenoid.Value.kForward);
 			}else{
 				piston.set(DoubleSolenoid.Value.kReverse);
 			}
-		}
+		}*/
 	}
 	
 	/**
 	 * This method runs in a loop during test mode.
 	 */
 	public void testPeriodic() {
-		distance.updateDistance();
-		System.out.println("Get Distance: " + distance.getDist());
-		System.out.println(ADXL362.getX());
+		trackDistance.updateDistance();
+		System.out.println("Get Distance: " + trackDistance.getDist());
+		System.out.println("");
+		//System.out.println(ADXL362.getX());
 		// Piston Code
-		if(flightStick.getRawButton(1)){
+		/**if(flightStick.getRawButton(1)){
 			piston.set(DoubleSolenoid.Value.kForward);		
 		}else{
 			piston.set(DoubleSolenoid.Value.kOff);
-		}
+		}*/
 		
 		
 		
