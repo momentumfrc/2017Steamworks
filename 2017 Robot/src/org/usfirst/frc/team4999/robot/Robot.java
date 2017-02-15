@@ -49,7 +49,7 @@ public class Robot extends IterativeRobot {
 	Ultrasonic ultrasonic;
 	Distance distance;
 	// test
-	long timer = 0;
+	long timer;
 	
 	
 	
@@ -77,7 +77,7 @@ public class Robot extends IterativeRobot {
 		piston = new DoubleSolenoid(0,1);
 		server = new CamServer(SERVER_IP, SERVER_PORT);
 		flightStick = new Joystick(0);
-		
+		timer = 0;
 		autonomusChooser.addObject("Right Side Of The Field", right);
 		autonomusChooser.addObject("Left Side Of The Field", left);
 		autonomusChooser.addObject("Middle Of The Field", middle);
