@@ -1,6 +1,5 @@
 package org.usfirst.frc.team4999.robot;
 
-import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.interfaces.Accelerometer;
 import org.usfirst.frc.analog.adis16448.*;
 
@@ -10,9 +9,9 @@ public class Distance {
 	double[] accelsX;
 	double[] accelsY;
 	double[] accelsZ;
-	Accelerometer builtIn = new BuiltInAccelerometer();
-	Accelerometer ADXL362 = new ADXL362(Accelerometer.Range.k8G);
-	ADIS16448_IMU adis = new ADIS16448_IMU();
+	Accelerometer builtIn; // = new BuiltInAccelerometer();
+	Accelerometer ADXL362; // = new ADXL362(Accelerometer.Range.k8G);
+	ADIS16448_IMU adis; // = new ADIS16448_IMU();
 	long time = System.currentTimeMillis();
 	
 	private Vector2D accel = new Vector2D(0,0);
@@ -22,9 +21,12 @@ public class Distance {
 	/**
 	 * Creates a new Distance object.
 	 */
-	public Distance() {
+	public Distance(Accelerometer builtIn, Accelerometer ADXL362, ADIS16448_IMU adis) {
 		accelsX = new double[9];
 		accelsY = new double[9];
+		this.builtIn = builtIn;
+		this.ADXL362 = ADXL362;
+		this.adis = adis;
 	}
 	/**
 	 * Returns the acceleration in a Vector2D object

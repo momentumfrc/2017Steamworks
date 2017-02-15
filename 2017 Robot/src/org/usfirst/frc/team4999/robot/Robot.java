@@ -2,6 +2,7 @@
 package org.usfirst.frc.team4999.robot;
 
 import edu.wpi.first.wpilibj.ADXL362;
+import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
@@ -57,8 +58,10 @@ public class Robot extends IterativeRobot {
 	 * This method is run once when the robot is turned on.
 	 */
 	public void robotInit() {
-		//ADXL362 =  new ADXL362(Accelerometer.Range.k8G);
-		trackDistance = new Distance();
+		ADXL362 ADXL362 =  new ADXL362(Accelerometer.Range.k8G);
+		ADIS16448_IMU adis = new ADIS16448_IMU(ADIS16448_IMU.Axis.kX);
+		Accelerometer builtIn = new BuiltInAccelerometer();
+		trackDistance = new Distance(builtIn, ADXL362, adis);
 		leftFront = new VictorSP(0);
 		rightFront = new VictorSP(1);
 		leftBack = new VictorSP(2);
@@ -67,12 +70,10 @@ public class Robot extends IterativeRobot {
 		helix = new VictorSP(5);
 		intake = new VictorSP(6);
 		winch = new VictorSP(7);
-		adis = new ADIS16448_IMU(ADIS16448_IMU.Axis.kX);
 		adis.reset();
 		adis.updateTable();
 		input = new DigitalInput(0);
 		output = new DigitalOutput(1);
-		distance = new Distance();
 		ultrasonic = new Ultrasonic(0,1);
 		piston = new DoubleSolenoid(0,1);
 		server = new CamServer(SERVER_IP, SERVER_PORT);
