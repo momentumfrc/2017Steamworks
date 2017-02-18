@@ -266,7 +266,7 @@ public class Robot extends IterativeRobot {
 			}
 		}*/
 	}catch (NullPointerException e){
-		System.err.println(RED + "Something May Be Disconnected. Please Check Connections And Try Again." + ColorReset);
+		System.err.println("****CHECK YOUR CONNECTIONS. SOMETHING IS DISCONNECTED****");
 	}
 	}
 	
