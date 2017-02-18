@@ -123,28 +123,7 @@ public class Robot extends IterativeRobot {
 		Scheduler.getInstance().run();
 		switch (autoSelected) {
 		case left:
-			// Add the code to turn the robot to the right then keep on going!
-			// Code for the ultrasonic to stop the robot if we are too close.
-			 /*if(ultrasonic.getRangeInches() > 4){
-				timer = System.currentTimeMillis();
-				leftFront.set(0);
-				leftBack.set(0);
-				rightFront.set(0);
-				rightBack.set(0);
-				if(timer > 250){
-					if(ultrasonic.getRangeInches() < 4){
-						arcadeDrive(1, 0, 0.25);
-						timer = 0;
-					}else{
-						timer = System.currentTimeMillis();
-						leftFront.set(0);
-						leftBack.set(0);
-						rightFront.set(0);
-						rightBack.set(0);
-					}
-				}
-			}
-			*/
+
 			break;
 		case middle:
 			// Add the code to make the robot continue on a straight vector then do the things it needs to do
@@ -160,28 +139,7 @@ public class Robot extends IterativeRobot {
 			}
 			break;
 		case right:
-			// Add the code to make the robot turn to the left then do the things it needs to do.
-			// Code for the ultrasonic to stop the robot if we are too close.
-				/*if(ultrasonic.getRangeInches() > 4){
-							timer = System.currentTimeMillis();
-							leftFront.set(0);
-							leftBack.set(0);
-							rightFront.set(0);
-							rightBack.set(0);
-					if(timer > 250){
-						if(ultrasonic.getRangeInches() < 4){
-							timer = 0;
-							arcadeDrive(1, 0, 0.25);
-						}else{
-							timer = System.currentTimeMillis();
-							leftFront.set(0);
-							leftBack.set(0);
-							rightFront.set(0);
-							rightBack.set(0);
-						}
-					}
-				}
-				*/
+			
 			break;
 		}
 	}
