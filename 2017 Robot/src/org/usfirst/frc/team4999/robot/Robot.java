@@ -228,7 +228,7 @@ public class Robot extends IterativeRobot {
 		System.out.println(xAcceleration);
 
 		arcadeDrive(moveRequest, xRotationError, speedLimiter);
-		
+		try{
 		if(xboxController.getRawAxis(3) == 1){
 			shooter.set(.5);
 		}
@@ -263,6 +263,9 @@ public class Robot extends IterativeRobot {
 				piston.set(DoubleSolenoid.Value.kReverse);
 			}
 		}*/
+	}catch (NullPointerException e){
+		System.out.println("Something May Be Disconnected. Please Check Connections And Try Again.");
+	}
 	}
 	
 	/**
