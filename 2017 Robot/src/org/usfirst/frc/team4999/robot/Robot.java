@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.interfaces.Accelerometer;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.Servo;
 
 import org.usfirst.frc.analog.adis16448.ADIS16448_IMU;
 
@@ -56,8 +57,7 @@ public class Robot extends IterativeRobot {
 	Distance distance;
 	// test
 	long timer;
-	public static final String RED = "\u001B[31m";
-	public static final String ColorReset = "\u001B[0m";
+	Servo servo = new Servo(9);
 	
 	
 	
@@ -306,6 +306,9 @@ public class Robot extends IterativeRobot {
 	
 	
 	public void testPeriodic() {
+		servo.set(0);
+		servo.set(1);
+		
 		trackDistance.updateDistance();
 		System.out.println("Get Distance: X:" + trackDistance.getDist().getX() + " Z: " + trackDistance.getDist().getY() /** Y is being misused on the vector class to hold Z*/ );
 		System.out.println("");
@@ -404,5 +407,6 @@ public class Robot extends IterativeRobot {
 		else
 			return input;
 	}
+	
 
 }
