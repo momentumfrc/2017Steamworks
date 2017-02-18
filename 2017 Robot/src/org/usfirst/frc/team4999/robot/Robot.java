@@ -258,13 +258,9 @@ public class Robot extends IterativeRobot {
 			leftFront.setInverted(true);
 			leftBack.setInverted(true);
 		}
-		/**if(flightStick.getRawButton(1)){
-			if(flightStick.getRawButton(7) || flightStick.getRawButton(8)){
-				piston.set(DoubleSolenoid.Value.kForward);
-			}else{
-				piston.set(DoubleSolenoid.Value.kReverse);
-			}
-		}*/
+		if(flightStick.getRawButton(1)){
+			gearPlacement();
+		}
 	}catch (NullPointerException e){
 		System.err.println("****CHECK YOUR CONNECTIONS. SOMETHING IS DISCONNECTED****");
 	}
@@ -275,7 +271,7 @@ public class Robot extends IterativeRobot {
 	 */
 	
 	public void gearPlacement(){
-		final double moveRequest = deadzone(-flightStick.getY(), 0.15);
+
 		final double turnRequest = deadzone(flightStick.getTwist(), 0.20);
 		final double turnRateRequest = turnRequest * 45;
 		final double speedLimiter = (-flightStick.getThrottle() + 1) / 2;
@@ -296,7 +292,7 @@ public class Robot extends IterativeRobot {
 				if(distance < 2){
 					timer = System.currentTimeMillis();
 					piston.set(DoubleSolenoid.Value.kForward);
-					if(timer > .25){
+					if(timer > 750){
 						piston.set(DoubleSolenoid.Value.kReverse);
 					}
 				}
