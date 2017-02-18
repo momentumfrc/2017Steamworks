@@ -287,7 +287,15 @@ public class Robot extends IterativeRobot {
 			final int xErr = server.getXError();
 			map(xErr, -80, 80, -1, 1);
 			arcadeDrive(1, xErr, .25);
-			
+			if(xErr == 0){
+				if(distance < 2){
+					timer = System.currentTimeMillis();
+					piston.set(DoubleSolenoid.Value.kForward);
+					if(timer > .25){
+						piston.set(DoubleSolenoid.Value.kReverse);
+					}
+				}
+			}
 		}
 	}
 	
