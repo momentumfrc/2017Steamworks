@@ -149,26 +149,14 @@ public class Robot extends IterativeRobot {
 		case middle:
 			// Add the code to make the robot continue on a straight vector then do the things it needs to do
 			// Code for the ultrasonic to stop the robot if we are too close.
-			/*if(ultrasonic.getRangeInches() > 4){
-							timer = System.currentTimeMillis();
-							leftFront.set(0);
-							leftBack.set(0);
-							rightFront.set(0);
-							rightBack.set(0);
-				if(timer > 250){
-					if(ultrasonic.getRangeInches() < 4){
-						timer = 0;
-						arcadeDrive(1, 0, 0.25);
-						}else{
-							timer = System.currentTimeMillis();
-							leftFront.set(0);
-							leftBack.set(0);
-							rightFront.set(0);
-							rightBack.set(0);
-						}
-					}
-				}
-				*/
+			if (ultrasonic.getRangeInches() < 4){
+				leftFront.set(0);
+				leftBack.set(0);
+				rightFront.set(0);
+				rightBack.set(0);
+			}else{
+				arcadeDrive(1, 0, 0.25);
+			}
 			break;
 		case right:
 			// Add the code to make the robot turn to the left then do the things it needs to do.
