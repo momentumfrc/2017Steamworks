@@ -268,6 +268,30 @@ public class Robot extends IterativeRobot {
 	/**
 	 * This method runs in a loop during test mode.
 	 */
+	
+	public void gearPlacement(){
+		final double moveRequest = deadzone(-flightStick.getY(), 0.15);
+		final double turnRequest = deadzone(flightStick.getTwist(), 0.20);
+		final double turnRateRequest = turnRequest * 45;
+		final double speedLimiter = (-flightStick.getThrottle() + 1) / 2;
+		final double rateX = -adis.getRateX();
+		final double angleY = -adis.getAngleY();
+		final double angleZ = -adis.getAngleZ();
+		final double xRotationError = map(turnRateRequest - rateX, -45, 45, -1, 1);
+		final double getYaw = adis.getYaw();
+		final double getRoll = adis.getRoll();
+		final double xAcceleration = adis.getAccelX();
+		double distance = ultrasonic.getRangeInches();
+		arcadeDrive(moveRequest, xRotationError, speedLimiter);
+		if(distance < 2){
+			final int xErr = server.getXError();
+			map(xErr, -80, 80, -1, 1);
+			arcadeDrive(1, xErr, .25);
+			
+		}
+	}
+	
+	
 	public void testPeriodic() {
 		trackDistance.updateDistance();
 		System.out.println("Get Distance: X:" + trackDistance.getDist().getX() + " Z: " + trackDistance.getDist().getY() /** Y is being misused on the vector class to hold Z*/ );
