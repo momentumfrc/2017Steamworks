@@ -103,4 +103,7 @@ public class Vector2D {
 		this.x += otherVector.getX() * t;
 		this.y += otherVector.getY() * t;
 	}
+	public String toString() {
+		return("X: " + x + " Y: " + y);
+	}
 }

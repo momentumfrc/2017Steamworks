@@ -2,6 +2,7 @@
 package org.usfirst.frc.team4999.robot;
 
 import edu.wpi.first.wpilibj.ADXL362;
+import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
@@ -15,6 +16,8 @@ import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.interfaces.Accelerometer;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.SPI;
+
 import org.usfirst.frc.analog.adis16448.ADIS16448_IMU;
 
 
@@ -32,11 +35,15 @@ public class Robot extends IterativeRobot {
 	private VictorSP leftFront, leftBack, rightFront, rightBack, shooter, intake, helix, winch;
 	private CamServer server;
 	String autoSelected;
-	private ADIS16448_IMU adis;
+	// <Accelerometers>
+	private ADIS16448_IMU adis = new ADIS16448_IMU(ADIS16448_IMU.Axis.kX);
+	private Accelerometer builtIn = new BuiltInAccelerometer();
+	//private ADXL362 ADXL =  new ADXL362(Accelerometer.Range.k8G); //commented out until we get it working
+	//</Accelerometers>
 	public static final String SERVER_IP = "10.49.99.12";
 	public static  final int SERVER_PORT = 5810;
+	boolean isInverted = false;
 	Distance trackDistance;
-	Accelerometer ADXL362;
 	final String right = "Right Side";
 	final String left = "Left Side";
 	final String middle = "Middle Side";
@@ -52,7 +59,7 @@ public class Robot extends IterativeRobot {
 	Distance distance;
 >>>>>>> branch 'master' of https://github.com/momentumfrc/2017Steamworks.git
 	// test
-	long timer = 0;
+	long timer;
 	
 	
 	
@@ -60,8 +67,7 @@ public class Robot extends IterativeRobot {
 	 * This method is run once when the robot is turned on.
 	 */
 	public void robotInit() {
-		ADXL362 =  new ADXL362(Accelerometer.Range.k8G);
-		trackDistance = new Distance();
+		trackDistance = new Distance(builtIn, adis);
 		leftFront = new VictorSP(0);
 		rightFront = new VictorSP(1);
 		leftBack = new VictorSP(2);
@@ -70,17 +76,16 @@ public class Robot extends IterativeRobot {
 		helix = new VictorSP(5);
 		intake = new VictorSP(6);
 		winch = new VictorSP(7);
-		adis = new ADIS16448_IMU(ADIS16448_IMU.Axis.kX);
 		adis.reset();
 		adis.updateTable();
-		input = new DigitalInput(0);
-		output = new DigitalOutput(1);
-		distance = new Distance();
+		/**input = new DigitalInput(0);
+		output = new DigitalOutput(1);*/
 		ultrasonic = new Ultrasonic(0,1);
-		piston = new DoubleSolenoid(0,1);
+		//piston = new DoubleSolenoid(0,1);
 		server = new CamServer(SERVER_IP, SERVER_PORT);
 		flightStick = new Joystick(0);
-		
+		timer = 0;
+		autonomusChooser = new SendableChooser();
 		autonomusChooser.addObject("Right Side Of The Field", right);
 		autonomusChooser.addObject("Left Side Of The Field", left);
 		autonomusChooser.addObject("Middle Of The Field", middle);
@@ -246,28 +251,62 @@ public class Robot extends IterativeRobot {
 		if(xboxController.getRawAxis(1) == 1){
 			winch.set(1);
 		}
-		if(flightStick.getRawButton(1)){
+		if(flightStick.getRawButton(3)){
+			isInverted =! isInverted;
+		}
+		if(isInverted){
+			rightFront.setInverted(true);
+			rightBack.setInverted(true);
+			leftFront.setInverted(true);
+			leftBack.setInverted(true);
+		}
+		/**if(flightStick.getRawButton(1)){
 			if(flightStick.getRawButton(7) || flightStick.getRawButton(8)){
 				piston.set(DoubleSolenoid.Value.kForward);
 			}else{
 				piston.set(DoubleSolenoid.Value.kReverse);
 			}
-		}
+		}*/
 	}
 	
 	/**
 	 * This method runs in a loop during test mode.
 	 */
+	
+	public void gearPlacement(){
+		final double moveRequest = deadzone(-flightStick.getY(), 0.15);
+		final double turnRequest = deadzone(flightStick.getTwist(), 0.20);
+		final double turnRateRequest = turnRequest * 45;
+		final double speedLimiter = (-flightStick.getThrottle() + 1) / 2;
+		final double rateX = -adis.getRateX();
+		final double angleY = -adis.getAngleY();
+		final double angleZ = -adis.getAngleZ();
+		final double xRotationError = map(turnRateRequest - rateX, -45, 45, -1, 1);
+		final double getYaw = adis.getYaw();
+		final double getRoll = adis.getRoll();
+		final double xAcceleration = adis.getAccelX();
+		double distance = ultrasonic.getRangeInches();
+		arcadeDrive(moveRequest, xRotationError, speedLimiter);
+		if(distance < 2){
+			final int xErr = server.getXError();
+			map(xErr, -80, 80, -1, 1);
+			arcadeDrive(1, xErr, .25);
+			
+		}
+	}
+	
+	
 	public void testPeriodic() {
-		distance.updateDistance();
-		System.out.println("Get Distance: " + distance.getDist());
-		System.out.println(ADXL362.getX());
+		trackDistance.updateDistance();
+		System.out.println("Get Distance: X:" + trackDistance.getDist().getX() + " Z: " + trackDistance.getDist().getY() /** Y is being misused on the vector class to hold Z*/ );
+		System.out.println("");
+		//System.out.println(ADXL362.getX());
 		// Piston Code
-		if(flightStick.getRawButton(1)){
+		/**if(flightStick.getRawButton(1)){
 			piston.set(DoubleSolenoid.Value.kForward);		
 		}else{
 			piston.set(DoubleSolenoid.Value.kOff);
-		}
+		}*/
 		
 		
 		

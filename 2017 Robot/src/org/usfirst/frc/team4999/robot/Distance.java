@@ -1,30 +1,45 @@
 package org.usfirst.frc.team4999.robot;
 
-import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.interfaces.Accelerometer;
 import org.usfirst.frc.analog.adis16448.*;
 
 import Vector.Vector2D;
 
+/**
+ * 		Z
+ * 		^
+ * _____|_____
+ * |	 	  |
+ * |	_ Y	  |
+ * |	/|	  |--> X
+ * |   /	  |
+ * |__________|
+ */
+
 public class Distance {
 	double[] accelsX;
-	double[] accelsY;
 	double[] accelsZ;
-	Accelerometer builtIn = new BuiltInAccelerometer();
-	Accelerometer ADXL362 = new ADXL362(Accelerometer.Range.k8G);
-	ADIS16448_IMU adis = new ADIS16448_IMU();
+	Accelerometer builtIn; 
+	ADIS16448_IMU adis;
 	long time = System.currentTimeMillis();
+	private double[] offsetX = {0,0}; // ADIS, BuiltIn
+	private double[] offsetZ = {0,0};
+	boolean calibrate = true; // Set calibrate to true to set the offset
 	
-	private Vector2D accel = new Vector2D(0,0);
+	//We'll only worry about X and Z, the robot isn't likely to fly
+	//X will be first, followed by Z
+	private Vector2D accel = new Vector2D(0/** X */,0/** Z */);
 	private Vector2D vel = new Vector2D(0,0);
 	private Vector2D dist = new Vector2D(0,0);
 	
 	/**
 	 * Creates a new Distance object.
 	 */
-	public Distance() {
-		accelsX = new double[9];
-		accelsY = new double[9];
+	public Distance(Accelerometer builtIn, ADIS16448_IMU adis) {
+		accelsX = new double[6];
+		accelsZ = new double[6];
+		this.builtIn = builtIn;
+		this.adis = adis;
 	}
 	/**
 	 * Returns the acceleration in a Vector2D object
@@ -56,21 +71,48 @@ public class Distance {
 	 * Updates acceleration, velocity, and distance properties.
 	 */
 	public void updateDistance() {
-		for(int i = 0; i < 9; i += 3) {
-			accelsX[i] = builtIn.getX();
-			accelsX[i+1] = ADXL362.getX();
-			accelsX[i+2] = adis.getAccelX();
-			accelsY[i] = builtIn.getY();
-			accelsY[i+1] = ADXL362.getY();
-			accelsY[i+2] = adis.getAccelY();
+		//Set the offset if the calibrate boolean is true. 
+		if(calibrate) {
+			offsetX[0] = adis.getAccelX();
+			offsetX[1] = builtIn.getX();
+			offsetZ[0] = adis.getAccelZ();
+			offsetZ[1] = builtIn.getZ();
+			calibrate = false;
 		}
-		double[] averageAccels = new double[2];
-		for(int i=0; i < 9; i++) {
+		
+		//System.out.println("ADXL362: X: " + ADXL.getAcceleration(ADXL362.Axes.kX) + " Y: " + ADXL.getAcceleration(ADXL362.Axes.kY) + " Z: " + ADXL.getAcceleration(ADXL362.Axes.kZ));
+		System.out.println("Builtin: X: " + builtIn.getX() + " Y: "+ builtIn.getY() + " Z: " + builtIn.getZ());
+		System.out.println("ADIS: X: " + adis.getAccelX() + " Y: " + adis.getAccelY() + " Z: "+ adis.getAccelZ());
+		
+		// Sum the accelerometer values over 3 samples
+		for(int i = 0; i < 6; i += 2) {
+			accelsX[i] = builtIn.getX() - offsetX[1];
+			accelsX[i+1] = -(adis.getAccelX() - offsetX[0]); // adis is reversed to align with the builtin accelerometer
+			accelsZ[i] = builtIn.getZ() - offsetZ[1];
+			accelsZ[i+1] = -(adis.getAccelZ() - offsetZ[0]);
+			//wait 5ms to take the next sample
+			try {
+			    Thread.sleep(5);
+			} catch(InterruptedException ex) {
+			    Thread.currentThread().interrupt();
+			}
+		}
+		
+		double[] averageAccels = new double[2]; // 0 : X, 1 : Z
+		for(int i=0; i < 6; i++) {
 			averageAccels[0] += accelsX[i];
-			averageAccels[1] += accelsY[i];
+			averageAccels[1] += accelsZ[i];
 		}
-		averageAccels[0] = averageAccels[0] / 9;
-		averageAccels[1] = averageAccels[1] / 9;
+		averageAccels[0] = averageAccels[0] / 6;
+		averageAccels[1] = averageAccels[1] / 6;
+		System.out.println("Acceleration: X: " + averageAccels[0] + " Z: " + averageAccels[1] );
+		for(int i = 0; i < 2; i++ ) {
+			if(Math.abs(averageAccels[i]) < .15 ) { // ignore noise below a certain threshold
+				averageAccels[i] = 0;
+			}
+			// averageAccels[i] = averageAccels[i] * 9.81; // meters
+			averageAccels[i] = averageAccels[i] * 32.174; // feet
+		}
 		accel.addToXY(averageAccels[0], averageAccels[1]);
 		long timeChange = System.currentTimeMillis() - time;
 		time = System.currentTimeMillis();
