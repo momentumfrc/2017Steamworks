@@ -306,9 +306,17 @@ public class Robot extends IterativeRobot {
 	
 	
 	public void testPeriodic() {
-		servo.set(0);
-		servo.set(1);
-		
+		if(flightStick.getRawButton(1)){
+			servo.setAngle(0);
+		} else {
+			servo.setAngle(90);
+		}
+		if(flightStick.getRawButton(2)) {
+			trackDistance.zero();
+		}
+		if(flightStick.getRawButton(5)) {
+			trackDistance.calibrate = true;
+		}
 		trackDistance.updateDistance();
 		System.out.println("Get Distance: X:" + trackDistance.getDist().getX() + " Z: " + trackDistance.getDist().getY() /** Y is being misused on the vector class to hold Z*/ );
 		System.out.println("");

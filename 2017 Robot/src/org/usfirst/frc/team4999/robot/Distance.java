@@ -81,8 +81,8 @@ public class Distance {
 		}
 		
 		//System.out.println("ADXL362: X: " + ADXL.getAcceleration(ADXL362.Axes.kX) + " Y: " + ADXL.getAcceleration(ADXL362.Axes.kY) + " Z: " + ADXL.getAcceleration(ADXL362.Axes.kZ));
-		System.out.println("Builtin: X: " + builtIn.getX() + " Y: "+ builtIn.getY() + " Z: " + builtIn.getZ());
-		System.out.println("ADIS: X: " + adis.getAccelX() + " Y: " + adis.getAccelY() + " Z: "+ adis.getAccelZ());
+		/**System.out.println("Builtin: X: " + builtIn.getX() + " Y: "+ builtIn.getY() + " Z: " + builtIn.getZ());
+		System.out.println("ADIS: X: " + adis.getAccelX() + " Y: " + adis.getAccelY() + " Z: "+ adis.getAccelZ());*/
 		
 		// Sum the accelerometer values over 3 samples
 		for(int i = 0; i < 6; i += 2) {
@@ -90,12 +90,6 @@ public class Distance {
 			accelsX[i+1] = -(adis.getAccelX() - offsetX[0]); // adis is reversed to align with the builtin accelerometer
 			accelsZ[i] = builtIn.getZ() - offsetZ[1];
 			accelsZ[i+1] = -(adis.getAccelZ() - offsetZ[0]);
-			//wait 5ms to take the next sample
-			try {
-			    Thread.sleep(5);
-			} catch(InterruptedException ex) {
-			    Thread.currentThread().interrupt();
-			}
 		}
 		
 		double[] averageAccels = new double[2]; // 0 : X, 1 : Z
@@ -117,6 +111,13 @@ public class Distance {
 		long timeChange = System.currentTimeMillis() - time;
 		time = System.currentTimeMillis();
 		vel.addVectorWithTime(accel, timeChange);
+		if(vel.getX() < .1 ) {
+			vel.setX(0.0);
+		}
+		if(vel.getY() < .1 ){
+			vel.setY(0.0);
+		}
+		System.out.println("Velocity: X:" + vel.getX() + " Z: " + vel.getY());
 		dist.addVectorWithTime(vel, timeChange);
 	}
 }
