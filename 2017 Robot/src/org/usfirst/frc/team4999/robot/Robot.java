@@ -49,11 +49,15 @@ public class Robot extends IterativeRobot {
 	final String middle = "Middle Side";
 	Command autonomusCommand;
 	SendableChooser autonomusChooser;
+<<<<<<< HEAD
+	
+=======
 	DigitalInput input;
 	DigitalOutput output;
 	DoubleSolenoid piston;
 	Ultrasonic ultrasonic;
 	Distance distance;
+>>>>>>> branch 'master' of https://github.com/momentumfrc/2017Steamworks.git
 	// test
 	long timer;
 	
