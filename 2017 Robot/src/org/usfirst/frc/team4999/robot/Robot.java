@@ -56,6 +56,8 @@ public class Robot extends IterativeRobot {
 	Distance distance;
 	// test
 	long timer;
+	public static final String RED = "\u001B[31m";
+	public static final String ColorReset = "\u001B[0m";
 	
 	
 	
@@ -264,7 +266,7 @@ public class Robot extends IterativeRobot {
 			}
 		}*/
 	}catch (NullPointerException e){
-		System.err.println("Something May Be Disconnected. Please Check Connections And Try Again.");
+		System.err.println(RED + "Something May Be Disconnected. Please Check Connections And Try Again." + ColorReset);
 	}
 	}
 	
