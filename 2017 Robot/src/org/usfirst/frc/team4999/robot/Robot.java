@@ -4,6 +4,7 @@ package org.usfirst.frc.team4999.robot;
 import edu.wpi.first.wpilibj.ADXL362;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DigitalOutput;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Ultrasonic;
@@ -27,7 +28,8 @@ import org.usfirst.frc.analog.adis16448.ADIS16448_IMU;
 
 public class Robot extends IterativeRobot {
 	private Joystick flightStick;
-	private VictorSP leftFront, leftBack, rightFront, rightBack;
+	private Joystick xboxController;
+	private VictorSP leftFront, leftBack, rightFront, rightBack, shooter, intake, helix, winch;
 	private CamServer server;
 	String autoSelected;
 	private ADIS16448_IMU adis;
@@ -40,7 +42,15 @@ public class Robot extends IterativeRobot {
 	final String middle = "Middle Side";
 	Command autonomusCommand;
 	SendableChooser autonomusChooser;
+<<<<<<< HEAD
 	
+=======
+	DigitalInput input;
+	DigitalOutput output;
+	DoubleSolenoid piston;
+	Ultrasonic ultrasonic;
+	Distance distance;
+>>>>>>> branch 'master' of https://github.com/momentumfrc/2017Steamworks.git
 	// test
 	long timer = 0;
 	
@@ -56,12 +66,18 @@ public class Robot extends IterativeRobot {
 		rightFront = new VictorSP(1);
 		leftBack = new VictorSP(2);
 		rightBack = new VictorSP(3);
-		
+		shooter = new VictorSP(4);
+		helix = new VictorSP(5);
+		intake = new VictorSP(6);
+		winch = new VictorSP(7);
 		adis = new ADIS16448_IMU(ADIS16448_IMU.Axis.kX);
 		adis.reset();
 		adis.updateTable();
-		
-		
+		input = new DigitalInput(0);
+		output = new DigitalOutput(1);
+		distance = new Distance();
+		ultrasonic = new Ultrasonic(0,1);
+		piston = new DoubleSolenoid(0,1);
 		server = new CamServer(SERVER_IP, SERVER_PORT);
 		flightStick = new Joystick(0);
 		
@@ -194,6 +210,8 @@ public class Robot extends IterativeRobot {
 		final double getRoll = adis.getRoll();
 		final double xAcceleration = adis.getAccelX();
 		//final double antiTipError = map(angleY,)
+		
+
 
 		System.out.println("moveRequest: " + moveRequest);
 		System.out.println("turnRequest: " + turnRequest);
@@ -210,14 +228,50 @@ public class Robot extends IterativeRobot {
 
 		arcadeDrive(moveRequest, xRotationError, speedLimiter);
 		
+		if(xboxController.getRawAxis(3) == 1){
+			shooter.set(.5);
+		}
+		if(xboxController.getRawAxis(2) == 1){
+			intake.set(1);
+		}
+		if(xboxController.getRawButton(4)){
+			intake.set(-1);
+		}
+		if(xboxController.getRawAxis(6) == -1){
+			helix.set(-1);
+		}
+		if(xboxController.getRawAxis(6) == 1){
+			helix.set(1);
+		}
+		if(xboxController.getRawAxis(1) == 1){
+			winch.set(1);
+		}
+		if(flightStick.getRawButton(1)){
+			if(flightStick.getRawButton(7) || flightStick.getRawButton(8)){
+				piston.set(DoubleSolenoid.Value.kForward);
+			}else{
+				piston.set(DoubleSolenoid.Value.kReverse);
+			}
+		}
 	}
 	
 	/**
 	 * This method runs in a loop during test mode.
 	 */
 	public void testPeriodic() {
-		
+		distance.updateDistance();
+		System.out.println("Get Distance: " + distance.getDist());
 		System.out.println(ADXL362.getX());
+		// Piston Code
+		if(flightStick.getRawButton(1)){
+			piston.set(DoubleSolenoid.Value.kForward);		
+		}else{
+			piston.set(DoubleSolenoid.Value.kOff);
+		}
+		
+		
+		
+		
 		
 		/*trackDistance.updateDistance();
 		 // Code to write to the smart dashboard
