@@ -149,11 +149,12 @@ public class Robot extends IterativeRobot {
 		case middle:
 			// Add the code to make the robot continue on a straight vector then do the things it needs to do
 			// Code for the ultrasonic to stop the robot if we are too close.
-			if (ultrasonic.getRangeInches() < 4){
+			if (ultrasonic.getRangeInches() < 2){
 				leftFront.set(0);
 				leftBack.set(0);
 				rightFront.set(0);
 				rightBack.set(0);
+				gearPlacement();
 			}else{
 				arcadeDrive(1, 0, 0.25);
 			}
