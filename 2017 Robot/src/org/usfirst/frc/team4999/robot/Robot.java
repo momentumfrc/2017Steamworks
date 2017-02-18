@@ -264,7 +264,7 @@ public class Robot extends IterativeRobot {
 			}
 		}*/
 	}catch (NullPointerException e){
-		System.err.print("Something May Be Disconnected. Please Check Connections And Try Again.");
+		System.err.println("Something May Be Disconnected. Please Check Connections And Try Again.");
 	}
 	}
 	
