@@ -271,7 +271,7 @@ public class Robot extends IterativeRobot {
 		final double getRoll = adis.getRoll();
 		final double xAcceleration = adis.getAccelX();
 		double distance = ultrasonic.getRangeInches();
-		arcadeDrive(.25, xRotationError, 1);
+		arcadeDrive(1, xRotationError, .25);
 		if(distance < 2){
 			final int xErr = server.getXError();
 			map(xErr, -80, 80, -1, 1);
