@@ -67,13 +67,13 @@ public class Robot extends IterativeRobot {
 	public void robotInit() {
 		trackDistance = new Distance(builtIn, adis);
 		leftFront = new VictorSP(0);
-		rightFront = new VictorSP(1);
-		leftBack = new VictorSP(2);
+		rightFront = new VictorSP(2);
+		leftBack = new VictorSP(1);
 		rightBack = new VictorSP(3);
-		shooter = new VictorSP(4);
-		helix = new VictorSP(5);
-		intake = new VictorSP(6);
-		winch = new VictorSP(7);
+		//shooter = new VictorSP(4);
+		//helix = new VictorSP(5);
+		//intake = new VictorSP(6);
+		//winch = new VictorSP(7);
 		adis.reset();
 		adis.updateTable();
 		/**input = new DigitalInput(0);
@@ -204,6 +204,7 @@ public class Robot extends IterativeRobot {
 	/**
 	 * This method runs in a loop during teleop mode.
 	 */
+	boolean ignoreInput = false;
 	public void teleopPeriodic() {		
 		final double moveRequest = deadzone(-flightStick.getY(), 0.15);
 		final double turnRequest = deadzone(flightStick.getTwist(), 0.20);
@@ -234,28 +235,35 @@ public class Robot extends IterativeRobot {
 		System.out.println(xAcceleration);
 
 		arcadeDrive(moveRequest, xRotationError, speedLimiter);
-		try{
+		
 		if(xboxController.getRawAxis(3) == 1){
-			shooter.set(.5);
+			//shooter.set(.5);
 		}
 		if(xboxController.getRawAxis(2) == 1){
-			intake.set(1);
+			//intake.set(1);
 		}
 		if(xboxController.getRawButton(4)){
-			intake.set(-1);
+			//intake.set(-1);
 		}
 		if(xboxController.getRawAxis(6) == -1){
-			helix.set(-1);
+			//helix.set(-1);
 		}
 		if(xboxController.getRawAxis(6) == 1){
-			helix.set(1);
+			//helix.set(1);
 		}
 		if(xboxController.getRawAxis(1) == 1){
 			winch.set(1);
 		}
+		
 		if(flightStick.getRawButton(3)){
-			isInverted =! isInverted;
+			if (!ignoreInput){
+				ignoreInput = true;
+				isInverted =! isInverted;
+			}
+		}else{
+			ignoreInput = false;
 		}
+		
 		if(isInverted){
 			rightFront.setInverted(true);
 			rightBack.setInverted(true);
@@ -263,11 +271,14 @@ public class Robot extends IterativeRobot {
 			leftBack.setInverted(true);
 		}
 		if(flightStick.getRawButton(1)){
-			gearPlacement();
+			if(flightStick.getRawButton(7) || flightStick.getRawButton(8)){
+				timer = System.currentTimeMillis();
+				piston.set(DoubleSolenoid.Value.kForward);
+				if(timer > 750){
+					piston.set(DoubleSolenoid.Value.kReverse);
+				}
+			}
 		}
-	}catch (NullPointerException e){
-		System.err.println("****CHECK YOUR CONNECTIONS. SOMETHING IS DISCONNECTED****");
-	}
 	}
 	
 	/**
