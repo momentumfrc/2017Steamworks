@@ -121,13 +121,43 @@ public class Robot extends IterativeRobot {
 		arcadeDrive(1, turnRequest, 0.25);
 		
 		Scheduler.getInstance().run();
+		boolean searchingForPeg = true;
+		boolean aligningPeg = false;
 		switch (autoSelected) {
 		case left:
-
+			//first stage: turn the camera and move forward until peg is next to camera
+			if (searchingForPeg){
+				servo.setAngle(180);
+				arcadeDrive(1, 0, 0.25);
+				if (xErr > -10 && xErr < 10) {
+					arcadeDrive(0, 0, 0);
+					servo.setAngle(90);
+					searchingForPeg = false;
+					aligningPeg = true;
+				}
+			}else{
+			//second stage: turn the whole robot around and go forward until peg is directly in front
+				if (aligningPeg){
+					arcadeDrive(0, 0.5, 0.25);
+				}
+				if (xErr > -10 && xErr < 10) {
+					aligningPeg = false;
+					if (ultrasonic.getRangeInches() < 2){
+						leftFront.set(0);
+						leftBack.set(0);
+						rightFront.set(0);
+						rightBack.set(0);
+						gearPlacement();
+					}else{
+						arcadeDrive(1, 0, 0.25);
+					}
+				}
+			}
 			break;
 		case middle:
 			// Add the code to make the robot continue on a straight vector then do the things it needs to do
 			// Code for the ultrasonic to stop the robot if we are too close.
+			servo.setAngle(90);
 			if (ultrasonic.getRangeInches() < 2){
 				leftFront.set(0);
 				leftBack.set(0);
@@ -139,7 +169,34 @@ public class Robot extends IterativeRobot {
 			}
 			break;
 		case right:
-			
+			//first stage: turn the camera and move forward until peg is next to camera
+			if (searchingForPeg){
+				servo.setAngle(0);
+				arcadeDrive(1, 0, 0.25);
+				if (xErr > -10 && xErr < 10) {
+					arcadeDrive(0, 0, 0);
+					servo.setAngle(90);
+					searchingForPeg = false;
+					aligningPeg = true;
+				}
+			}else{
+			//second stage: turn the whole robot around and go forward until peg is directly in front
+				if (aligningPeg){
+					arcadeDrive(0, -0.5, 0.25);
+				}
+				if (xErr > -10 && xErr < 10) {
+					aligningPeg = false;
+					if (ultrasonic.getRangeInches() < 2){
+						leftFront.set(0);
+						leftBack.set(0);
+						rightFront.set(0);
+						rightBack.set(0);
+						gearPlacement();
+					}else{
+						arcadeDrive(1, 0, 0.25);
+					}
+				}
+			}
 			break;
 		}
 	}
