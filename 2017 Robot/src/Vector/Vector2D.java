@@ -99,7 +99,7 @@ public class Vector2D {
 		this.x += x;
 		this.y += y;
 	}
-	public void addVectorWithTime(Vector2D otherVector, long t) {
+	public void addVectorWithTime(Vector2D otherVector, double t) {
 		this.x += otherVector.getX() * t;
 		this.y += otherVector.getY() * t;
 	}

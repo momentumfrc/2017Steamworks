@@ -88,7 +88,7 @@ public class Robot extends IterativeRobot {
 		autonomusChooser.addObject("Left Side Of The Field", left);
 		autonomusChooser.addObject("Middle Of The Field", middle);
 		SmartDashboard.putData("Autonomus Mode Selector", autonomusChooser);
-
+		SmartDashboard.putNumber("Smoothing", trackDistance.ALPHA);
 	}
 	
 	/**
@@ -249,19 +249,26 @@ public class Robot extends IterativeRobot {
 	
 	
 	public void testPeriodic() {
-		if(flightStick.getRawButton(1)){
+		trackDistance.ALPHA = SmartDashboard.getNumber("Smoothing", .8);
+		if(flightStick.getRawButton(6)){
 			servo.setAngle(0);
-		} else {
+		} else if (flightStick.getRawButton(4)) {
+			servo.setAngle(180);
+		}
+		else {
 			servo.setAngle(90);
 		}
 		if(flightStick.getRawButton(2)) {
-			trackDistance.zero();
+			trackDistance.velocity = 0.0;
+			trackDistance.distance = 0.0;
 		}
 		if(flightStick.getRawButton(5)) {
 			trackDistance.calibrate = true;
 		}
 		trackDistance.updateDistance();
-		System.out.println("Get Distance: X:" + trackDistance.getDist().getX() + " Z: " + trackDistance.getDist().getY() /** Y is being misused on the vector class to hold Z*/ );
+		//System.out.println("Get Distance: X:" + trackDistance.getDist().getX() + " Z: " + trackDistance.getDist().getY() /** Y is being misused on the vector class to hold Z*/ );
+		System.out.println("Velocity: " + trackDistance.velocity);
+		System.out.println("Distance: " + trackDistance.distance + " ft");
 		System.out.println("");
 		//System.out.println(ADXL362.getX());
 		// Piston Code
