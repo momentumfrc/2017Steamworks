@@ -35,7 +35,7 @@ public class Distance {
 	public double distance = 0.0;
 	public double velocity = 0.0;
 	
-	public double ALPHA = 0.5;
+	public double ALPHA = 0.8;
 	
 	/**
 	 * Creates a new Distance object.

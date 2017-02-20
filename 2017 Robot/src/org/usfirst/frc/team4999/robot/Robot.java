@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.VictorSP;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.interfaces.Accelerometer;
@@ -32,7 +33,7 @@ import org.usfirst.frc.analog.adis16448.ADIS16448_IMU;
 
 public class Robot extends IterativeRobot {
 	private Joystick flightStick;
-	private Joystick xboxController;
+	private XboxController xboxController = new XboxController(0);
 	private VictorSP leftFront, leftBack, rightFront, rightBack, shooter, intake, helix, winch;
 	private CamServer server;
 	String autoSelected;
@@ -66,22 +67,24 @@ public class Robot extends IterativeRobot {
 	 */
 	public void robotInit() {
 		trackDistance = new Distance(builtIn, adis);
-		leftFront = new VictorSP(0);
-		rightFront = new VictorSP(2);
-		leftBack = new VictorSP(1);
-		rightBack = new VictorSP(3);
+		rightFront = new VictorSP(0);
+		leftFront = new VictorSP(2);
+		rightBack = new VictorSP(1);
+		leftBack = new VictorSP(3);
+		rightBack.setInverted(true);
+		rightFront.setInverted(true);
 		//shooter = new VictorSP(4);
 		//helix = new VictorSP(5);
 		//intake = new VictorSP(6);
-		//winch = new VictorSP(7);
+		winch = new VictorSP(5);
 		adis.reset();
 		adis.updateTable();
 		/**input = new DigitalInput(0);
 		output = new DigitalOutput(1);*/
 		ultrasonic = new Ultrasonic(0,1);
-		//piston = new DoubleSolenoid(0,1);
+		piston = new DoubleSolenoid(0,1);
 		server = new CamServer(SERVER_IP, SERVER_PORT);
-		flightStick = new Joystick(0);
+		flightStick = new Joystick(1);
 		timer = 0;
 		autonomusChooser = new SendableChooser();
 		autonomusChooser.addObject("Right Side Of The Field", right);
@@ -205,9 +208,13 @@ public class Robot extends IterativeRobot {
 	 * This method runs in a loop during teleop mode.
 	 */
 	boolean ignoreInput = false;
-	public void teleopPeriodic() {		
+	public void teleopPeriodic() {
 		final double moveRequest = deadzone(-flightStick.getY(), 0.15);
-		final double turnRequest = deadzone(flightStick.getTwist(), 0.20);
+		final double turnRequest;
+		if (isInverted)
+			turnRequest = -deadzone(flightStick.getTwist(), 0.20);
+		else
+			turnRequest = deadzone(flightStick.getTwist(), 0.20);
 		final double turnRateRequest = turnRequest * 45;
 		final double speedLimiter = (-flightStick.getThrottle() + 1) / 2;
 		final double rateX = -adis.getRateX();
@@ -220,7 +227,17 @@ public class Robot extends IterativeRobot {
 		//final double antiTipError = map(angleY,)
 		
 
-
+		trackDistance.updateDistance();
+		
+		if(flightStick.getRawButton(2)) {
+			trackDistance.velocity = 0.0;
+			trackDistance.distance = 0.0;
+		}
+		if(flightStick.getRawButton(5)) {
+			trackDistance.calibrate = true;
+		}
+		
+		/*
 		System.out.println("moveRequest: " + moveRequest);
 		System.out.println("turnRequest: " + turnRequest);
 		System.out.println("speedLimiter: " + speedLimiter);
@@ -233,7 +250,15 @@ public class Robot extends IterativeRobot {
 		System.out.println("Yaw: " + angleY);
 		System.out.println("Y accel:" + adis.getAccelY());
 		System.out.println(xAcceleration);
-
+		*/
+		
+		System.out.println("distance travelled: " + trackDistance.distance);
+		System.out.println("Left Front: " + leftFront.getInverted());
+		System.out.println("Left Back: " + leftBack.getInverted());
+		System.out.println("Right Front: " + rightFront.getInverted());
+		System.out.println("Right Back: " + rightBack.getInverted());
+		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		
 		arcadeDrive(moveRequest, xRotationError, speedLimiter);
 		
 		if(xboxController.getRawAxis(3) == 1){
@@ -251,33 +276,31 @@ public class Robot extends IterativeRobot {
 		if(xboxController.getRawAxis(6) == 1){
 			//helix.set(1);
 		}
-		if(xboxController.getRawAxis(1) == 1){
-			winch.set(1);
-		}
+		
+		
+		winch.set(clip(xboxController.getRawAxis(1), 0, 1));
+		
 		
 		if(flightStick.getRawButton(3)){
 			if (!ignoreInput){
 				ignoreInput = true;
 				isInverted =! isInverted;
+				rightFront.setInverted(!rightFront.getInverted());
+				rightBack.setInverted(!rightBack.getInverted());
+				leftFront.setInverted(!leftFront.getInverted());
+				leftBack.setInverted(!leftBack.getInverted());
 			}
 		}else{
 			ignoreInput = false;
-		}
-		
-		if(isInverted){
-			rightFront.setInverted(true);
-			rightBack.setInverted(true);
-			leftFront.setInverted(true);
-			leftBack.setInverted(true);
 		}
 		if(flightStick.getRawButton(1)){
 			if(flightStick.getRawButton(7) || flightStick.getRawButton(8)){
 				timer = System.currentTimeMillis();
 				piston.set(DoubleSolenoid.Value.kForward);
-				if(timer > 750){
-					piston.set(DoubleSolenoid.Value.kReverse);
-				}
 			}
+		}
+		if(System.currentTimeMillis() - timer > 750){
+			piston.set(DoubleSolenoid.Value.kReverse);
 		}
 	}
 	
@@ -307,7 +330,7 @@ public class Robot extends IterativeRobot {
 				if(distance < 2){
 					timer = System.currentTimeMillis();
 					piston.set(DoubleSolenoid.Value.kForward);
-					if(timer > 750){
+					if(System.currentTimeMillis() - timer > 750){
 						piston.set(DoubleSolenoid.Value.kReverse);
 					}
 				}
