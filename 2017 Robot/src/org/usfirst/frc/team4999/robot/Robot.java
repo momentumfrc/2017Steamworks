@@ -373,8 +373,12 @@ public class Robot extends IterativeRobot {
 	}
 
 	public void getCenter(double x1, double x2, double y1, double y2){
-		double trueX = x1 + x2 / 2;
-		double trueY = y1 + y1 / 2;
+		double centerX = x1 + x2 / 2;
+		double centerY = y1 + y1 / 2;
+	}
+	
+	public void parallax(double x1, double x2, double y1, double y2){
+		//make a parallax thing
 	}
 	
 	
