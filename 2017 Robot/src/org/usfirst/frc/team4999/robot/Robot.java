@@ -41,10 +41,10 @@ public class Robot extends IterativeRobot {
 	NetworkTable.initialize();
 	*/
 	NetworkTable table;
-	
-	
-	
-	
+
+
+
+
 	private Joystick flightStick;
 	private XboxController xboxController = new XboxController(0);
 	private VictorSP leftFront, leftBack, rightFront, rightBack, shooter, intake, helix, winch;
@@ -73,9 +73,9 @@ public class Robot extends IterativeRobot {
 	long timer;
 	Servo servo = new Servo(9);
 	boolean foundTarget;
-	
-	
-	
+
+
+
 	/**
 	 * This method is run once when the robot is turned on.
 	 */
@@ -108,19 +108,19 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putNumber("Smoothing", trackDistance.ALPHA);
 		table = NetworkTable.getTable("visionTable");
 	}
-	
+
 	/**
 	 * This method is run once at the beginning of the autonomous period.
 	 */
 	public void autonomousInit() {
 		server = new CamServer(SERVER_IP, SERVER_PORT);
 	}
-	
+
 	public void disabledInit() {
 		server = new CamServer(SERVER_IP, SERVER_PORT);
 		adis.reset();
 	}
-	
+
 	/**
 	 * This method runs in a loop during autonomous mode.
 	 */
@@ -128,16 +128,16 @@ public class Robot extends IterativeRobot {
 		server.refresh();
 		final int xErr = server.getXError();
 		final int yErr = server.getYError();
-		
+
 		// Our image width is 160, so the error must be within -80 and 80 pixels.
 		final double turnRequest = map(xErr, -80, 80, -1, 1);
 		//final double gearForwardErr = map(ultrasonic.getRangeInches(), 1, 4, -1, 1);
-		
+
 		System.out.println("blobXError: " + xErr);
 		System.out.println("turnRequest: " + turnRequest);
-		
+
 		arcadeDrive(1, turnRequest, 0.25);
-		
+
 		Scheduler.getInstance().run();
 		boolean searchingForPeg = true;
 		boolean aligningPeg = false;
@@ -218,7 +218,7 @@ public class Robot extends IterativeRobot {
 			break;
 		}
 	}
-	
+
 	/**
 	 * This method runs in a loop during teleop mode.
 	 */
@@ -240,10 +240,10 @@ public class Robot extends IterativeRobot {
 		final double getRoll = adis.getRoll();
 		final double xAcceleration = adis.getAccelX();
 		//final double antiTipError = map(angleY,)
-		
+
 
 		trackDistance.updateDistance();
-		
+
 		if(flightStick.getRawButton(2)) {
 			trackDistance.velocity = 0.0;
 			trackDistance.distance = 0.0;
@@ -251,7 +251,7 @@ public class Robot extends IterativeRobot {
 		if(flightStick.getRawButton(5)) {
 			trackDistance.calibrate = true;
 		}
-		
+
 		/*
 		System.out.println("moveRequest: " + moveRequest);
 		System.out.println("turnRequest: " + turnRequest);
@@ -266,16 +266,16 @@ public class Robot extends IterativeRobot {
 		System.out.println("Y accel:" + adis.getAccelY());
 		System.out.println(xAcceleration);
 		*/
-		
+
 		System.out.println("distance travelled: " + trackDistance.distance);
 		System.out.println("Left Front: " + leftFront.getInverted());
 		System.out.println("Left Back: " + leftBack.getInverted());
 		System.out.println("Right Front: " + rightFront.getInverted());
 		System.out.println("Right Back: " + rightBack.getInverted());
 		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-		
+
 		arcadeDrive(moveRequest, xRotationError, speedLimiter);
-		
+
 		if(xboxController.getRawAxis(3) == 1){
 			//shooter.set(.5);
 		}
@@ -291,11 +291,11 @@ public class Robot extends IterativeRobot {
 		if(xboxController.getRawAxis(6) == 1){
 			//helix.set(1);
 		}
-		
-		
+
+
 		winch.set(clip(xboxController.getRawAxis(1), 0, 1));
-		
-		
+
+
 		if(flightStick.getRawButton(3)){
 			if (!ignoreInput){
 				ignoreInput = true;
@@ -318,11 +318,11 @@ public class Robot extends IterativeRobot {
 			piston.set(DoubleSolenoid.Value.kReverse);
 		}
 	}
-	
+
 	/**
 	 * This method runs in a loop during test mode.
 	 */
-	
+
 	public void gearPlacement(){
 
 		final double turnRequest = deadzone(flightStick.getTwist(), 0.20);
@@ -352,25 +352,30 @@ public class Robot extends IterativeRobot {
 			}
 		}
 	}
-	
+
 	public void scan(int pos){
 		// Pos 1 = Left, 2 = Middle, 3 = Right
-		
-		if(pos == 1){
-			scanRight();
-		}
-		if(pos == 2){
-			// Go Forward 
-		}
-		if(pos == 3){
-			scanLeft();
+
+		// scan left and right should move forward a certain
+		// amount first.
+		switch (pos) {
+			case 1:
+				scanRight();
+				break;
+
+			case 3:
+				scanLeft();
+				break;
+
+			default:
+				// move forwards
 		}
 	}
-	
+
 	public void scanRight(){
 		boolean found = table.getBoolean("foundTarget", true);
 		if(found){
-			
+
 		}else{
 			rightFront.set(.1);
 			rightBack.set(.1);
@@ -379,14 +384,14 @@ public class Robot extends IterativeRobot {
 	public void scanLeft(){
 		boolean found = table.getBoolean("foundTarget", true);
 		if(found){
-			
+
 		}else{
-			rightFront.set(.1);
-			rightBack.set(.1);
+			leftFront.set(.1);
+			leftBack.set(.1);
 		}
 	}
-	
-	
+
+
 	public void testPeriodic() {
 		trackDistance.ALPHA = SmartDashboard.getNumber("Smoothing", .8);
 		if(flightStick.getRawButton(6)){
@@ -412,22 +417,22 @@ public class Robot extends IterativeRobot {
 		//System.out.println(ADXL362.getX());
 		// Piston Code
 		/**if(flightStick.getRawButton(1)){
-			piston.set(DoubleSolenoid.Value.kForward);		
+			piston.set(DoubleSolenoid.Value.kForward);
 		}else{
 			piston.set(DoubleSolenoid.Value.kOff);
 		}*/
-		
-		
-		
-		
-		
+
+
+
+
+
 		/*trackDistance.updateDistance();
 		 // Code to write to the smart dashboard
 		SmartDashboard.putNumber("X Acceleration", adis.getAccelX());
 		SmartDashboard.putNumber("Y Acceleration", adis.getAccelY());
 		SmartDashboard.putNumber("Z Acceleration", adis.getAccelZ());*/
 	}
-	
+
 	/**
 	 * Moves the robot in arcade-drive fashion with given joystick input. Input values are expected to be
 	 * within the range of -1 and 1.
@@ -439,13 +444,13 @@ public class Robot extends IterativeRobot {
 	private void arcadeDrive(double moveRequest, double turnRequest, double speedLimiter) {
 		double leftDrive = speedLimiter * (moveRequest + turnRequest);
 		double rightDrive = speedLimiter * (moveRequest - turnRequest);
-		
+
 		leftFront.set(leftDrive);
 		leftBack.set(leftDrive);
 		rightFront.set(rightDrive);
 		rightBack.set(rightDrive);
 	}
-	
+
 	/**
 	 * Maps a number from one range to another range.
 	 *
@@ -459,7 +464,7 @@ public class Robot extends IterativeRobot {
 	public static double map(double input, double minIn, double maxIn, double minOut, double maxOut) {
 		return minOut + (maxOut - minOut) * ((input - minIn) / (maxIn - minIn));
 	}
-	
+
 	/**
 	 * Clips a value to be within a given range.
 	 *
@@ -474,9 +479,9 @@ public class Robot extends IterativeRobot {
 		else if(input < min)
 			return min;
 		else
-			return input;	
+			return input;
 	}
-	
+
 	/**
 	 * Takes the output value of a joystick axis, and applies a deadzone if it is within -0.1 and 0.1
 	 *
@@ -488,9 +493,9 @@ public class Robot extends IterativeRobot {
 		if(input < zone && input > -zone)
 			return 0;
 		else
-			return input;	
+			return input;
 	}
-	
+
 	/**
 	 * Takes the output value of a joystick axis, and applies a deadzone to it.
 	 *
