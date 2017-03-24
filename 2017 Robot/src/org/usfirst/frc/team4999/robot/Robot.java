@@ -42,7 +42,7 @@ public class Robot extends IterativeRobot {
 	*/
 	NetworkTable table;
 
-
+	
 
 
 	private Joystick flightStick;
@@ -372,6 +372,12 @@ public class Robot extends IterativeRobot {
 		}
 	}
 
+	public void getCenter(double x1, double x2, double y1, double y2){
+		double trueX = x1 + x2 / 2;
+		double trueY = y1 + y1 / 2;
+	}
+	
+	
 	public void scanRight(){
 		boolean found = table.getBoolean("foundTarget", true);
 		if(found){
