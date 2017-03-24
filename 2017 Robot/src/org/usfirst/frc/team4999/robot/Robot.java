@@ -16,6 +16,9 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.interfaces.Accelerometer;
+import edu.wpi.first.wpilibj.networktables.*;
+import edu.wpi.first.wpilibj.tables.*;
+
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Servo;
@@ -32,6 +35,16 @@ import org.usfirst.frc.analog.adis16448.ADIS16448_IMU;
 */
 
 public class Robot extends IterativeRobot {
+	/*
+	NewtorkTable.setServerMode();
+	NewtorkTable.setTeam(4999);
+	NetworkTable.initialize();
+	*/
+	NetworkTable table;
+	
+	
+	
+	
 	private Joystick flightStick;
 	private XboxController xboxController = new XboxController(0);
 	private VictorSP leftFront, leftBack, rightFront, rightBack, shooter, intake, helix, winch;
@@ -59,6 +72,7 @@ public class Robot extends IterativeRobot {
 	// test
 	long timer;
 	Servo servo = new Servo(9);
+	boolean foundTarget;
 	
 	
 	
@@ -92,6 +106,7 @@ public class Robot extends IterativeRobot {
 		autonomusChooser.addObject("Middle Of The Field", middle);
 		SmartDashboard.putData("Autonomus Mode Selector", autonomusChooser);
 		SmartDashboard.putNumber("Smoothing", trackDistance.ALPHA);
+		table = NetworkTable.getTable("visionTable");
 	}
 	
 	/**
@@ -335,6 +350,39 @@ public class Robot extends IterativeRobot {
 					}
 				}
 			}
+		}
+	}
+	
+	public void scan(int pos){
+		// Pos 1 = Left, 2 = Middle, 3 = Right
+		
+		if(pos == 1){
+			scanRight();
+		}
+		if(pos == 2){
+			// Go Forward 
+		}
+		if(pos == 3){
+			scanLeft();
+		}
+	}
+	
+	public void scanRight(){
+		boolean found = table.getBoolean("foundTarget", true);
+		if(found){
+			
+		}else{
+			rightFront.set(.1);
+			rightBack.set(.1);
+		}
+	}
+	public void scanLeft(){
+		boolean found = table.getBoolean("foundTarget", true);
+		if(found){
+			
+		}else{
+			rightFront.set(.1);
+			rightBack.set(.1);
 		}
 	}
 	
