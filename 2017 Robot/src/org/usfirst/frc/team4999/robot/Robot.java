@@ -42,9 +42,6 @@ public class Robot extends IterativeRobot {
 	*/
 	NetworkTable table;
 
-	
-
-
 	private Joystick flightStick;
 	private XboxController xboxController = new XboxController(0);
 	private VictorSP leftFront, leftBack, rightFront, rightBack, shooter, intake, helix, winch;
@@ -73,6 +70,7 @@ public class Robot extends IterativeRobot {
 	long timer;
 	Servo servo = new Servo(9);
 	boolean foundTarget;
+	double x1,x2,y1,y2,cX,cY,wL,hL,wR,hR;
 
 
 
@@ -107,14 +105,8 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putData("Autonomus Mode Selector", autonomusChooser);
 		SmartDashboard.putNumber("Smoothing", trackDistance.ALPHA);
 		table = NetworkTable.getTable("visionTable");
-		double x1,x2,y1,y2;
 		
-		x1 = table.getNumber("x1", 0);
-		x2 = table.getNumber("x2", 0);
-		y1 = table.getNumber("y1", 0);
-		y2 = table.getNumber("y2", 0);
-		
-		
+
 		
 	}
 
@@ -411,6 +403,20 @@ public class Robot extends IterativeRobot {
 		}
 	}
 
+	
+	public void udateTable(){
+		x1 = table.getNumber("x1", 0);
+		x2 = table.getNumber("x2", 0);
+		y1 = table.getNumber("y1", 0);
+		y2 = table.getNumber("y2", 0);
+		cX = table.getNumber("cX", 0);
+		cY = table.getNumber("cY", 0);
+		wR = table.getNumber("wR", 0);
+		wL = table.getNumber("wL", 0);
+		hR = table.getNumber("hR", 0);
+		hL = table.getNumber("hW", 0);
+	}
+	
 
 	public void testPeriodic() {
 		trackDistance.ALPHA = SmartDashboard.getNumber("Smoothing", .8);
