@@ -126,6 +126,23 @@ public class Robot extends IterativeRobot {
 	 * This method runs in a loop during autonomous mode.
 	 */
 	public void autonomousPeriodic() {
+		
+		
+		leftFront.set(.1);
+		leftBack.set(.1);
+		rightFront.set(.1);
+		rightBack.set(.1);
+		try {
+			Thread.sleep(5);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		scan(1);
+	
+		
+		/**
+		
 		server.refresh();
 		final int xErr = server.getXError();
 		final int yErr = server.getYError();
@@ -217,6 +234,7 @@ public class Robot extends IterativeRobot {
 			}
 			break;
 		}
+		*/
 	}
 
 	/**
@@ -386,7 +404,7 @@ public class Robot extends IterativeRobot {
 	public void scanRight(){
 		boolean found = table.getBoolean("foundTarget", true);
 		if(found){
-
+			gearPlacement();
 		}else{
 			
 			rightFront.set(.1);
