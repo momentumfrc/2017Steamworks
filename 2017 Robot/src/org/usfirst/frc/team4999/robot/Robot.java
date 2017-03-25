@@ -107,7 +107,15 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putData("Autonomus Mode Selector", autonomusChooser);
 		SmartDashboard.putNumber("Smoothing", trackDistance.ALPHA);
 		table = NetworkTable.getTable("visionTable");
-		x1 = table.getNumber();
+		double x1,x2,y1,y2;
+		
+		x1 = table.getNumber("x1", 0);
+		x2 = table.getNumber("x2", 0);
+		y1 = table.getNumber("y1", 0);
+		y2 = table.getNumber("y2", 0);
+		
+		
+		
 	}
 
 	/**
@@ -373,7 +381,7 @@ public class Robot extends IterativeRobot {
 		}
 	}
 
-	public void getCenter(x1, x2 ,y1 ,y2){
+	public void getCenter(double x1, double x2,double y1,double y2){
 		
 		double centerX = x1 + x2 / 2;
 		double centerY = y1 + y1 / 2;
@@ -389,6 +397,7 @@ public class Robot extends IterativeRobot {
 		if(found){
 
 		}else{
+			
 			rightFront.set(.1);
 			rightBack.set(.1);
 		}
