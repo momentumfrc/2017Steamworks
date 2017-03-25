@@ -414,7 +414,7 @@ public class Robot extends IterativeRobot {
 	public void scanLeft(){
 		boolean found = table.getBoolean("foundTarget", true);
 		if(found){
-
+			gearPlacement();
 		}else{
 			leftFront.set(.1);
 			leftBack.set(.1);
