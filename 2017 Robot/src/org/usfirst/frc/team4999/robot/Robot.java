@@ -311,11 +311,11 @@ public class Robot extends IterativeRobot {
 		if(xboxController.getRawAxis(3) == 1){
 			//shooter.set(.5);
 		}
-		if(xboxController.getRawAxis(2) == 1){
-			//intake.set(1);
+		if(xboxController.getRawAxis(5) == 1){
+			intake.set(1);
 		}
-		if(xboxController.getRawButton(4)){
-			//intake.set(-1);
+		if(xboxController.getRawButton(6)){
+			intake.set(-1);
 		}
 		if(xboxController.getRawAxis(6) == -1){
 			//helix.set(-1);
