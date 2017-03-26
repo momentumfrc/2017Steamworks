@@ -97,7 +97,7 @@ public class Robot extends IterativeRobot {
 		timer = 0;
 		autonomusChooser = new SendableChooser();
 		SmartDashboard.putData("Autonomus Mode Selector", autonomusChooser);
-		SmartDashboard.putNumber("Smoothing", trackDistance.ALPHA);
+		//SmartDashboard.putNumber("Smoothing", trackDistance.ALPHA);
 		table = NetworkTable.getTable("visionTable");
 		autonomusChooser.addObject("Left", 1);
 		autonomusChooser.addDefault("Middle", 2);
@@ -119,8 +119,8 @@ public class Robot extends IterativeRobot {
 	 * This method is run once at the beginning of the autonomous period.
 	 */
 	public void autonomousInit() {
-		//server = new CamServer(SERVER_IP, SERVER_PORT);
-		autoMode = (int) autonomusChooser.getSelected();
+	
+		timer = System.currentTimeMillis();
 	}
 
 	public void disabledInit() {
@@ -133,12 +133,14 @@ public class Robot extends IterativeRobot {
 	 */
 	public void autonomousPeriodic() {
 		
-		String selected = (String) autonomusChooser.getSelected();
-		scan(selected);
+		if(System.currentTimeMillis() - timer <= 6000) {
+			leftFront.set(0.25);
+			leftBack.set(0.25);
+			rightFront.set(0.25);
+			rightBack.set(0.25);
+		}	
+
 		
-}
-
-
 		/**
 
 		server.refresh();
@@ -234,12 +236,13 @@ public class Robot extends IterativeRobot {
 		}
 		*/
 
-
+	}
 	/**
 	 * This method runs in a loop during teleop mode.
 	 */
 	boolean ignoreInput = false;
 	public void teleopPeriodic() {
+		//TODO: Did we comment out the PID?
 		final double moveRequest = deadzone(-flightStick.getY(), 0.15);
 		final double turnRequest;
 		if (isInverted)
