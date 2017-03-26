@@ -71,7 +71,7 @@ public class Robot extends IterativeRobot {
 	Servo servo = new Servo(9);
 	boolean foundTarget;
 	double x1,x2,y1,y2,cX,cY,wL,hL,wR,hR;
-	
+
 	final String[] keys = {"HueMin","HueMax","SatMin","SatMax","ValMin","ValMax"};
 
 	/**
@@ -105,13 +105,13 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putData("Autonomus Mode Selector", autonomusChooser);
 		SmartDashboard.putNumber("Smoothing", trackDistance.ALPHA);
 		table = NetworkTable.getTable("visionTable");
-				
+
 		for(String key : keys) {
 			SmartDashboard.putNumber(key, table.getNumber(key, -1));
 		}
-		
+
 	}
-	
+
 	void updateFilter() {
 		for(String key : keys) {
 			table.putNumber(key, SmartDashboard.getNumber(key, table.getNumber(key, -1)));
@@ -134,7 +134,7 @@ public class Robot extends IterativeRobot {
 	 * This method runs in a loop during autonomous mode.
 	 */
 	public void autonomousPeriodic() {
-		
+
 		leftFront.set(.1);
 		leftBack.set(.1);
 		rightFront.set(.1);
@@ -146,10 +146,10 @@ public class Robot extends IterativeRobot {
 			e.printStackTrace();
 		}
 		scan(1);
-	
-		
+
+
 		/**
-		
+
 		server.refresh();
 		final int xErr = server.getXError();
 		final int yErr = server.getYError();
@@ -398,24 +398,24 @@ public class Robot extends IterativeRobot {
 	}
 
 	public void getCenter(double x1, double x2,double y1,double y2){
-		
+
 		double centerX = x1 + x2 / 2;
 		double centerY = y1 + y1 / 2;
 	}
-	
+
 	public void parallax(double x1, double x2, double y1, double y2){
 		//make a parallax thing
 	}
-	
-	
+
+
 	public void scanRight(){
 		boolean found = table.getBoolean("foundTarget", true);
 		if(found){
 			gearPlacement();
 		}else{
-			
-			rightFront.set(.1);
-			rightBack.set(.1);
+
+			rightFront.set(.25);
+			rightBack.set(.25);
 			leftFront.set(0);
 			leftBack.set(0);
 		}
@@ -425,8 +425,8 @@ public class Robot extends IterativeRobot {
 		if(found){
 			gearPlacement();
 		}else{
-			leftFront.set(.1);
-			leftBack.set(.1);
+			leftFront.set(.25);
+			leftBack.set(.25);
 			rightFront.set(0);
 			rightBack.set(0);
 		}
@@ -444,7 +444,7 @@ public class Robot extends IterativeRobot {
 			rightBack.set(.25);
 		}
 	}
-	
+
 	public void udateTable(){
 		x1 = table.getNumber("x1", 0);
 		x2 = table.getNumber("x2", 0);
@@ -457,12 +457,12 @@ public class Robot extends IterativeRobot {
 		hR = table.getNumber("hR", 0);
 		hL = table.getNumber("hW", 0);
 	}
-	
+
 
 	public void testPeriodic() {
-		
+
 		updateFilter();
-		
+
 		/*trackDistance.ALPHA = SmartDashboard.getNumber("Smoothing", .8);
 		if(flightStick.getRawButton(6)){
 			servo.setAngle(0);
