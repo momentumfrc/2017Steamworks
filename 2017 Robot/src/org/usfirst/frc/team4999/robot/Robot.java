@@ -135,16 +135,13 @@ public class Robot extends IterativeRobot {
 	 * This method runs in a loop during autonomous mode.
 	 */
 	public void autonomousPeriodic() {
-		
-		
-		if(SmartDashboard.getBoolean("autoFailSafe", false)){
-			if(System.currentTimeMillis() - timer <= 6000) {
+			if(System.currentTimeMillis() - timer <= 5500) {
 				leftFront.set(0.25);
 				leftBack.set(0.25);
 				rightFront.set(0.25);
 				rightBack.set(0.25);
 			}
-			
+		/*	
 		}else{
 
 			String selected = (String) autonomusChooser.getSelected();
@@ -155,7 +152,7 @@ public class Robot extends IterativeRobot {
 		
 		String selected = (String) autonomusChooser.getSelected();
 		
-		scan(selected);
+		scan(selected);*/
 		
 		/**
 
