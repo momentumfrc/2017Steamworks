@@ -86,14 +86,14 @@ public class Robot extends IterativeRobot {
 		rightFront.setInverted(true);
 		//shooter = new VictorSP(4);
 		//helix = new VictorSP(5);
-		//intake = new VictorSP(6);
+		intake = new VictorSP(4);
 		winch = new VictorSP(5);
 		adis.reset();
 		adis.updateTable();
 		/**input = new DigitalInput(0);
 		output = new DigitalOutput(1);*/
 		ultrasonic = new Ultrasonic(0,1);
-		piston = new DoubleSolenoid(0,1);
+		piston = new DoubleSolenoid(2,0);
 		//server = new CamServer(SERVER_IP, SERVER_PORT);
 		flightStick = new Joystick(1);
 		timer = 0;
@@ -274,7 +274,7 @@ public class Robot extends IterativeRobot {
 		//final double antiTipError = map(angleY,)
 
 
-		trackDistance.updateDistance();
+		/*trackDistance.updateDistance();
 
 		if(flightStick.getRawButton(2)) {
 			trackDistance.velocity = 0.0;
@@ -282,7 +282,7 @@ public class Robot extends IterativeRobot {
 		}
 		if(flightStick.getRawButton(5)) {
 			trackDistance.calibrate = true;
-		}
+		}*/
 
 		/*
 		System.out.println("moveRequest: " + moveRequest);
@@ -308,14 +308,15 @@ public class Robot extends IterativeRobot {
 
 		arcadeDrive(moveRequest, xRotationError, speedLimiter);
 
-		if(xboxController.getRawAxis(3) == 1){
+		/**if(xboxController.getRawAxis(3) == 1){
 			//shooter.set(.5);
-		}
-		if(xboxController.getRawAxis(5) == 1){
+		}*/
+		if(xboxController.getRawButton(5)){
 			intake.set(1);
-		}
-		if(xboxController.getRawButton(6)){
+		} else if(xboxController.getRawButton(6)){
 			intake.set(-1);
+		} else {
+			intake.set(0);
 		}
 		if(xboxController.getRawAxis(6) == -1){
 			//helix.set(-1);
@@ -325,10 +326,22 @@ public class Robot extends IterativeRobot {
 		}
 
 
-		winch.set(clip(xboxController.getRawAxis(1), 0, 1));
-
-
+		//winch.set(clip(xboxController.getRawAxis(1), 0, 1));
+		if(flightStick.getRawButton(5)){
+			winch.set(1);
+		} else {
+			winch.set(0);
+		}
+		
 		if(flightStick.getRawButton(3)){
+			winch.set(.25);
+		}
+		if(flightStick.getRawButton(6)){
+			winch.set(-.25);
+		}
+
+
+		/**if(flightStick.getRawButton(3)){
 			if (!ignoreInput){
 				ignoreInput = true;
 				isInverted =! isInverted;
@@ -339,9 +352,9 @@ public class Robot extends IterativeRobot {
 			}
 		}else{
 			ignoreInput = false;
-		}
-		if(flightStick.getRawButton(1)){
-			if(flightStick.getRawButton(7) || flightStick.getRawButton(8)){
+		}*/
+		if(flightStick.getRawButton(1) || xboxController.getBButton()){
+			if(flightStick.getRawButton(7) || flightStick.getRawButton(8) || xboxController.getBButton()){
 				timer = System.currentTimeMillis();
 				piston.set(DoubleSolenoid.Value.kForward);
 			}
@@ -350,6 +363,9 @@ public class Robot extends IterativeRobot {
 			piston.set(DoubleSolenoid.Value.kReverse);
 		}
 	}
+	
+	
+	
 
 	/**
 	 * This method runs in a loop during test mode.
