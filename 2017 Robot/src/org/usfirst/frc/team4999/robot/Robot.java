@@ -1,8 +1,10 @@
 
 package org.usfirst.frc.team4999.robot;
 
+import edu.wpi.cscore.MjpegServer;
 import edu.wpi.first.wpilibj.ADXL362;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
@@ -485,8 +487,10 @@ public class Robot extends IterativeRobot {
 	String coord(double x, double y) {
 		return("( " + x + ", " + y + ")");
 	}
-
-
+	public void testInit() {
+		MjpegServer pi = new MjpegServer("piServer", "10.49.99.12", 1186);
+		CameraServer.getInstance().startAutomaticCapture(pi.getSource());
+	}
 	public void testPeriodic() {
 
 		updateFilter();
