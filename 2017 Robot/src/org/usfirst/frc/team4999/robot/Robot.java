@@ -145,7 +145,7 @@ public class Robot extends IterativeRobot {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		scan(1);
+		scan("");
 
 
 		/**
@@ -378,17 +378,17 @@ public class Robot extends IterativeRobot {
 		}
 	}
 
-	public void scan(int pos){
+	public void scan(String  pos){
 		// Pos 1 = Left, 2 = Middle, 3 = Right
 
 		// scan left and right should move forward a certain
 		// amount first.
 		switch (pos) {
-			case 1:
+			case "Right":
 				scanRight();
 				break;
 
-			case 3:
+			case "Left":
 				scanLeft();
 				break;
 
