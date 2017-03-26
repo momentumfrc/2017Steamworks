@@ -361,7 +361,8 @@ public class Robot extends IterativeRobot {
 		double distance = ultrasonic.getRangeInches();
 		arcadeDrive(1, xRotationError, .25);
 		if(distance < 2){
-			final int xErr = 0;
+			final double xErr = 160 - cX;
+			final double yErr = 120 - cY;
 			map(xErr, -80, 80, -1, 1);
 			arcadeDrive(1, xErr, .25);
 			if(xErr == 0){
