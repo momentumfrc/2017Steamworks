@@ -481,12 +481,25 @@ public class Robot extends IterativeRobot {
 		hR = table.getNumber("hR", 0);
 		hL = table.getNumber("hW", 0);
 	}
+	
+	String coord(double x, double y) {
+		return("( " + x + ", " + y + ")");
+	}
 
 
 	public void testPeriodic() {
 
 		updateFilter();
-
+		
+		udateTable();
+		
+		System.out.println("Pt1: " + coord(x1,y1));
+		System.out.println("Pt2: " + coord(x2, y2));
+		System.out.println("Ctr: " + coord(cX, cY));
+		System.out.println("WHR: " + coord(wR, hR));
+		System.out.println("WHL: " + coord(wL, hL));
+		System.out.println("");
+		
 		/*trackDistance.ALPHA = SmartDashboard.getNumber("Smoothing", .8);
 		if(flightStick.getRawButton(6)){
 			servo.setAngle(0);
