@@ -416,6 +416,8 @@ public class Robot extends IterativeRobot {
 			
 			rightFront.set(.1);
 			rightBack.set(.1);
+			leftFront.set(0);
+			leftBack.set(0);
 		}
 	}
 	public void scanLeft(){
@@ -425,6 +427,8 @@ public class Robot extends IterativeRobot {
 		}else{
 			leftFront.set(.1);
 			leftBack.set(.1);
+			rightFront.set(0);
+			rightBack.set(0);
 		}
 	}
 
