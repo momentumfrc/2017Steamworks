@@ -68,7 +68,7 @@ public class Robot extends IterativeRobot {
 	Servo servo = new Servo(9);
 	boolean foundTarget;
 	double x1,x2,y1,y2,cX,cY,wL,hL,wR,hR;
-
+	boolean failSafeAuto = false;
 	final String[] keys = {"HueMin","HueMax","SatMin","SatMax","ValMin","ValMax"};
 
 	/**
@@ -102,6 +102,7 @@ public class Robot extends IterativeRobot {
 		autonomusChooser.addObject("Left", 1);
 		autonomusChooser.addDefault("Middle", 2);
 		autonomusChooser.addObject("Right", 3);
+		SmartDashboard.putBoolean("autoFailSafe", false);
 		SmartDashboard.putData("Autonomus Chooser", autonomusChooser);
 		for(String key : keys) {
 			SmartDashboard.putNumber(key, table.getNumber(key, -1));
@@ -133,15 +134,23 @@ public class Robot extends IterativeRobot {
 	 */
 	public void autonomousPeriodic() {
 		
-		/** In Case Of The Gear Placement Fail
-		if(System.currentTimeMillis() - timer <= 6000) {
-			leftFront.set(0.25);
-			leftBack.set(0.25);
-			rightFront.set(0.25);
-			rightBack.set(0.25);
-		}	
 		
-		**/
+		if(SmartDashboard.getBoolean("autoFailSafe", false)){
+			if(System.currentTimeMillis() - timer <= 6000) {
+				leftFront.set(0.25);
+				leftBack.set(0.25);
+				rightFront.set(0.25);
+				rightBack.set(0.25);
+			}
+			
+		}else{
+
+			String selected = (String) autonomusChooser.getSelected();
+			scan(selected);
+		}
+		
+		
+		
 		String selected = (String) autonomusChooser.getSelected();
 		
 		scan(selected);
