@@ -41,7 +41,7 @@ public class Robot extends IterativeRobot {
 	NetworkTable.initialize();
 	*/
 	NetworkTable table;
-
+	int autoMode;
 	private Joystick flightStick;
 	private XboxController xboxController = new XboxController(0);
 	private VictorSP leftFront, leftBack, rightFront, rightBack, shooter, intake, helix, winch;
@@ -56,9 +56,7 @@ public class Robot extends IterativeRobot {
 	public static  final int SERVER_PORT = 5810;
 	boolean isInverted = false;
 	Distance trackDistance;
-	final String right = "Right Side";
-	final String left = "Left Side";
-	final String middle = "Middle Side";
+	
 	Command autonomusCommand;
 	SendableChooser autonomusChooser;
 	DigitalInput input;
@@ -99,9 +97,6 @@ public class Robot extends IterativeRobot {
 		flightStick = new Joystick(1);
 		timer = 0;
 		autonomusChooser = new SendableChooser();
-		autonomusChooser.addObject("Right Side Of The Field", right);
-		autonomusChooser.addObject("Left Side Of The Field", left);
-		autonomusChooser.addObject("Middle Of The Field", middle);
 		SmartDashboard.putData("Autonomus Mode Selector", autonomusChooser);
 		SmartDashboard.putNumber("Smoothing", trackDistance.ALPHA);
 		table = NetworkTable.getTable("visionTable");
@@ -395,6 +390,13 @@ public class Robot extends IterativeRobot {
 			default:
 				scanMain();
 		}
+	}
+	
+	
+	
+	public String field(){
+		return autoSelected;
+		
 	}
 
 	public void getCenter(double x1, double x2,double y1,double y2){
