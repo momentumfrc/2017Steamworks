@@ -127,7 +127,6 @@ public class Robot extends IterativeRobot {
 	 */
 	public void autonomousPeriodic() {
 		
-		
 		leftFront.set(.1);
 		leftBack.set(.1);
 		rightFront.set(.1);
@@ -386,7 +385,7 @@ public class Robot extends IterativeRobot {
 				break;
 
 			default:
-				// move forwards
+				scanMain();
 		}
 	}
 
@@ -421,6 +420,18 @@ public class Robot extends IterativeRobot {
 		}
 	}
 
+	public void scanMain(){
+		boolean found = table.getBoolean("foundTarget", false);
+		if(found){
+			gearPlacement();
+		}
+		else{
+			leftFront.set(.25);
+			leftBack.set(.25);
+			rightFront.set(.25);
+			rightBack.set(.25);
+		}
+	}
 	
 	public void udateTable(){
 		x1 = table.getNumber("x1", 0);
