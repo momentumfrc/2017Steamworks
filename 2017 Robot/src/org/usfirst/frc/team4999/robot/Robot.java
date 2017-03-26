@@ -56,7 +56,6 @@ public class Robot extends IterativeRobot {
 	public static  final int SERVER_PORT = 5810;
 	boolean isInverted = false;
 	Distance trackDistance;
-	
 	Command autonomusCommand;
 	SendableChooser autonomusChooser;
 	DigitalInput input;
@@ -100,7 +99,10 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putData("Autonomus Mode Selector", autonomusChooser);
 		SmartDashboard.putNumber("Smoothing", trackDistance.ALPHA);
 		table = NetworkTable.getTable("visionTable");
-
+		autonomusChooser.addObject("Left", 1);
+		autonomusChooser.addDefault("Middle", 2);
+		autonomusChooser.addObject("Right", 3);
+		SmartDashboard.putData("Autonomus Chooser", autonomusChooser);
 		for(String key : keys) {
 			SmartDashboard.putNumber(key, table.getNumber(key, -1));
 		}
@@ -118,6 +120,7 @@ public class Robot extends IterativeRobot {
 	 */
 	public void autonomousInit() {
 		//server = new CamServer(SERVER_IP, SERVER_PORT);
+		autoMode = (int) autonomusChooser.getSelected();
 	}
 
 	public void disabledInit() {
@@ -394,9 +397,17 @@ public class Robot extends IterativeRobot {
 	
 	
 	
-	public String field(){
-		return autoSelected;
+	public int getData(){
+		switch(autoMode){
+		case 1:
+			break;
+		case 2:
+			break;
+		case 3:
+			break;
+		}
 		
+		return autoMode;
 	}
 
 	public void getCenter(double x1, double x2,double y1,double y2){
