@@ -133,13 +133,18 @@ public class Robot extends IterativeRobot {
 	 */
 	public void autonomousPeriodic() {
 		
+		/** In Case Of The Gear Placement Fail
 		if(System.currentTimeMillis() - timer <= 6000) {
 			leftFront.set(0.25);
 			leftBack.set(0.25);
 			rightFront.set(0.25);
 			rightBack.set(0.25);
 		}	
-
+		
+		**/
+		String selected = (String) autonomusChooser.getSelected();
+		
+		scan(selected);
 		
 		/**
 
