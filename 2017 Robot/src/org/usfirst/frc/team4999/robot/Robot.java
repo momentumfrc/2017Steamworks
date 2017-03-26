@@ -132,18 +132,11 @@ public class Robot extends IterativeRobot {
 	 * This method runs in a loop during autonomous mode.
 	 */
 	public void autonomousPeriodic() {
-
-		leftFront.set(.1);
-		leftBack.set(.1);
-		rightFront.set(.1);
-		rightBack.set(.1);
-		try {
-			Thread.sleep(5);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		scan("");
+		
+		String selected = (String) autonomusChooser.getSelected();
+		scan(selected);
+		
+}
 
 
 		/**
@@ -240,7 +233,7 @@ public class Robot extends IterativeRobot {
 			break;
 		}
 		*/
-	}
+
 
 	/**
 	 * This method runs in a loop during teleop mode.
