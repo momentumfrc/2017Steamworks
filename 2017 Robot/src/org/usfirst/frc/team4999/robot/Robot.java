@@ -45,7 +45,7 @@ public class Robot extends IterativeRobot {
 	private Joystick flightStick;
 	private XboxController xboxController = new XboxController(0);
 	private VictorSP leftFront, leftBack, rightFront, rightBack, shooter, intake, helix, winch;
-	private CamServer server;
+	//private CamServer server;
 	String autoSelected;
 	// <Accelerometers>
 	private ADIS16448_IMU adis = new ADIS16448_IMU(ADIS16448_IMU.Axis.kX);
@@ -71,8 +71,8 @@ public class Robot extends IterativeRobot {
 	Servo servo = new Servo(9);
 	boolean foundTarget;
 	double x1,x2,y1,y2,cX,cY,wL,hL,wR,hR;
-
-
+	
+	final String[] keys = {"HueMin","HueMax","SatMin","SatMax","ValMin","ValMax"};
 
 	/**
 	 * This method is run once when the robot is turned on.
@@ -95,7 +95,7 @@ public class Robot extends IterativeRobot {
 		output = new DigitalOutput(1);*/
 		ultrasonic = new Ultrasonic(0,1);
 		piston = new DoubleSolenoid(0,1);
-		server = new CamServer(SERVER_IP, SERVER_PORT);
+		//server = new CamServer(SERVER_IP, SERVER_PORT);
 		flightStick = new Joystick(1);
 		timer = 0;
 		autonomusChooser = new SendableChooser();
@@ -105,20 +105,28 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putData("Autonomus Mode Selector", autonomusChooser);
 		SmartDashboard.putNumber("Smoothing", trackDistance.ALPHA);
 		table = NetworkTable.getTable("visionTable");
+				
+		for(String key : keys) {
+			SmartDashboard.putNumber(key, table.getNumber(key, -1));
+		}
 		
-
-		
+	}
+	
+	void updateFilter() {
+		for(String key : keys) {
+			table.putNumber(key, SmartDashboard.getNumber(key, table.getNumber(key, -1)));
+		}
 	}
 
 	/**
 	 * This method is run once at the beginning of the autonomous period.
 	 */
 	public void autonomousInit() {
-		server = new CamServer(SERVER_IP, SERVER_PORT);
+		//server = new CamServer(SERVER_IP, SERVER_PORT);
 	}
 
 	public void disabledInit() {
-		server = new CamServer(SERVER_IP, SERVER_PORT);
+		//server = new CamServer(SERVER_IP, SERVER_PORT);
 		adis.reset();
 	}
 
@@ -448,7 +456,10 @@ public class Robot extends IterativeRobot {
 	
 
 	public void testPeriodic() {
-		trackDistance.ALPHA = SmartDashboard.getNumber("Smoothing", .8);
+		
+		updateFilter();
+		
+		/*trackDistance.ALPHA = SmartDashboard.getNumber("Smoothing", .8);
 		if(flightStick.getRawButton(6)){
 			servo.setAngle(0);
 		} else if (flightStick.getRawButton(4)) {
@@ -465,10 +476,9 @@ public class Robot extends IterativeRobot {
 			trackDistance.calibrate = true;
 		}
 		trackDistance.updateDistance();
-		//System.out.println("Get Distance: X:" + trackDistance.getDist().getX() + " Z: " + trackDistance.getDist().getY() /** Y is being misused on the vector class to hold Z*/ );
 		System.out.println("Velocity: " + trackDistance.velocity);
 		System.out.println("Distance: " + trackDistance.distance + " ft");
-		System.out.println("");
+		System.out.println("");*/
 		//System.out.println(ADXL362.getX());
 		// Piston Code
 		/**if(flightStick.getRawButton(1)){
