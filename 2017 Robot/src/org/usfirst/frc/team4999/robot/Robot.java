@@ -87,14 +87,14 @@ public class Robot extends IterativeRobot {
 		rightFront.setInverted(true);
 		//shooter = new VictorSP(4);
 		//helix = new VictorSP(5);
-		//intake = new VictorSP(6);
+		intake = new VictorSP(4);
 		winch = new VictorSP(5);
 		adis.reset();
 		adis.updateTable();
 		/**input = new DigitalInput(0);
 		output = new DigitalOutput(1);*/
 		ultrasonic = new Ultrasonic(0,1);
-		piston = new DoubleSolenoid(0,1);
+		piston = new DoubleSolenoid(2,0);
 		//server = new CamServer(SERVER_IP, SERVER_PORT);
 		flightStick = new Joystick(1);
 		timer = 0;
@@ -143,6 +143,114 @@ public class Robot extends IterativeRobot {
 				rightFront.set(0.25);
 				rightBack.set(0.25);
 			}
+
+		/*	
+		}else{
+
+			String selected = (String) autonomusChooser.getSelected();
+			scan(selected);
+		}
+		
+		
+		
+		String selected = (String) autonomusChooser.getSelected();
+		
+		scan(selected);*/
+		
+		/**
+
+		server.refresh();
+		final int xErr = server.getXError();
+		final int yErr = server.getYError();
+
+		// Our image width is 160, so the error must be within -80 and 80 pixels.
+		final double turnRequest = map(xErr, -80, 80, -1, 1);
+		//final double gearForwardErr = map(ultrasonic.getRangeInches(), 1, 4, -1, 1);
+		System.out.println("blobXError: " + xErr);
+		System.out.println("turnRequest: " + turnRequest);
+
+		arcadeDrive(1, turnRequest, 0.25);
+
+		Scheduler.getInstance().run();
+		boolean searchingForPeg = true;
+		boolean aligningPeg = false;
+		switch (autoSelected) {
+		case left:
+			//first stage: turn the camera and move forward until peg is next to camera
+			if (searchingForPeg){
+				servo.setAngle(180);
+				arcadeDrive(1, 0, 0.25);
+				if (xErr > -10 && xErr < 10) {
+					arcadeDrive(0, 0, 0);
+					servo.setAngle(90);
+					searchingForPeg = false;
+					aligningPeg = true;
+				}
+			}else{
+			//second stage: turn the whole robot around and go forward until peg is directly in front
+				if (aligningPeg){
+					arcadeDrive(0, 0.5, 0.25);
+				}
+				if (xErr > -10 && xErr < 10) {
+					aligningPeg = false;
+					if (ultrasonic.getRangeInches() < 2){
+						leftFront.set(0);
+						leftBack.set(0);
+						rightFront.set(0);
+						rightBack.set(0);
+						gearPlacement();
+					}else{
+						arcadeDrive(1, 0, 0.25);
+					}
+				}
+			}
+			break;
+		case middle:
+			// Add the code to make the robot continue on a straight vector then do the things it needs to do
+			// Code for the ultrasonic to stop the robot if we are too close.
+			servo.setAngle(90);
+			if (ultrasonic.getRangeInches() < 2){
+				leftFront.set(0);
+				leftBack.set(0);
+				rightFront.set(0);
+				rightBack.set(0);
+				gearPlacement();
+			}else{
+				arcadeDrive(1, 0, 0.25);
+			}
+			break;
+		case right:
+			//first stage: turn the camera and move forward until peg is next to camera
+			if (searchingForPeg){
+				servo.setAngle(0);
+				arcadeDrive(1, 0, 0.25);
+				if (xErr > -10 && xErr < 10) {
+					arcadeDrive(0, 0, 0);
+					servo.setAngle(90);
+					searchingForPeg = false;
+					aligningPeg = true;
+				}
+			}else{
+			//second stage: turn the whole robot around and go forward until peg is directly in front
+				if (aligningPeg){
+					arcadeDrive(0, -0.5, 0.25);
+				}
+				if (xErr > -10 && xErr < 10) {
+					aligningPeg = false;
+					if (ultrasonic.getRangeInches() < 2){
+						leftFront.set(0);
+						leftBack.set(0);
+						rightFront.set(0);
+						rightBack.set(0);
+						gearPlacement();
+					}else{
+						arcadeDrive(1, 0, 0.25);
+					}
+				}
+			}
+			break;
+		}
+>>>>>>> branch 'master' of https://github.com/momentumfrc/2017Steamworks.git
 		*/
 		String selected = (String) autonomusChooser.getSelected();
 		scan(selected);
@@ -172,7 +280,7 @@ public class Robot extends IterativeRobot {
 		//final double antiTipError = map(angleY,)
 
 
-		trackDistance.updateDistance();
+		/*trackDistance.updateDistance();
 
 		if(flightStick.getRawButton(2)) {
 			trackDistance.velocity = 0.0;
@@ -180,7 +288,7 @@ public class Robot extends IterativeRobot {
 		}
 		if(flightStick.getRawButton(5)) {
 			trackDistance.calibrate = true;
-		}
+		}*/
 
 		/*
 		System.out.println("moveRequest: " + moveRequest);
@@ -206,14 +314,15 @@ public class Robot extends IterativeRobot {
 
 		arcadeDrive(moveRequest, xRotationError, speedLimiter);
 
-		if(xboxController.getRawAxis(3) == 1){
+		/**if(xboxController.getRawAxis(3) == 1){
 			//shooter.set(.5);
-		}
-		if(xboxController.getRawAxis(5) == 1){
+		}*/
+		if(xboxController.getRawButton(5)){
 			intake.set(1);
-		}
-		if(xboxController.getRawButton(6)){
+		} else if(xboxController.getRawButton(6)){
 			intake.set(-1);
+		} else {
+			intake.set(0);
 		}
 		if(xboxController.getRawAxis(6) == -1){
 			//helix.set(-1);
@@ -223,10 +332,22 @@ public class Robot extends IterativeRobot {
 		}
 
 
-		winch.set(clip(xboxController.getRawAxis(1), 0, 1));
-
-
+		//winch.set(clip(xboxController.getRawAxis(1), 0, 1));
+		if(flightStick.getRawButton(5)){
+			winch.set(1);
+		} else {
+			winch.set(0);
+		}
+		
 		if(flightStick.getRawButton(3)){
+			winch.set(.25);
+		}
+		if(flightStick.getRawButton(6)){
+			winch.set(-.25);
+		}
+
+
+		/**if(flightStick.getRawButton(3)){
 			if (!ignoreInput){
 				ignoreInput = true;
 				isInverted =! isInverted;
@@ -237,9 +358,9 @@ public class Robot extends IterativeRobot {
 			}
 		}else{
 			ignoreInput = false;
-		}
-		if(flightStick.getRawButton(1)){
-			if(flightStick.getRawButton(7) || flightStick.getRawButton(8)){
+		}*/
+		if(flightStick.getRawButton(1) || xboxController.getBButton()){
+			if(flightStick.getRawButton(7) || flightStick.getRawButton(8) || xboxController.getBButton()){
 				timer = System.currentTimeMillis();
 				piston.set(DoubleSolenoid.Value.kForward);
 			}
@@ -248,6 +369,9 @@ public class Robot extends IterativeRobot {
 			piston.set(DoubleSolenoid.Value.kReverse);
 		}
 	}
+	
+	
+	
 
 	/**
 	 * This method runs in a loop during test mode.
