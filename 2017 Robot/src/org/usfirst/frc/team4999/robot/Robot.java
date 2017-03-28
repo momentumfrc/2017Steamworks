@@ -65,6 +65,7 @@ public class Robot extends IterativeRobot {
 	DoubleSolenoid piston;
 	Ultrasonic ultrasonic;
 	Distance distance;
+	AutoGear autoPlace;
 	// test
 	long timer;
 	Servo servo = new Servo(9);
@@ -129,126 +130,23 @@ public class Robot extends IterativeRobot {
 	public void disabledInit() {
 		//server = new CamServer(SERVER_IP, SERVER_PORT);
 		adis.reset();
+		String selected = (String) autonomusChooser.getSelected();
 	}
 
 	/**
 	 * This method runs in a loop during autonomous mode.
 	 */
 	public void autonomousPeriodic() {
-			if(System.currentTimeMillis() - timer <= 5500) {
+			/*if(System.currentTimeMillis() - timer <= 5500) {
 				leftFront.set(0.25);
 				leftBack.set(0.25);
 				rightFront.set(0.25);
 				rightBack.set(0.25);
 			}
-		/*	
-		}else{
-
-			String selected = (String) autonomusChooser.getSelected();
-			scan(selected);
-		}
-		
-		
-		
-		String selected = (String) autonomusChooser.getSelected();
-		
-		scan(selected);*/
-		
-		/**
-
-		server.refresh();
-		final int xErr = server.getXError();
-		final int yErr = server.getYError();
-
-		// Our image width is 160, so the error must be within -80 and 80 pixels.
-		final double turnRequest = map(xErr, -80, 80, -1, 1);
-		//final double gearForwardErr = map(ultrasonic.getRangeInches(), 1, 4, -1, 1);
-		System.out.println("blobXError: " + xErr);
-		System.out.println("turnRequest: " + turnRequest);
-
-		arcadeDrive(1, turnRequest, 0.25);
-
-		Scheduler.getInstance().run();
-		boolean searchingForPeg = true;
-		boolean aligningPeg = false;
-		switch (autoSelected) {
-		case left:
-			//first stage: turn the camera and move forward until peg is next to camera
-			if (searchingForPeg){
-				servo.setAngle(180);
-				arcadeDrive(1, 0, 0.25);
-				if (xErr > -10 && xErr < 10) {
-					arcadeDrive(0, 0, 0);
-					servo.setAngle(90);
-					searchingForPeg = false;
-					aligningPeg = true;
-				}
-			}else{
-			//second stage: turn the whole robot around and go forward until peg is directly in front
-				if (aligningPeg){
-					arcadeDrive(0, 0.5, 0.25);
-				}
-				if (xErr > -10 && xErr < 10) {
-					aligningPeg = false;
-					if (ultrasonic.getRangeInches() < 2){
-						leftFront.set(0);
-						leftBack.set(0);
-						rightFront.set(0);
-						rightBack.set(0);
-						gearPlacement();
-					}else{
-						arcadeDrive(1, 0, 0.25);
-					}
-				}
-			}
-			break;
-		case middle:
-			// Add the code to make the robot continue on a straight vector then do the things it needs to do
-			// Code for the ultrasonic to stop the robot if we are too close.
-			servo.setAngle(90);
-			if (ultrasonic.getRangeInches() < 2){
-				leftFront.set(0);
-				leftBack.set(0);
-				rightFront.set(0);
-				rightBack.set(0);
-				gearPlacement();
-			}else{
-				arcadeDrive(1, 0, 0.25);
-			}
-			break;
-		case right:
-			//first stage: turn the camera and move forward until peg is next to camera
-			if (searchingForPeg){
-				servo.setAngle(0);
-				arcadeDrive(1, 0, 0.25);
-				if (xErr > -10 && xErr < 10) {
-					arcadeDrive(0, 0, 0);
-					servo.setAngle(90);
-					searchingForPeg = false;
-					aligningPeg = true;
-				}
-			}else{
-			//second stage: turn the whole robot around and go forward until peg is directly in front
-				if (aligningPeg){
-					arcadeDrive(0, -0.5, 0.25);
-				}
-				if (xErr > -10 && xErr < 10) {
-					aligningPeg = false;
-					if (ultrasonic.getRangeInches() < 2){
-						leftFront.set(0);
-						leftBack.set(0);
-						rightFront.set(0);
-						rightBack.set(0);
-						gearPlacement();
-					}else{
-						arcadeDrive(1, 0, 0.25);
-					}
-				}
-			}
-			break;
-		}
 		*/
-
+		String selected = (String) autonomusChooser.getSelected();
+		scan(selected);
+		
 	}
 	/**
 	 * This method runs in a loop during teleop mode.
