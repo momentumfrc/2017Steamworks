@@ -25,8 +25,9 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Servo;
 
-import org.usfirst.frc.analog.adis16448.ADIS16448_IMU;
+import edu.wpi.first.wpilibj.Preferences;
 
+import org.usfirst.frc.analog.adis16448.ADIS16448_IMU;
 
 /**
 * The VM is configured to automatically run this class, and to call the
@@ -39,6 +40,11 @@ import org.usfirst.frc.analog.adis16448.ADIS16448_IMU;
 public class Robot extends IterativeRobot {
 
 	NetworkTable table;
+
+	public static final int IMAGE_WIDTH = 160;
+	public static final int IMAGE_HEIGHT = 120;
+
+	Preferences prefs;
 
 	int autoMode;
 	private Joystick flightStick;
@@ -68,7 +74,7 @@ public class Robot extends IterativeRobot {
 	boolean foundTarget;
 	double x1,x2,y1,y2,cX,cY,wL,hL,wR,hR;
 	boolean failSafeAuto = false;
-	final String[] keys = {"HueMin","HueMax","SatMin","SatMax","ValMin","ValMax"};
+	//final String[] keys = {"HueMin","HueMax","SatMin","SatMax","ValMin","ValMax"};
 
 	/**
 	 * This method is run once when the robot is turned on.
@@ -77,6 +83,22 @@ public class Robot extends IterativeRobot {
 		NetworkTable.setServerMode();
 		NetworkTable.setTeam(4999);
 		NetworkTable.initialize();
+		prefs = Preferences.getInstance();
+
+		// pixel values
+		if (!prefs.containsKey("IMAGE_IDEAL_X"))
+			prefs.putNumber("IMAGE_IDEAL_X", 82.53102656137833);
+		if (!prefs.containsKey("IMAGE_IDEAL_Y"))
+			prefs.putNumber("IMAGE_IDEAL_Y", 90.11185929648241);
+
+		// inches value
+		if (!prefs.containsKey("ENGAGE_DIST"))
+			prefs.putNumber("ENGAGE_DIST", 10);
+
+		// pixel value
+		if (!prefs.containsKey("ENGAGE_XERR"))
+			prefs.putNumber("ENGAGE_XERR", 5);
+
 		trackDistance = new Distance(builtIn, adis);
 		rightFront = new VictorSP(0);
 		leftFront = new VictorSP(2);
@@ -102,21 +124,23 @@ public class Robot extends IterativeRobot {
 		//SmartDashboard.putNumber("Smoothing", trackDistance.ALPHA);
 		table = NetworkTable.getTable("visionTable");
 		autonomusChooser.addObject("Left", 1);
-		autonomusChooser.addDefault("Middle", 2);
+		autonomusChooser.addObject("Middle", 2);
 		autonomusChooser.addObject("Right", 3);
-		SmartDashboard.putBoolean("autoFailSafe", false);
+		autonomusChooser.addDefault("Failsafe", 4);
+		//SmartDashboard.putBoolean("autoFailSafe", false);
 		SmartDashboard.putData("Autonomus Chooser", autonomusChooser);
+		/*
 		for(String key : keys) {
 			SmartDashboard.putNumber(key, table.getNumber(key, -1));
 		}
-
+		*/
 	}
 
-	void updateFilter() {
+	/*void updateFilter() {
 		for(String key : keys) {
 			table.putNumber(key, SmartDashboard.getNumber(key, table.getNumber(key, -1)));
 		}
-	}
+	}*/
 
 	/**
 	 * This method is run once at the beginning of the autonomous period.
@@ -254,10 +278,8 @@ public class Robot extends IterativeRobot {
 			break;
 		}
 		*/
-
 		String selected = (String) autonomusChooser.getSelected();
 		scan(selected);
-
 	}
 	/**
 	 * This method runs in a loop during teleop mode.
@@ -382,6 +404,7 @@ public class Robot extends IterativeRobot {
 
 	public void gearPlacement(){
 
+		/*
 		final double turnRequest = deadzone(flightStick.getTwist(), 0.20);
 		final double turnRateRequest = turnRequest * 45;
 		final double speedLimiter = (-flightStick.getThrottle() + 1) / 2;
@@ -393,6 +416,7 @@ public class Robot extends IterativeRobot {
 		final double getRoll = adis.getRoll();
 		final double xAcceleration = adis.getAccelX();
 		double distance = ultrasonic.getRangeInches();
+
 		arcadeDrive(1, xRotationError, .25);
 		if(distance < 2){
 			final double xErr = 160 - cX;
@@ -408,6 +432,23 @@ public class Robot extends IterativeRobot {
 					}
 				}
 			}
+		}
+		*/
+
+		double distance = ultrasonic.getRangeInches();
+		final double xErr = prefs.getNumber("IMAGE_IDEAL_X", (IMAGE_WIDTH/2)) - cX;
+
+		if (distance < prefs.getNumber("ENGAGE_DIST", 10) && Math.abs(xErr) < prefs.getNumber("ENGAGE_XERR", 5)) {
+
+			// engage piston
+			timer = System.currentTimeMillis();
+			piston.set(DoubleSolenoid.Value.kForward);
+			if(System.currentTimeMillis() - timer > 750){
+				piston.set(DoubleSolenoid.Value.kReverse);
+			}
+
+		} else {
+			arcadeDrive(1,map(xerr, -IMAGE_WIDTH/2, IMAGE_WIDTH/2, -1, 1),0.25);
 		}
 	}
 
@@ -425,8 +466,23 @@ public class Robot extends IterativeRobot {
 				scanLeft();
 				break;
 
-			default:
+			case "Middle":
 				scanMain();
+				break;
+
+			default:
+				double distance = ultrasonic.getRangeInches();
+				if(System.currentTimeMillis() - timer <= 5000 && distance > 10) {
+					leftFront.set(0.25);
+					leftBack.set(0.25);
+					rightFront.set(0.25);
+					rightBack.set(0.25);
+				} else {
+					leftFront.set(0);
+					leftBack.set(0);
+					rightFront.set(0);
+					rightBack.set(0);
+				}
 		}
 	}
 
@@ -515,7 +571,7 @@ public class Robot extends IterativeRobot {
 	}
 	public void testPeriodic() {
 
-		updateFilter();
+		//updateFilter();
 
 		udateTable();
 
@@ -524,7 +580,11 @@ public class Robot extends IterativeRobot {
 		System.out.println("Ctr: " + coord(cX, cY));
 		System.out.println("WHR: " + coord(wR, hR));
 		System.out.println("WHL: " + coord(wL, hL));
+
+		System.out.printf("Dist: %.2f", ultrasonic.getRangeInches());
+
 		System.out.println("");
+
 
 		/*trackDistance.ALPHA = SmartDashboard.getNumber("Smoothing", .8);
 		if(flightStick.getRawButton(6)){
