@@ -39,7 +39,7 @@ import org.usfirst.frc.analog.adis16448.ADIS16448_IMU;
 public class Robot extends IterativeRobot {
 
 	NetworkTable table;
-		
+
 	int autoMode;
 	private Joystick flightStick;
 	private XboxController xboxController = new XboxController(0);
@@ -122,20 +122,21 @@ public class Robot extends IterativeRobot {
 	 * This method is run once at the beginning of the autonomous period.
 	 */
 	public void autonomousInit() {
-	
+
 		timer = System.currentTimeMillis();
 	}
 
 	public void disabledInit() {
 		//server = new CamServer(SERVER_IP, SERVER_PORT);
 		adis.reset();
+		String selected = (String) autonomousChooser.getSelected();
 	}
 
 	/**
 	 * This method runs in a loop during autonomous mode.
 	 */
 	public void autonomousPeriodic() {
-			if(System.currentTimeMillis() - timer <= 5000) {
+			/*if(System.currentTimeMillis() - timer <= 5000) {
 				leftFront.set(0.25);
 				leftBack.set(0.25);
 				rightFront.set(0.25);
@@ -146,19 +147,19 @@ public class Robot extends IterativeRobot {
 				rightFront.set(0);
 				rightBack.set(0);
 			}
-		/*	
+		/*
 		}else{
 
 			String selected = (String) autonomusChooser.getSelected();
 			scan(selected);
 		}
-		
-		
-		
+
+
+
 		String selected = (String) autonomusChooser.getSelected();
-		
+
 		scan(selected);*/
-		
+
 		/**
 
 		server.refresh();
@@ -254,6 +255,9 @@ public class Robot extends IterativeRobot {
 		}
 		*/
 
+		String selected = (String) autonomusChooser.getSelected();
+		scan(selected);
+
 	}
 	/**
 	 * This method runs in a loop during teleop mode.
@@ -337,7 +341,7 @@ public class Robot extends IterativeRobot {
 		} else {
 			winch.set(0);
 		}
-		
+
 		if(flightStick.getRawButton(3)){
 			winch.set(.25);
 		}
@@ -368,9 +372,9 @@ public class Robot extends IterativeRobot {
 			piston.set(DoubleSolenoid.Value.kReverse);
 		}
 	}
-	
-	
-	
+
+
+
 
 	/**
 	 * This method runs in a loop during test mode.
@@ -425,9 +429,9 @@ public class Robot extends IterativeRobot {
 				scanMain();
 		}
 	}
-	
-	
-	
+
+
+
 	public int getData(){
 		switch(autoMode){
 		case 1:
@@ -437,7 +441,7 @@ public class Robot extends IterativeRobot {
 		case 3:
 			break;
 		}
-		
+
 		return autoMode;
 	}
 
@@ -494,14 +498,14 @@ public class Robot extends IterativeRobot {
 		x2 = table.getNumber("x2", 0);
 		y1 = table.getNumber("y1", 0);
 		y2 = table.getNumber("y2", 0);
-		cX = table.getNumber("cx", 0);
-		cY = table.getNumber("cy", 0);
+		cX = table.getNumber("cX", 0);
+		cY = table.getNumber("cY", 0);
 		wR = table.getNumber("wR", 0);
 		wL = table.getNumber("wL", 0);
 		hR = table.getNumber("hR", 0);
 		hL = table.getNumber("hW", 0);
 	}
-	
+
 	String coord(double x, double y) {
 		return("( " + x + ", " + y + ")");
 	}
@@ -512,16 +516,16 @@ public class Robot extends IterativeRobot {
 	public void testPeriodic() {
 
 		updateFilter();
-		
+
 		udateTable();
-		
+
 		System.out.println("Pt1: " + coord(x1,y1));
 		System.out.println("Pt2: " + coord(x2, y2));
 		System.out.println("Ctr: " + coord(cX, cY));
 		System.out.println("WHR: " + coord(wR, hR));
 		System.out.println("WHL: " + coord(wL, hL));
 		System.out.println("");
-		
+
 		/*trackDistance.ALPHA = SmartDashboard.getNumber("Smoothing", .8);
 		if(flightStick.getRawButton(6)){
 			servo.setAngle(0);
