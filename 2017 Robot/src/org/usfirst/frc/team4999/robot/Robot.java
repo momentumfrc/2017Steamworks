@@ -581,10 +581,7 @@ public class Robot extends IterativeRobot {
 		System.out.println("WHR: " + coord(wR, hR));
 		System.out.println("WHL: " + coord(wL, hL));
 
-		System.out.printf("Dist: %.2f", ultrasonic.getRangeInches());
-
-		System.out.println("");
-
+		System.out.printf("Dist: %.2f\n\n", ultrasonic.getRangeInches());
 
 		/*trackDistance.ALPHA = SmartDashboard.getNumber("Smoothing", .8);
 		if(flightStick.getRawButton(6)){
