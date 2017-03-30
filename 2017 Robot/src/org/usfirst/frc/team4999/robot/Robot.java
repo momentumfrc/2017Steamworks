@@ -87,17 +87,17 @@ public class Robot extends IterativeRobot {
 
 		// pixel values
 		if (!prefs.containsKey("IMAGE_IDEAL_X"))
-			prefs.putNumber("IMAGE_IDEAL_X", 82.53102656137833);
+			prefs.putInt("IMAGE_IDEAL_X", 82);
 		if (!prefs.containsKey("IMAGE_IDEAL_Y"))
-			prefs.putNumber("IMAGE_IDEAL_Y", 90.11185929648241);
+			prefs.putInt("IMAGE_IDEAL_Y", 90);
 
 		// inches value
 		if (!prefs.containsKey("ENGAGE_DIST"))
-			prefs.putNumber("ENGAGE_DIST", 10);
+			prefs.putInt("ENGAGE_DIST", 10);
 
 		// pixel value
 		if (!prefs.containsKey("ENGAGE_XERR"))
-			prefs.putNumber("ENGAGE_XERR", 5);
+			prefs.putInt("ENGAGE_XERR", 5);
 
 		trackDistance = new Distance(builtIn, adis);
 		rightFront = new VictorSP(0);
@@ -153,7 +153,7 @@ public class Robot extends IterativeRobot {
 	public void disabledInit() {
 		//server = new CamServer(SERVER_IP, SERVER_PORT);
 		adis.reset();
-		String selected = (String) autonomousChooser.getSelected();
+		//String selected = (String) autonomusChooser.getSelected();
 	}
 
 	/**
@@ -436,9 +436,9 @@ public class Robot extends IterativeRobot {
 		*/
 
 		double distance = ultrasonic.getRangeInches();
-		final double xErr = prefs.getNumber("IMAGE_IDEAL_X", (IMAGE_WIDTH/2)) - cX;
+		final double xErr = prefs.getInt("IMAGE_IDEAL_X", (IMAGE_WIDTH/2)) - cX;
 
-		if (distance < prefs.getNumber("ENGAGE_DIST", 10) && Math.abs(xErr) < prefs.getNumber("ENGAGE_XERR", 5)) {
+		if (distance < prefs.getInt("ENGAGE_DIST", 10) && Math.abs(xErr) < prefs.getInt("ENGAGE_XERR", 5)) {
 
 			// engage piston
 			timer = System.currentTimeMillis();
@@ -448,7 +448,7 @@ public class Robot extends IterativeRobot {
 			}
 
 		} else {
-			arcadeDrive(1,map(xerr, -IMAGE_WIDTH/2, IMAGE_WIDTH/2, -1, 1),0.25);
+			arcadeDrive(1,map(xErr, -IMAGE_WIDTH/2, IMAGE_WIDTH/2, -1, 1),0.25);
 		}
 	}
 
