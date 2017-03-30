@@ -134,6 +134,7 @@ public class Robot extends IterativeRobot {
 			SmartDashboard.putNumber(key, table.getNumber(key, -1));
 		}
 		*/
+		CameraServer.getInstance().startAutomaticCapture("DriverView", 0);
 	}
 
 	/*void updateFilter() {
