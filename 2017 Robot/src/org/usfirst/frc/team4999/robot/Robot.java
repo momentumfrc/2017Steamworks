@@ -115,6 +115,7 @@ public class Robot extends IterativeRobot {
 		/**input = new DigitalInput(0);
 		output = new DigitalOutput(1);*/
 		ultrasonic = new Ultrasonic(0,1);
+		ultrasonic.setAutomaticMode(true);
 		piston = new DoubleSolenoid(2,0);
 		//server = new CamServer(SERVER_IP, SERVER_PORT);
 		flightStick = new Joystick(1);
@@ -279,7 +280,7 @@ public class Robot extends IterativeRobot {
 			break;
 		}
 		*/
-		String selected = (String) autonomusChooser.getSelected();
+		int selected = (int) autonomusChooser.getSelected();
 		scan(selected);
 	}
 	/**
@@ -287,6 +288,11 @@ public class Robot extends IterativeRobot {
 	 */
 	boolean ignoreInput = false;
 	public void teleopPeriodic() {
+		udateTable();
+		System.out.println("xER:" + (prefs.getInt("IMAGE_IDEAL_X", (IMAGE_WIDTH/2)) - cX));
+
+		System.out.printf("Dist: %.2f\n\n", ultrasonic.getRangeInches());
+		
 		//TODO: Did we comment out the PID?
 		final double moveRequest = deadzone(-flightStick.getY(), 0.15);
 		final double turnRequest;
@@ -453,21 +459,21 @@ public class Robot extends IterativeRobot {
 		}
 	}
 
-	public void scan(String  pos){
+	public void scan(int  pos){
 		// Pos 1 = Left, 2 = Middle, 3 = Right
 
 		// scan left and right should move forward a certain
 		// amount first.
 		switch (pos) {
-			case "Right":
+			case 3:
 				scanRight();
 				break;
 
-			case "Left":
+			case 1:
 				scanLeft();
 				break;
 
-			case "Middle":
+			case 2:
 				scanMain();
 				break;
 
@@ -581,6 +587,8 @@ public class Robot extends IterativeRobot {
 		System.out.println("Ctr: " + coord(cX, cY));
 		System.out.println("WHR: " + coord(wR, hR));
 		System.out.println("WHL: " + coord(wL, hL));
+		
+		System.out.println("xER:" + (prefs.getInt("IMAGE_IDEAL_X", (IMAGE_WIDTH/2)) - cX));
 
 		System.out.printf("Dist: %.2f\n\n", ultrasonic.getRangeInches());
 
