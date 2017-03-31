@@ -643,7 +643,7 @@ public class Robot extends IterativeRobot {
 		System.out.printf ("angleX: %.2d angleY: %.2d angleZ: %.2d\n", angleX, angleY, angleZ);
 		System.out.printf ("pitch: %.2d yaw: .2d roll: %.2d\n", pitch, yaw, roll);
 		System.out.printf ("xAcceleration: %.2d yAcceleration: %.2d zAcceleration: %.2d\n", xAcceleration, yAcceleration, zAcceleration);
-		System.out.println ("====")
+		System.out.println ("====");
 		/*
 		System.out.println("Pt1: " + coord(x1,y1));
 		System.out.println("Pt2: " + coord(x2, y2));
