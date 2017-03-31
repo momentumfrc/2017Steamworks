@@ -149,7 +149,7 @@ public class Robot extends IterativeRobot {
 	 * This method is run once at the beginning of the autonomous period.
 	 */
 	public void autonomousInit() {
-
+		adis.reset();
 		timer = System.currentTimeMillis();
 		System.out.println((int)autonomusChooser.getSelected());
 	}
@@ -164,6 +164,17 @@ public class Robot extends IterativeRobot {
 	 * This method runs in a loop during autonomous mode.
 	 */
 	public void autonomousPeriodic() {
+
+
+			double distance = ultrasonic.getRangeInches();
+
+			int moveRequest = (distance > 10)? 1 : 0;
+			double turnRequest = (0);
+
+			if (System.currentTimeMillis() - timer <= 5000)
+				arcadeDrive(moveRequest, turnRequest, 0.25);
+
+
 			/*if(System.currentTimeMillis() - timer <= 5000) {
 				leftFront.set(0.25);
 				leftBack.set(0.25);
@@ -281,9 +292,9 @@ public class Robot extends IterativeRobot {
 			}
 			break;
 		}
-		*/
+
 		int selected = (int) autonomusChooser.getSelected();
-		scan(selected);
+		scan(selected);*/
 	}
 	/**
 	 * This method runs in a loop during teleop mode.
@@ -294,7 +305,7 @@ public class Robot extends IterativeRobot {
 		System.out.println("xER:" + (prefs.getInt("IMAGE_IDEAL_X", (IMAGE_WIDTH/2)) - cX));
 
 		System.out.printf("Dist: %.2f\n\n", ultrasonic.getRangeInches());
-		
+
 		//TODO: Did we comment out the PID?
 		final double moveRequest = deadzone(-flightStick.getY(), 0.15);
 		final double turnRequest;
@@ -446,22 +457,22 @@ public class Robot extends IterativeRobot {
 
 		double distance = ultrasonic.getRangeInches();
 		final double xErr = prefs.getInt("IMAGE_IDEAL_X", (IMAGE_WIDTH/2)) - cX;
-		
-		
+
+
 		if(foundTarget){
 			if(Math.abs(xErr) > prefs.getInt("ENGAGE_XERR", 5)){
 				arcadeDrive(0,map(xErr, -IMAGE_WIDTH/2, IMAGE_WIDTH/2, -1, 1),0.25);
 			}else{
 				arcadeDrive(1, 0, .25);
 			}
-			
+
 		}
-		
+
 
 		/*if (distance < prefs.getInt("ENGAGE_DIST", 10) && Math.abs(xErr) > prefs.getInt("ENGAGE_XERR", 5)) {
 
 			arcadeDrive(0,map(xErr, -IMAGE_WIDTH/2, IMAGE_WIDTH/2, -1, 1),0.25);
-			
+
 			// engage piston
 			timer = System.currentTimeMillis();
 			piston.set(DoubleSolenoid.Value.kForward);
@@ -491,10 +502,10 @@ public class Robot extends IterativeRobot {
 			case 2:
 				scanMain();
 				break;
-				
+
 			case 6:
-				
-				
+
+
 				break;
 			case 5:
 				if(table.getBoolean("foundTarget", false)){
@@ -613,20 +624,41 @@ public class Robot extends IterativeRobot {
 		udateTable();
 		getCenter();
 
+
+		final double rateX = adis.getRateX();
+		final double rateY = adis.getRateY();
+		final double rateZ = adis.getRateZ();
+		final double angleX = adis.getAngleX();
+		final double angleY = adis.getAngleY();
+		final double angleZ = adis.getAngleZ();
+		final double pitch = adis.getPitch();
+		final double yaw = adis.getYaw();
+		final double roll = adis.getRoll();
+		final double yAcceleration = adis.getAccelY();
+		final double xAcceleration = adis.getAccelX();
+		final double zAcceleration = adis.getAccelZ();
+
+		System.out.println ("==== Gyro Data ====");
+		System.out.printf ("rateX: %.2d rateY: %.2d rateZ: %.2d\n", rateX, rateY, rateZ);
+		System.out.printf ("angleX: %.2d angleY: %.2d angleZ: %.2d\n", angleX, angleY, angleZ);
+		System.out.printf ("pitch: %.2d yaw: .2d roll: %.2d\n", pitch, yaw, roll);
+		System.out.printf ("xAcceleration: %.2d yAcceleration: %.2d zAcceleration: %.2d\n", xAcceleration, yAcceleration, zAcceleration);
+		System.out.println ("====")
+		/*
 		System.out.println("Pt1: " + coord(x1,y1));
 		System.out.println("Pt2: " + coord(x2, y2));
 		System.out.println("Ctr: " + coord(cX, cY));
 		System.out.println("WHR: " + coord(wR, hR));
 		System.out.println("WHL: " + coord(wL, hL));
-		
+
 		System.out.println("xER:" + (prefs.getInt("IMAGE_IDEAL_X", (IMAGE_WIDTH/2)) - cX));
 
 		System.out.printf("Dist: %.2f\n\n", ultrasonic.getRangeInches());
 
-		
+
 		double xErr = prefs.getInt("IMAGE_IDEAL_X", IMAGE_WIDTH/2) - cX;
 
-		
+
 		if(foundTarget){
 			if(Math.abs(xErr) > prefs.getInt("ENGAGE_XERR", 5)){
 				arcadeDrive(0,map(xErr, -IMAGE_WIDTH/2, IMAGE_WIDTH/2, -1, 1),0.25);
