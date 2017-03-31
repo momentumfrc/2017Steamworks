@@ -128,6 +128,7 @@ public class Robot extends IterativeRobot {
 		autonomusChooser.addObject("Middle", 2);
 		autonomusChooser.addObject("Right", 3);
 		autonomusChooser.addDefault("Failsafe", 4);
+		autonomusChooser.addObject("Debug", 5);
 		//SmartDashboard.putBoolean("autoFailSafe", false);
 		SmartDashboard.putData("Autonomus Chooser", autonomusChooser);
 		/*
@@ -150,6 +151,7 @@ public class Robot extends IterativeRobot {
 	public void autonomousInit() {
 
 		timer = System.currentTimeMillis();
+		System.out.println((int)autonomusChooser.getSelected());
 	}
 
 	public void disabledInit() {
@@ -444,9 +446,22 @@ public class Robot extends IterativeRobot {
 
 		double distance = ultrasonic.getRangeInches();
 		final double xErr = prefs.getInt("IMAGE_IDEAL_X", (IMAGE_WIDTH/2)) - cX;
+		
+		
+		if(foundTarget){
+			if(Math.abs(xErr) > prefs.getInt("ENGAGE_XERR", 5)){
+				arcadeDrive(0,map(xErr, -IMAGE_WIDTH/2, IMAGE_WIDTH/2, -1, 1),0.25);
+			}else{
+				arcadeDrive(1, 0, .25);
+			}
+			
+		}
+		
 
-		if (distance < prefs.getInt("ENGAGE_DIST", 10) && Math.abs(xErr) < prefs.getInt("ENGAGE_XERR", 5)) {
+		/*if (distance < prefs.getInt("ENGAGE_DIST", 10) && Math.abs(xErr) > prefs.getInt("ENGAGE_XERR", 5)) {
 
+			arcadeDrive(0,map(xErr, -IMAGE_WIDTH/2, IMAGE_WIDTH/2, -1, 1),0.25);
+			
 			// engage piston
 			timer = System.currentTimeMillis();
 			piston.set(DoubleSolenoid.Value.kForward);
@@ -456,7 +471,7 @@ public class Robot extends IterativeRobot {
 
 		} else {
 			arcadeDrive(1,map(xErr, -IMAGE_WIDTH/2, IMAGE_WIDTH/2, -1, 1),0.25);
-		}
+		}*/
 	}
 
 	public void scan(int  pos){
@@ -476,6 +491,20 @@ public class Robot extends IterativeRobot {
 			case 2:
 				scanMain();
 				break;
+				
+			case 6:
+				
+				
+				break;
+			case 5:
+				if(table.getBoolean("foundTarget", false)){
+					gearPlacement();
+				} else {
+					leftFront.set(0);
+					leftBack.set(0);
+					rightFront.set(0);
+					rightBack.set(0);
+				}
 
 			default:
 				double distance = ultrasonic.getRangeInches();
@@ -508,10 +537,11 @@ public class Robot extends IterativeRobot {
 		return autoMode;
 	}
 
-	public void getCenter(double x1, double x2,double y1,double y2){
-
-		double centerX = x1 + x2 / 2;
-		double centerY = y1 + y1 / 2;
+	public void getCenter(){
+		double centerX = (x1 + x2) / 2;
+		double centerY = (y1 + y2) / 2;
+		cX = centerX;
+		cY = centerY;
 	}
 
 	public void parallax(double x1, double x2, double y1, double y2){
@@ -557,16 +587,16 @@ public class Robot extends IterativeRobot {
 	}
 
 	public void udateTable(){
-		x1 = table.getNumber("x1", 0);
-		x2 = table.getNumber("x2", 0);
-		y1 = table.getNumber("y1", 0);
-		y2 = table.getNumber("y2", 0);
-		cX = table.getNumber("cX", 0);
-		cY = table.getNumber("cY", 0);
-		wR = table.getNumber("wR", 0);
-		wL = table.getNumber("wL", 0);
-		hR = table.getNumber("hR", 0);
-		hL = table.getNumber("hW", 0);
+		x1 = table.getNumber("x1", -1);
+		x2 = table.getNumber("x2", -1);
+		y1 = table.getNumber("y1", -1);
+		y2 = table.getNumber("y2", -1);
+		cX = table.getNumber("cX", -1);
+		cY = table.getNumber("cY", -1);
+		wR = table.getNumber("wR", -1);
+		wL = table.getNumber("wL", -1);
+		hR = table.getNumber("hR", -1);
+		hL = table.getNumber("hW", -1);
 	}
 
 	String coord(double x, double y) {
@@ -581,6 +611,7 @@ public class Robot extends IterativeRobot {
 		//updateFilter();
 
 		udateTable();
+		getCenter();
 
 		System.out.println("Pt1: " + coord(x1,y1));
 		System.out.println("Pt2: " + coord(x2, y2));
@@ -592,6 +623,15 @@ public class Robot extends IterativeRobot {
 
 		System.out.printf("Dist: %.2f\n\n", ultrasonic.getRangeInches());
 
+		
+		double xErr = prefs.getInt("IMAGE_IDEAL_X", IMAGE_WIDTH/2) - cX;
+
+		
+		if(foundTarget){
+			if(Math.abs(xErr) > prefs.getInt("ENGAGE_XERR", 5)){
+				arcadeDrive(0,map(xErr, -IMAGE_WIDTH/2, IMAGE_WIDTH/2, -1, 1),0.25);
+			}
+		}
 		/*trackDistance.ALPHA = SmartDashboard.getNumber("Smoothing", .8);
 		if(flightStick.getRawButton(6)){
 			servo.setAngle(0);
