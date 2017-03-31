@@ -166,13 +166,20 @@ public class Robot extends IterativeRobot {
 	public void autonomousPeriodic() {
 
 
+		//TERRY: Can you check this
+		
+		
 			double distance = ultrasonic.getRangeInches();
 
 			int moveRequest = (distance > 10)? 1 : 0;
 			double turnRequest = (0);
 
+			
+			
 			if (System.currentTimeMillis() - timer <= 5000)
 				arcadeDrive(moveRequest, turnRequest, 0.25);
+			else
+				arcadeDrive(0,0,0);
 
 
 			/*if(System.currentTimeMillis() - timer <= 5000) {
