@@ -162,7 +162,6 @@ public class Robot extends IterativeRobot {
 		timer = System.currentTimeMillis();
 		System.out.println((int)autonomusChooser.getSelected());
 		turnRequest = prefs.getDouble("AUTO_TURN_REQUEST", 0);
-		pid = prefs.getBoolean("USE_PID", pid);
 	}
 
 	public void disabledInit() {
@@ -179,7 +178,7 @@ public class Robot extends IterativeRobot {
 
 			double distance = ultrasonic.getRangeInches();
 
-			int moveRequest = (distance > 10)? 1 : 0;
+			int moveRequest = (distance > 5)? 1 : 0;
 
 			if (System.currentTimeMillis() - timer <= 5000)
 				arcadeDrive(moveRequest, turnRequest, 0.25);
@@ -312,6 +311,9 @@ public class Robot extends IterativeRobot {
 	 * This method runs in a loop during teleop mode.
 	 */
 	boolean ignoreInput = false;
+	public void teleopInit() {
+		pid = prefs.getBoolean("USE_PID", pid);
+	}
 	public void teleopPeriodic() {
 		udateTable();
 		System.out.println("xER:" + (prefs.getInt("IMAGE_IDEAL_X", (IMAGE_WIDTH/2)) - cX));
@@ -368,6 +370,10 @@ public class Robot extends IterativeRobot {
 		System.out.println("Right Front: " + rightFront.getInverted());
 		System.out.println("Right Back: " + rightBack.getInverted());
 		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		
+		if(flightStick.getRawButton(11)) {
+			pid = false;
+		}
 
 		if(pid){
 			arcadeDrive(moveRequest, turnRequest, speedLimiter);
