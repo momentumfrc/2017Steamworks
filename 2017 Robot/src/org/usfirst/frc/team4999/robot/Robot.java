@@ -74,12 +74,15 @@ public class Robot extends IterativeRobot {
 	boolean foundTarget;
 	double x1,x2,y1,y2,cX,cY,wL,hL,wR,hR;
 	boolean failSafeAuto = false;
+	double turnRequest;
+	boolean pid;
 	//final String[] keys = {"HueMin","HueMax","SatMin","SatMax","ValMin","ValMax"};
 
 	/**
 	 * This method is run once when the robot is turned on.
 	 */
 	public void robotInit() {
+		pid = true;
 		NetworkTable.setServerMode();
 		NetworkTable.setTeam(4999);
 		NetworkTable.initialize();
@@ -156,6 +159,7 @@ public class Robot extends IterativeRobot {
 		adis.reset();
 		timer = System.currentTimeMillis();
 		System.out.println((int)autonomusChooser.getSelected());
+		turnRequest = prefs.getDouble("AUTO_TURN_REQUEST", 0);
 	}
 
 	public void disabledInit() {
@@ -173,7 +177,6 @@ public class Robot extends IterativeRobot {
 			double distance = ultrasonic.getRangeInches();
 
 			int moveRequest = (distance > 10)? 1 : 0;
-			double turnRequest = prefs.getDouble("AUTO_TURN_REQUEST", 0);
 
 			if (System.currentTimeMillis() - timer <= 5000)
 				arcadeDrive(moveRequest, turnRequest, 0.25);
@@ -363,7 +366,11 @@ public class Robot extends IterativeRobot {
 		System.out.println("Right Back: " + rightBack.getInverted());
 		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
-		arcadeDrive(moveRequest, turnRequest, speedLimiter);
+		if(pid){
+			arcadeDrive(moveRequest, turnRequest, speedLimiter);
+			}else{
+				arcadeDrive(moveRequest, map(turnRateRequest - rateX, -45, 45, -1, 1),speedLimiter);
+			}
 
 		/**if(xboxController.getRawAxis(3) == 1){
 			//shooter.set(.5);
@@ -391,7 +398,7 @@ public class Robot extends IterativeRobot {
 		}
 
 		if(flightStick.getRawButton(3)){
-			winch.set(.25);
+			winch.set(.50);
 		}
 		if(flightStick.getRawButton(6)){
 			winch.set(-.25);
