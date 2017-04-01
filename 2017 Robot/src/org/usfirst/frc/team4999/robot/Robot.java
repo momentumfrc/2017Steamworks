@@ -69,6 +69,7 @@ public class Robot extends IterativeRobot {
 	Ultrasonic ultrasonic;
 	Distance distance;
 	// test
+	boolean pid = true;
 	long timer;
 	Servo servo = new Servo(9);
 	boolean foundTarget;
@@ -171,8 +172,8 @@ public class Robot extends IterativeRobot {
 		
 			double distance = ultrasonic.getRangeInches();
 
-			int moveRequest = (distance > 10)? 1 : 0;
-			double turnRequest = (0);
+			int moveRequest = (distance > 5)? 1 : 0;
+			double turnRequest = (0.1);
 
 			
 			
@@ -364,7 +365,12 @@ public class Robot extends IterativeRobot {
 		System.out.println("Right Back: " + rightBack.getInverted());
 		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
+		
+		if(pid){
 		arcadeDrive(moveRequest, turnRequest, speedLimiter);
+		}else{
+			arcadeDrive(moveRequest, map(turnRateRequest - rateX, -45, 45, -1, 1),speedLimiter);
+		}
 
 		/**if(xboxController.getRawAxis(3) == 1){
 			//shooter.set(.5);
@@ -392,7 +398,7 @@ public class Robot extends IterativeRobot {
 		}
 
 		if(flightStick.getRawButton(3)){
-			winch.set(.25);
+			winch.set(.50);
 		}
 		if(flightStick.getRawButton(6)){
 			winch.set(-.25);
