@@ -69,7 +69,6 @@ public class Robot extends IterativeRobot {
 	Ultrasonic ultrasonic;
 	Distance distance;
 	// test
-	boolean pid = true;
 	long timer;
 	Servo servo = new Servo(9);
 	boolean foundTarget;
@@ -99,6 +98,10 @@ public class Robot extends IterativeRobot {
 		// pixel value
 		if (!prefs.containsKey("ENGAGE_XERR"))
 			prefs.putInt("ENGAGE_XERR", 5);
+		
+		// turn request
+		if (!prefs.containsKey("AUTO_TURN_REQUEST"))
+			prefs.putDouble("AUTO_TURN_REQUEST", 0);
 
 		trackDistance = new Distance(builtIn, adis);
 		rightFront = new VictorSP(0);
@@ -167,19 +170,14 @@ public class Robot extends IterativeRobot {
 	public void autonomousPeriodic() {
 
 
-		//TERRY: Can you check this
-		
-		
 			double distance = ultrasonic.getRangeInches();
 
-			int moveRequest = (distance > 5)? 1 : 0;
-			double turnRequest = (0.1);
+			int moveRequest = (distance > 10)? 1 : 0;
+			double turnRequest = prefs.getDouble("AUTO_TURN_REQUEST", 0);
 
-			
-			
 			if (System.currentTimeMillis() - timer <= 5000)
 				arcadeDrive(moveRequest, turnRequest, 0.25);
-			else
+			else 
 				arcadeDrive(0,0,0);
 
 
@@ -365,12 +363,7 @@ public class Robot extends IterativeRobot {
 		System.out.println("Right Back: " + rightBack.getInverted());
 		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
-		
-		if(pid){
 		arcadeDrive(moveRequest, turnRequest, speedLimiter);
-		}else{
-			arcadeDrive(moveRequest, map(turnRateRequest - rateX, -45, 45, -1, 1),speedLimiter);
-		}
 
 		/**if(xboxController.getRawAxis(3) == 1){
 			//shooter.set(.5);
@@ -398,7 +391,7 @@ public class Robot extends IterativeRobot {
 		}
 
 		if(flightStick.getRawButton(3)){
-			winch.set(.50);
+			winch.set(.25);
 		}
 		if(flightStick.getRawButton(6)){
 			winch.set(-.25);
@@ -721,7 +714,7 @@ public class Robot extends IterativeRobot {
 	 * within the range of -1 and 1.
 	 *
 	 * @param moveRequest The value used to drive the robot forwards and backwards (usually y-axis of joystick).
-	 * @param turnRequest The value used to turn the robot (usually x-axis or z-axis of the joystick).
+	 * @param turnRequest The value used to turn the robot (usually x-axis or z-axis of the joystick). Positive is left.
 	 * @param speedLimiter A multiplier used to slow down the robot. Set this to 1 for no limitation.
 	 */
 	private void arcadeDrive(double moveRequest, double turnRequest, double speedLimiter) {
