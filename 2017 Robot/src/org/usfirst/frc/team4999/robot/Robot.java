@@ -82,6 +82,8 @@ public class Robot extends IterativeRobot {
 	 * This method is run once when the robot is turned on.
 	 */
 	public void robotInit() {
+		
+		
 		pid = true;
 		NetworkTable.setServerMode();
 		NetworkTable.setTeam(4999);
@@ -375,7 +377,7 @@ public class Robot extends IterativeRobot {
 			pid = false;
 		}
 
-		if(pid){
+		if(!pid){
 			arcadeDrive(moveRequest, turnRequest, speedLimiter);
 		}else{
 			arcadeDrive(moveRequest, map(turnRateRequest - rateX, -45, 45, -1, 1),speedLimiter);
