@@ -93,7 +93,7 @@ public class Robot extends IterativeRobot {
 		// pixel values
 		if (!prefs.containsKey("USE_PID"))
 			prefs.putBoolean("USE_PID", true);
-		if (!prefs.containsKey("IMAGE_IDEAL_X"))
+		/*if (!prefs.containsKey("IMAGE_IDEAL_X"))
 			prefs.putInt("IMAGE_IDEAL_X", 82);
 		if (!prefs.containsKey("IMAGE_IDEAL_Y"))
 			prefs.putInt("IMAGE_IDEAL_Y", 90);
@@ -104,12 +104,18 @@ public class Robot extends IterativeRobot {
 
 		// pixel value
 		if (!prefs.containsKey("ENGAGE_XERR"))
-			prefs.putInt("ENGAGE_XERR", 5);
+			prefs.putInt("ENGAGE_XERR", 5);*/
 		
 		// turn request
 		if (!prefs.containsKey("AUTO_TURN_REQUEST"))
 			prefs.putDouble("AUTO_TURN_REQUEST", 0);
-
+		if(!prefs.containsKey("AUTO_LEFT"))
+			prefs.putDouble("AUTO_LEFT", 1);
+		if(!prefs.containsKey("AUTO_RIGHT"))
+			prefs.putDouble("AUTO_RIGHT", 1);
+		if(!prefs.containsKey("AUTO_MULT"))
+			prefs.putDouble("AUTO_MULT", .25);
+		
 		trackDistance = new Distance(builtIn, adis);
 		rightFront = new VictorSP(0);
 		leftFront = new VictorSP(2);
@@ -177,16 +183,22 @@ public class Robot extends IterativeRobot {
 	 */
 	public void autonomousPeriodic() {
 
-
 			double distance = ultrasonic.getRangeInches();
-
+			
+			if (System.currentTimeMillis() - timer <= 5000 && distance > 5) {
+				tankDrive(prefs.getDouble("AUTO_LEFT",1),prefs.getDouble("AUTO_RIGHT", 1),prefs.getDouble("AUTO_MULT", 0.25));
+			} else {
+				tankDrive (0,0,0);
+			}
+			
+			/*
 			int moveRequest = (distance > 5)? 1 : 0;
 
 			if (System.currentTimeMillis() - timer <= 5000)
 				arcadeDrive(moveRequest, turnRequest, 0.25);
 			else 
 				arcadeDrive(0,0,0);
-
+			*/
 
 			/*if(System.currentTimeMillis() - timer <= 5000) {
 				leftFront.set(0.25);
@@ -743,6 +755,13 @@ public class Robot extends IterativeRobot {
 		leftBack.set(leftDrive);
 		rightFront.set(rightDrive);
 		rightBack.set(rightDrive);
+	}
+	
+	public void tankDrive(double left, double right, double multiplier){
+		leftFront.set(left * multiplier);
+		leftBack.set(left * multiplier);
+		rightFront.set(right * multiplier);
+		rightBack.set(right * multiplier);
 	}
 
 	/**
