@@ -89,6 +89,8 @@ public class Robot extends IterativeRobot {
 		prefs = Preferences.getInstance();
 
 		// pixel values
+		if (!prefs.containsKey("USE_PID"))
+			prefs.putBoolean("USE_PID", true);
 		if (!prefs.containsKey("IMAGE_IDEAL_X"))
 			prefs.putInt("IMAGE_IDEAL_X", 82);
 		if (!prefs.containsKey("IMAGE_IDEAL_Y"))
@@ -160,6 +162,7 @@ public class Robot extends IterativeRobot {
 		timer = System.currentTimeMillis();
 		System.out.println((int)autonomusChooser.getSelected());
 		turnRequest = prefs.getDouble("AUTO_TURN_REQUEST", 0);
+		pid = prefs.getBoolean("USE_PID", pid);
 	}
 
 	public void disabledInit() {
@@ -368,9 +371,9 @@ public class Robot extends IterativeRobot {
 
 		if(pid){
 			arcadeDrive(moveRequest, turnRequest, speedLimiter);
-			}else{
-				arcadeDrive(moveRequest, map(turnRateRequest - rateX, -45, 45, -1, 1),speedLimiter);
-			}
+		}else{
+			arcadeDrive(moveRequest, map(turnRateRequest - rateX, -45, 45, -1, 1),speedLimiter);
+		}
 
 		/**if(xboxController.getRawAxis(3) == 1){
 			//shooter.set(.5);
