@@ -115,6 +115,8 @@ public class Robot extends IterativeRobot {
 			prefs.putDouble("AUTO_RIGHT", 1);
 		if(!prefs.containsKey("AUTO_MULT"))
 			prefs.putDouble("AUTO_MULT", .25);
+		if(!prefs.containsKey("AUTO_TIME"))
+			prefs.putDouble("AUTO_TIME", 5000);
 		
 		trackDistance = new Distance(builtIn, adis);
 		rightFront = new VictorSP(0);
@@ -183,9 +185,9 @@ public class Robot extends IterativeRobot {
 	 */
 	public void autonomousPeriodic() {
 
-			double distance = ultrasonic.getRangeInches();
+			//double distance = ultrasonic.getRangeInches();
 			
-			if (System.currentTimeMillis() - timer <= 5000 && distance > 5) {
+			if (System.currentTimeMillis() - timer <= prefs.getDouble("AUTO_TIME", 5000) /**&& distance > 5*/) {
 				tankDrive(prefs.getDouble("AUTO_LEFT",1),prefs.getDouble("AUTO_RIGHT", 1),prefs.getDouble("AUTO_MULT", 0.25));
 			} else {
 				tankDrive (0,0,0);
