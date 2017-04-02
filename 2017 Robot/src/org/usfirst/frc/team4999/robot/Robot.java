@@ -156,6 +156,7 @@ public class Robot extends IterativeRobot {
 		}
 		*/
 		CameraServer.getInstance().startAutomaticCapture("DriverView", 0);
+		CameraServer.getInstance().startAutomaticCapture("OtherView", 1);
 	}
 
 	/*void updateFilter() {
