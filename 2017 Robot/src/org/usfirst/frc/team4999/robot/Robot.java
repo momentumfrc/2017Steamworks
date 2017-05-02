@@ -2,6 +2,7 @@
 package org.usfirst.frc.team4999.robot;
 
 import edu.wpi.cscore.MjpegServer;
+import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.ADXL362;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.CameraServer;
@@ -60,6 +61,7 @@ public class Robot extends IterativeRobot {
 	public static final String SERVER_IP = "10.49.99.12";
 	public static  final int SERVER_PORT = 5810;
 	boolean isInverted = false;
+	boolean triggered = false;
 	Distance trackDistance;
 	Command autonomusCommand;
 	SendableChooser autonomusChooser;
@@ -76,6 +78,7 @@ public class Robot extends IterativeRobot {
 	boolean failSafeAuto = false;
 	double turnRequest;
 	boolean pid;
+	UsbCamera cam1,cam2;
 	//final String[] keys = {"HueMin","HueMax","SatMin","SatMax","ValMin","ValMax"};
 
 	/**
@@ -93,6 +96,9 @@ public class Robot extends IterativeRobot {
 		// pixel values
 		if (!prefs.containsKey("USE_PID"))
 			prefs.putBoolean("USE_PID", true);
+		if(!prefs.containsKey("USE_TANK")) {
+			prefs.putBoolean("USE_TANK", false);
+		}
 		/*if (!prefs.containsKey("IMAGE_IDEAL_X"))
 			prefs.putInt("IMAGE_IDEAL_X", 82);
 		if (!prefs.containsKey("IMAGE_IDEAL_Y"))
@@ -155,8 +161,9 @@ public class Robot extends IterativeRobot {
 			SmartDashboard.putNumber(key, table.getNumber(key, -1));
 		}
 		*/
-		CameraServer.getInstance().startAutomaticCapture("DriverView", 0);
-		CameraServer.getInstance().startAutomaticCapture("OtherView", 1);
+		cam1 = CameraServer.getInstance().startAutomaticCapture("DriverView", 0);
+		cam2 = CameraServer.getInstance().startAutomaticCapture("OtherView", 1);
+		//cam1.setResolution(320,240);
 	}
 
 	/*void updateFilter() {
@@ -332,27 +339,49 @@ public class Robot extends IterativeRobot {
 		pid = prefs.getBoolean("USE_PID", pid);
 	}
 	public void teleopPeriodic() {
+		if(prefs.getBoolean("USE_TANK", false)){
+			teleopTank();
+		} else {
+			teleopArcade();
+		}
+	}
+	public void teleopTank() {
+		double right = deadZone(xboxController.getRawAxis(5),.1);
+		double left = deadZone(xboxController.getRawAxis(1),.1);
+		tankDrive(left,right,1);
+		
+	}
+	public double deadZone(double value, double zone) {
+		if(Math.abs(value) < zone) {
+			return 0;
+		} else {
+			return value;
+		}
+	}
+	public void teleopArcade() {
 		udateTable();
 		System.out.println("xER:" + (prefs.getInt("IMAGE_IDEAL_X", (IMAGE_WIDTH/2)) - cX));
 
 		System.out.printf("Dist: %.2f\n\n", ultrasonic.getRangeInches());
 
 		//TODO: Did we comment out the PID?
-		final double moveRequest = deadzone(-flightStick.getY(), 0.15);
+		double moveRequest = deadzone(-flightStick.getY(), 0.15);
 		final double turnRequest;
-		if (isInverted)
+		/**
+		 * f (isInverted)
 			turnRequest = -deadzone(flightStick.getTwist(), 0.20);
-		else
+		else*/
 			turnRequest = deadzone(flightStick.getTwist(), 0.20);
+		moveRequest = (isInverted)? -moveRequest: moveRequest;
 		final double turnRateRequest = turnRequest * 45;
 		final double speedLimiter = (-flightStick.getThrottle() + 1) / 2;
 		final double rateX = -adis.getRateX();
-		final double angleY = -adis.getAngleY();
+		/*final double angleY = -adis.getAngleY();
 		final double angleZ = -adis.getAngleZ();
 		final double xRotationError = map(turnRateRequest - rateX, -45, 45, -1, 1);
 		final double getYaw = adis.getYaw();
 		final double getRoll = adis.getRoll();
-		final double xAcceleration = adis.getAccelX();
+		final double xAcceleration = adis.getAccelX();*/
 		//final double antiTipError = map(angleY,)
 
 
@@ -388,9 +417,9 @@ public class Robot extends IterativeRobot {
 		System.out.println("Right Back: " + rightBack.getInverted());
 		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 		
-		if(flightStick.getRawButton(11)) {
+		/*if(flightStick.getRawButton(11)) {
 			pid = false;
-		}
+		}*/
 
 		if(!pid){
 			arcadeDrive(moveRequest, turnRequest, speedLimiter);
@@ -414,7 +443,14 @@ public class Robot extends IterativeRobot {
 		if(xboxController.getRawAxis(6) == 1){
 			//helix.set(1);
 		}
-
+		if(flightStick.getRawButton(2)){
+			if(!triggered){
+				triggered = true;
+				isInverted = !isInverted;
+			}
+		} else {
+			triggered = false;
+		}
 
 		//winch.set(clip(xboxController.getRawAxis(1), 0, 1));
 		if(flightStick.getRawButton(5)){
@@ -429,6 +465,14 @@ public class Robot extends IterativeRobot {
 		if(flightStick.getRawButton(6)){
 			winch.set(-.25);
 		}
+		/*if(flightStick.getRawButton(11)){
+			cam1.setExposureHoldCurrent();
+			cam2.setExposureHoldCurrent();
+		}
+		if(flightStick.getRawButton(12)){
+			cam1.setExposureAuto();
+			cam2.setExposureAuto();
+		}*/
 
 
 		/**if(flightStick.getRawButton(3)){
