@@ -218,6 +218,9 @@ public class Robot extends IterativeRobot {
 	}
 	
 	public void testPeriodic() {
+		if(outreachDisabled) {
+			arcadeDrive(0,0,0);
+		}
 		if((System.currentTimeMillis() - timer_outreach < prefs.getDouble("OUTREACH_TIME",30) * 1000) && !outreachDisabled) {
 			double moveRequest = deadzone(-flightStick.getY(), 0.15);
 			double turnRequest = map(deadzone(flightStick.getTwist(), 0.20),0,1,0,prefs.getDouble("OUTREACH_TURN", .5));
