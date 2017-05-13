@@ -33,11 +33,12 @@ public class Robot extends IterativeRobot {
 	
 	// Booleans used to invert the front/back of the robot.
 	boolean isInverted = false; // True if inverted
-	boolean triggered = false; // True while the button is held down. Prevents rapid oscillation from back to front while the button is held down.
+	boolean triggered2 = false; // True while the button is held down. Prevents rapid oscillation from back to front while the button is held down.
 	
 	//Boolean to disable outreach driving
 	boolean outreachDisabled = false;
-	boolean outreachTriggered = false;
+	boolean triggeredX = false;
+	boolean triggeredY = false;
 	
 	// Piston used to deploy gears.
 	DoubleSolenoid piston;
@@ -50,6 +51,9 @@ public class Robot extends IterativeRobot {
 	
 	// The two cameras connected to the RoboRio.
 	UsbCamera cam1,cam2;
+	
+	// Values to store user input
+	double moveRequest,turnRequest;
 
 	/**
 	 * This method is run once when the robot is turned on.
@@ -159,8 +163,8 @@ public class Robot extends IterativeRobot {
 		System.out.printf("Dist: %.2f\n\n", ultrasonic.getRangeInches());
 
 		// The input from the driver. Deadzones are used to make the robot less twitchy.
-		double moveRequest = deadzone(-flightStick.getY(), 0.15);
-		double turnRequest = deadzone(flightStick.getTwist(), 0.20);
+		moveRequest = deadzone(-flightStick.getY(), 0.15);
+		turnRequest = deadzone(flightStick.getTwist(), 0.20);
 		
 		// Allow the driver to switch back and front.
 		moveRequest = (isInverted)? -moveRequest: moveRequest;
@@ -181,12 +185,12 @@ public class Robot extends IterativeRobot {
 		
 		// Switch front and back on the push of button 2.
 		if(flightStick.getRawButton(2)){
-			if(!triggered){
-				triggered = true;
+			if(!triggered2){
+				triggered2 = true;
 				isInverted = !isInverted;
 			}
 		} else {
-			triggered = false;
+			triggered2 = false;
 		}
 		
 		// Drive the winch.
@@ -218,12 +222,9 @@ public class Robot extends IterativeRobot {
 	}
 	
 	public void testPeriodic() {
-		if(outreachDisabled) {
-			arcadeDrive(0,0,0);
-		}
-		if((System.currentTimeMillis() - timer_outreach < prefs.getDouble("OUTREACH_TIME",30) * 1000) && !outreachDisabled) {
-			double moveRequest = deadzone(-flightStick.getY(), 0.15);
-			double turnRequest = map(deadzone(flightStick.getTwist(), 0.20),0,1,0,prefs.getDouble("OUTREACH_TURN", .5));
+		if(!outreachDisabled) {
+			moveRequest = deadzone(-flightStick.getY(), 0.15);
+			turnRequest = map(deadzone(flightStick.getTwist(), 0.20),0,1,0,prefs.getDouble("OUTREACH_TURN", .5));
 			
 			// Allow the driver to switch back and front.
 			moveRequest = (isInverted)? -moveRequest: moveRequest;
@@ -244,22 +245,12 @@ public class Robot extends IterativeRobot {
 			
 			// Switch front and back on the push of button 2.
 			if(flightStick.getRawButton(2)){
-				if(!triggered){
-					triggered = true;
+				if(!triggered2){
+					triggered2 = true;
 					isInverted = !isInverted;
 				}
 			} else {
-				triggered = false;
-			}
-			
-			// Disable by pushing X
-			if(xboxController.getXButton()){
-				if(!outreachTriggered){
-					outreachTriggered = true;
-					outreachDisabled = !outreachDisabled;
-				}
-			} else {
-				outreachTriggered = false;
+				triggered2 = false;
 			}
 			
 			// Drive the winch.
@@ -285,6 +276,33 @@ public class Robot extends IterativeRobot {
 			if(System.currentTimeMillis() - timer_gear > 750){
 				piston.set(DoubleSolenoid.Value.kReverse);
 			}
+		}
+		if(System.currentTimeMillis() - timer_outreach > prefs.getDouble("OUTREACH_TIME",30) * 1000) {
+			outreachDisabled = true;
+			
+		}
+		
+		// Disable by pushing X
+		if(xboxController.getXButton()){
+			if(!triggeredX){
+				triggeredX = true;
+				outreachDisabled = !outreachDisabled;
+			}
+		} else {
+			triggeredX = false;
+		}
+		
+		// Reset time by pushing Y
+		if(xboxController.getYButton()) {
+			if(!triggeredY){
+				triggeredY = true;
+				timer_outreach = System.currentTimeMillis();
+			}
+		} else {
+			triggeredY = false;
+		}
+		if(outreachDisabled) {
+			arcadeDrive(0,0,1);
 		}
 	}
 
