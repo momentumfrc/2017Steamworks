@@ -35,6 +35,10 @@ public class Robot extends IterativeRobot {
 	boolean isInverted = false; // True if inverted
 	boolean triggered = false; // True while the button is held down. Prevents rapid oscillation from back to front while the button is held down.
 	
+	//Boolean to disable outreach driving
+	boolean outreachDisabled = false;
+	boolean outreachTriggered = false;
+	
 	// Piston used to deploy gears.
 	DoubleSolenoid piston;
 	
@@ -42,7 +46,7 @@ public class Robot extends IterativeRobot {
 	Ultrasonic ultrasonic;
 	
 	// Timers. timer_gear ensures the piston is deployed for at least 0.75 seconds, and timer_auto ensures the robot drives for 5 seconds before stopping.
-	long timer_gear, timer_auto;
+	long timer_gear, timer_auto, timer_outreach;
 	
 	// The two cameras connected to the RoboRio.
 	UsbCamera cam1,cam2;
@@ -66,6 +70,18 @@ public class Robot extends IterativeRobot {
 		// AUTO_TIME is the amount time the robot will move forward for.
 		if(!prefs.containsKey("AUTO_TIME"))
 			prefs.putDouble("AUTO_TIME", 5000);
+		// OUTREACH_TIME is the number of seconds allowed for outreach driving
+		if(!prefs.containsKey("OUTREACH_TIME")) {
+			prefs.putDouble("OUTREACH_TIME", 30);
+		}
+		// OUTREACH_SPEED is the max speed of the outreach driving.
+		if(!prefs.containsKey("OUTREACH_SPEED")){
+			prefs.putDouble("OUTREACH_SPEED",.25);
+		}
+		// OUTREACH_TURN is the max turn speed of the outreach driving.
+		if(!prefs.containsKey("OUTREACH_TURN")){
+			prefs.putDouble("OUTREACH_TURN", .5);
+		}
 		
 		// Motors
 		rightFront = new VictorSP(0);
@@ -197,8 +213,76 @@ public class Robot extends IterativeRobot {
 		}
 	}
 	
+	public void testInit(){
+		timer_outreach = System.currentTimeMillis();
+	}
+	
 	public void testPeriodic() {
-		// Test code goes here
+		if((System.currentTimeMillis() - timer_outreach < prefs.getDouble("OUTREACH_TIME",30) * 1000) && !outreachDisabled) {
+			double moveRequest = deadzone(-flightStick.getY(), 0.15);
+			double turnRequest = map(deadzone(flightStick.getTwist(), 0.20),0,1,0,prefs.getDouble("OUTREACH_TURN", .5));
+			
+			// Allow the driver to switch back and front.
+			moveRequest = (isInverted)? -moveRequest: moveRequest;
+			
+			// Throttle
+			double speedLimiter = map((-flightStick.getThrottle() + 1) / 2,0,1,0,prefs.getDouble("OUTREACH_SPEED",.25));
+			
+			arcadeDrive(moveRequest, turnRequest, speedLimiter);
+			
+			// Drive the intake
+			if(xboxController.getRawButton(5)){
+				intake.set(1);
+			} else if(xboxController.getRawButton(6)){
+				intake.set(-1);
+			} else {
+				intake.set(0);
+			}
+			
+			// Switch front and back on the push of button 2.
+			if(flightStick.getRawButton(2)){
+				if(!triggered){
+					triggered = true;
+					isInverted = !isInverted;
+				}
+			} else {
+				triggered = false;
+			}
+			
+			// Disable by pushing X
+			if(xboxController.getXButton()){
+				if(!outreachTriggered){
+					outreachTriggered = true;
+					outreachDisabled = !outreachDisabled;
+				}
+			} else {
+				outreachTriggered = false;
+			}
+			
+			// Drive the winch.
+			if(flightStick.getRawButton(5)){
+				winch.set(1);
+			} else {
+				winch.set(0);
+			}
+
+			if(flightStick.getRawButton(3)){
+				winch.set(.50);
+			}
+			if(flightStick.getRawButton(6)){
+				winch.set(-.25);
+			}
+			
+			
+			// Drive the gear.
+			if( (flightStick.getRawButton(1) && (flightStick.getRawButton(7) || flightStick.getRawButton(8)) ) || xboxController.getBButton()){
+				timer_gear = System.currentTimeMillis();
+				piston.set(DoubleSolenoid.Value.kForward);
+			}
+			if(System.currentTimeMillis() - timer_gear > 750){
+				piston.set(DoubleSolenoid.Value.kReverse);
+			}
+		}
 	}
 
 	/**
@@ -220,7 +304,7 @@ public class Robot extends IterativeRobot {
 	}
 	
 	/**
-	 * MOves the robot in a tank-drive fashion according to given inputs. All values are within the range of [-1,1].
+	 * Moves the robot in a tank-drive fashion according to given inputs. All values are within the range of [-1,1].
 	 * @param left The value to drive the left side
 	 * @param right The value to drive the right side
 	 * @param multiplier The speed multiplier
