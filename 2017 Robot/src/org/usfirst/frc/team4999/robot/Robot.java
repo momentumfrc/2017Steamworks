@@ -51,7 +51,7 @@ public class Robot extends IterativeRobot {
 	
 	// The two cameras connected to the RoboRio.
 	UsbCamera cam1;
-	Vision cam2;
+	Cam2 cam2;
 	
 	// Values to store user input
 	double moveRequest,turnRequest;
@@ -121,24 +121,7 @@ public class Robot extends IterativeRobot {
 		cam1 = CameraServer.getInstance().startAutomaticCapture("DriverView", 0);
 		
 		// Put text on the second camera to show if the robot is reversed
-		cam2 = new Vision("OtherView",1) {
-			public boolean reversed;
-			public void run() {
-				while(!Thread.interrupted()) {
-					if(imagesink.grabFrame(image) == 0)
-						continue;
-					if(reversed) {
-						drawText("Front",5,475,2,0,255,0);
-					} else {
-						drawText("Back",5,475,2,255,0,0);
-					}
-					
-					// If we wanted to do more  vision processing, we could do it here.
-					
-					imagesource.putFrame(image);
-				}
-			}
-		};
+		cam2 = new Cam2("OtherView",1);
 		cam2.start();
 		
 	}
@@ -209,6 +192,7 @@ public class Robot extends IterativeRobot {
 			if(!triggered2){
 				triggered2 = true;
 				isInverted = !isInverted;
+				cam2.reversed = isInverted;
 			}
 		} else {
 			triggered2 = false;
@@ -239,10 +223,20 @@ public class Robot extends IterativeRobot {
 	}
 	
 	public void testInit(){
-		timer_outreach = System.currentTimeMillis();
+		outreachInit();
 	}
 	
 	public void testPeriodic() {
+		outreachPeriodic();
+	}
+	
+	/**
+	 * Runs driving code that is modified to be safer for novices to drive. This could potentially be used for outreach by selling time driving the robot.
+	 */
+	void outreachInit() {
+		timer_outreach = System.currentTimeMillis();
+	}
+	void outreachPeriodic() {
 		if(!outreachDisabled) {
 			moveRequest = deadzone(-flightStick.getY(), 0.15);
 			turnRequest = map(deadzone(flightStick.getTwist(), 0.20),0,1,0,prefs.getDouble("OUTREACH_TURN", .5));
@@ -269,6 +263,7 @@ public class Robot extends IterativeRobot {
 				if(!triggered2){
 					triggered2 = true;
 					isInverted = !isInverted;
+					cam2.reversed = isInverted;
 				}
 			} else {
 				triggered2 = false;

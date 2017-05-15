@@ -12,7 +12,12 @@ import edu.wpi.cscore.UsbCamera;
 import edu.wpi.cscore.VideoMode;
 import edu.wpi.first.wpilibj.CameraServer; 
 
-public class Vision extends Thread {
+/**
+ * An abstract class that can be implemented to preform vision processing on usb cameras on the RoboRio.
+ * @author Jordan
+ *
+ */
+public abstract class Vision extends Thread {
 	// Get video from a usb camera
 	protected UsbCamera cam;
 	// CvSink gets frames from the camera
@@ -36,13 +41,12 @@ public class Vision extends Thread {
 		imagesource = new CvSource(name+" Source",VideoMode.PixelFormat.kMJPEG, 640, 480, 30);
 		CameraServer.getInstance().startAutomaticCapture(imagesource);
 	}
-	public void run() {
-		while(!Thread.interrupted()) {
-			if(imagesink.grabFrame(image) == 0)
-				continue;
-			imagesource.putFrame(image);
-		}		
-	}
+	
+	/**
+	 * Method run in the separate thread when start() is called.
+	 */
+	public abstract void run();
+	
 	/**
 	 * Draws a line of text on the image
 	 * @param text
