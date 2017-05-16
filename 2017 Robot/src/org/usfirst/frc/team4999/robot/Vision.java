@@ -32,14 +32,14 @@ public abstract class Vision extends Thread {
 	 * @param name The name of the camera
 	 * @param device The number of the device
 	 */
-	Vision(String name, int device) {
+	Vision(CameraServer server,String name, int device) {
 		super("Process "+name);
 		this.cam = new UsbCamera(name,device);
-		cam.setResolution(640, 480);
+		cam.setResolution(160, 120);
 		imagesink = new CvSink(name+" Sink");
 		imagesink.setSource(cam);
-		imagesource = new CvSource(name+" Source",VideoMode.PixelFormat.kMJPEG, 640, 480, 30);
-		CameraServer.getInstance().startAutomaticCapture(imagesource);
+		imagesource = new CvSource(name+" Source",VideoMode.PixelFormat.kMJPEG, 160, 120, 30);
+		server.startAutomaticCapture(imagesource);
 	}
 	
 	/**
@@ -58,6 +58,6 @@ public abstract class Vision extends Thread {
 	 * @param b blue
 	 */
 	void drawText(String text, double x, double y, double size, double r, double g, double b) {
-		Imgproc.putText(image, text, new Point(x,y), Core.FONT_HERSHEY_SIMPLEX, size, new Scalar(r,g,b));
+		Imgproc.putText(image, text, new Point(x,y), Core.FONT_HERSHEY_PLAIN, size, new Scalar(b,g,r),4);
 	}
 }
