@@ -52,7 +52,6 @@ public class Robot extends IterativeRobot {
 	// The two cameras connected to the RoboRio.
 	UsbCamera cam1;
 	Cam2 cam2;
-	CameraServer server;
 	
 	// Values to store user input
 	double moveRequest,turnRequest;
@@ -119,12 +118,10 @@ public class Robot extends IterativeRobot {
 		timer_auto = 0;
 		
 		// Begin capturing video from the cameras and streaming it back to the smartDashboard
-		//cam1 = CameraServer.getInstance().startAutomaticCapture("LessUsefulView", 0);
-		//System.out.println(cam1.enumerateProperties());
+		cam1 = CameraServer.getInstance().startAutomaticCapture("DriverView", 0);
+		
 		// Put text on the second camera to show if the robot is reversed
-		server = CameraServer.getInstance();
-		cam1 = server.startAutomaticCapture("NoText",0);
-		cam2 = new Cam2(server,"Text",1);
+		cam2 = new Cam2("OtherView",1);
 		cam2.start();
 		
 	}
