@@ -1,6 +1,10 @@
 package org.usfirst.frc.team4999.robot;
 
+import org.usfirst.frc.analog.adis16448.ADIS16448_IMU;
+
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.PIDSourceType;
 import edu.wpi.first.wpilibj.Preferences;
 
 public class beachBlitzAutoCode {
@@ -9,19 +13,34 @@ public class beachBlitzAutoCode {
 	Encoder right,left;
 	driveSystem drive;
 	Preferences prefs;
+	ADIS16448_IMU adis;
 	
 	beachBlitzAutoCode(driveSystem drive){
 		prefs = Preferences.getInstance();
 		
 		// The max speed the bot can travel in autonomous mode
-		if(!prefs.containsKey("AUTO_SPEED_LIMIT")) {
+		if(!prefs.containsKey("AUTO_SPEED_LIMIT"))
 			prefs.putDouble("AUTO_SPEED_LIMIT", 0.2);
-		}
+
 		// The distance that corresponds to one pulse of the encoder
-		if(!prefs.containsKey("AUTO_DIST_PER_PULSE")) {
+		if(!prefs.containsKey("AUTO_DIST_PER_PULSE"))
 			prefs.putDouble("AUTO_DIST_PER_PULSE", -1);
-			
-		}
+		
+		// Kp, Ki, and Kd for turn PID
+		if(!prefs.containsKey("AUTO_TURN_KP"))
+			prefs.putDouble("AUTO_TURN_KP", 0);
+		if(!prefs.containsKey("AUTO_TURN_KI"))
+			prefs.putDouble("AUTO_TURN_KI", 0);
+		if(!prefs.containsKey("AUTO_TURN_KD"))
+			prefs.putDouble("AUTO_TURN_KD", 0);
+		// Percent tolerance. If the turn PID is within this range, the pid will turn off
+		if(!prefs.containsKey("AUTO_TURN_TOLERANCE"))
+			prefs.putDouble("AUTO_TURN_TOLERANCE", 10.0);
+		
+		//Instantiate the adis
+		adis = new ADIS16448_IMU();
+		adis.setTiltCompYaw(false);
+		adis.setPIDSourceType(PIDSourceType.kDisplacement);
 		
 		// The two encoders
 		left = new Encoder(0,1);
@@ -63,11 +82,7 @@ public class beachBlitzAutoCode {
 	 * @param ticks - The number of ticks to move
 	 */
 	public void moveTicks(int ticks){
-		int target = ticks + left.get();
-		while(left.get() < target) {
-			drive.arcadeDrive(1, 0, speedLimit);
-		}
-		drive.stop();
+		this.moveTicks(ticks, 1);
 	}
 	/**
 	 * Moves the robot forward for a specified number of encoder ticks at a specified speed
@@ -88,7 +103,7 @@ public class beachBlitzAutoCode {
 	 * @param speed - The speed at which to move
 	 * @return A thread object running the move code. Movement may be interrupted by calling the method interrupt() on this object
 	 */
-	Thread asyncMoveTicks(int ticks, double speed) {
+	public Thread asyncMoveTicks(int ticks, double speed) {
 		Thread move = new Thread() {
 			public void run() {
 				int target = ticks + left.get();
@@ -111,11 +126,7 @@ public class beachBlitzAutoCode {
 	 * @param dist - The distance to move
 	 */
 	void moveDist(double dist) {
-		double target = dist + left.getDistance();
-		while(left.getDistance() < target) {
-			drive.arcadeDrive(1, 0, speedLimit);
-		}
-		drive.stop();
+		this.moveDist(dist,1);
 	}
 	
 	/**
@@ -136,7 +147,7 @@ public class beachBlitzAutoCode {
 	 * @param speed - The speed at which to move
 	 * @return A thread object running the move code. Movement may be interrupted by calling the method interrupt() on this object
 	 */
-	Thread asyncMoveDist(double dist, double speed) {
+	public Thread asyncMoveDist(double dist, double speed) {
 		Thread move = new Thread() {
 			public void run() {
 				double target = dist + left.getDistance();
@@ -152,6 +163,59 @@ public class beachBlitzAutoCode {
 		};
 		move.start();
 		return move;
+	}
+	
+	/**
+	 * Turns the robot the specified number of degrees
+	 * @param deg - Number of degrees to turn
+	 */
+	public void turn(double deg) {
+		drive.setPIDMode(driveSystem.PIDTurn);
+		PIDController turnCont = new PIDController(prefs.getDouble("AUTO_TURN_KP", 0), prefs.getDouble("AUTO_TURN_KI", 0), prefs.getDouble("AUTO_TURN_KD", 0),adis,drive);
+		turnCont.setOutputRange(-1,1);
+		turnCont.setPercentTolerance(prefs.getDouble("AUTO_TURN_TOLERANCE", 10.0));
+		turnCont.setSetpoint(deg);
+		turnCont.enable();
+		while(!turnCont.onTarget()){
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				break;
+			}
+		}
+		turnCont.disable();
+	}
+	
+	/**
+	 * Asynchronously turns the robot the specified number of degrees
+	 * @param deg - Number of degrees to turn
+	 * @return A thread object running the turn code. Rotation may be interrupted by calling the method interrupt() on this object
+	 */
+	public Thread asyncTurn(double deg) {
+		Thread turn = new Thread() {
+			public void run() {
+				drive.setPIDMode(driveSystem.PIDTurn);
+				PIDController turnCont = new PIDController(prefs.getDouble("AUTO_TURN_KP", 0), prefs.getDouble("AUTO_TURN_KI", 0), prefs.getDouble("AUTO_TURN_KD", 0),adis,drive);
+				turnCont.setOutputRange(-1,1);
+				turnCont.setPercentTolerance(prefs.getDouble("AUTO_TURN_TOLERANCE", 10.0));
+				turnCont.setSetpoint(deg);
+				turnCont.enable();
+				while(!turnCont.onTarget()){
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						break;
+					}
+					if(Thread.interrupted()) {
+						turnCont.disable();
+						return;
+					}
+				}
+				turnCont.disable();
+			}
+		};
+		turn.start();
+		return turn;
 	}
 	
 	

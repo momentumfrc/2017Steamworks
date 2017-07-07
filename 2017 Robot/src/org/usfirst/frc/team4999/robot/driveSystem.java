@@ -1,9 +1,15 @@
 package org.usfirst.frc.team4999.robot;
 
+import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.VictorSP;
 
-public class driveSystem {
+public class driveSystem implements PIDOutput {
 	VictorSP leftFront, leftBack, rightFront, rightBack;
+	
+	int pidMode = driveSystem.PIDTurn;
+	
+	static final int PIDTurn = 1;
+	static final int PIDMove = 2;
 	
 	/**
 	 * Initiates the robot drive system object
@@ -66,5 +72,19 @@ public class driveSystem {
 		leftBack.set(0);
 		rightFront.set(0);
 		rightBack.set(0);
+	}
+	
+	public void setPIDMode(int mode) {
+		if (mode == PIDMove || mode == PIDTurn) {
+			this.pidMode = mode;
+		}
+	}
+	@Override
+	public void pidWrite(double output) {
+		if(pidMode == PIDMove) {
+			this.arcadeDrive(output, 0, 0.2);
+		} else if(pidMode == PIDTurn) {
+			this.arcadeDrive(1, output, 0.2);
+		}
 	}
 }
