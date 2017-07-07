@@ -6,5 +6,6 @@ public class TestChooser extends SendableChooser<String> {
 	TestChooser(){
 		super();
 		addDefault("Shooter", "shooter");
+		addObject("Autonomous","auto");
 	}
 }

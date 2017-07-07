@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Preferences;
@@ -64,6 +63,9 @@ public class Robot extends IterativeRobot {
 	
 	// Sendable chooser for test mode
 	TestChooser testMode;
+	
+	// Autonomous code controller
+	beachBlitzAutoCode autoCont;
 
 	/**
 	 * This method is run once when the robot is turned on.
@@ -130,6 +132,9 @@ public class Robot extends IterativeRobot {
 		testMode = new TestChooser();
 		
 		SmartDashboard.putData("Test Chooser", testMode);
+		
+		// Initialize the autonomous code controller
+		autoCont = new beachBlitzAutoCode(drive);
 	}
 
 	public void autonomousInit() {
@@ -225,6 +230,8 @@ public class Robot extends IterativeRobot {
 		switch(testMode.getSelected()) {
 		case "shooter":
 			break;
+		case "auto":
+			break;
 		default:
 			break;
 		}
@@ -234,6 +241,10 @@ public class Robot extends IterativeRobot {
 		switch(testMode.getSelected()) {
 		case "shooter":
 			shooterPeriodic();
+			break;
+		case "auto":
+			autoTestPeriodic();
+			break;
 		default:
 			break;
 		}
@@ -344,6 +355,13 @@ public class Robot extends IterativeRobot {
 			shooterLeft.set(0);
 			shooterRight.set(0);
 		}
+	}
+	
+	/**
+	 * Test various autonomous methods
+	 */
+	void autoTestPeriodic() {
+		autoCont.turn(45);
 	}
 
 	/**
