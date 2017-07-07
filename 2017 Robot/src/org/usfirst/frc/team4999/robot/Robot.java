@@ -98,8 +98,6 @@ public class Robot extends IterativeRobot {
 		shooterLeft = new VictorSP((int)prefs.getDouble("LEFT", 6));
 		
 		//Right front and back are inverted because of how they are wired.
-		rightBack.setInverted(true);
-		rightFront.setInverted(true);
 		shooterLeft.setInverted(true);
 		
 		
