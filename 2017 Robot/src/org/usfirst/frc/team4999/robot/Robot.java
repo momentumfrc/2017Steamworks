@@ -8,6 +8,8 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Preferences;
 
@@ -29,7 +31,7 @@ public class Robot extends IterativeRobot {
 	private XboxController xboxController = new XboxController(0);
 	
 	// Motors
-	private VictorSP leftFront, leftBack, rightFront, rightBack, intake, winch;
+	private VictorSP leftFront, leftBack, rightFront, rightBack, intake, winch, shooterRight, shooterLeft;
 	
 	// Booleans used to invert the front/back of the robot.
 	boolean isInverted = false; // True if inverted
@@ -55,6 +57,9 @@ public class Robot extends IterativeRobot {
 	
 	// Values to store user input
 	double moveRequest,turnRequest;
+	
+	// Sendable chooser for test mode
+	TestChooser testMode;
 
 	/**
 	 * This method is run once when the robot is turned on.
@@ -88,15 +93,24 @@ public class Robot extends IterativeRobot {
 			prefs.putDouble("OUTREACH_TURN", .5);
 		}
 		
+		// The two pins the motors for the shooter are connected to
+		if(!prefs.containsKey("SHOOTER_LEEFT"))
+			prefs.putDouble("SHOOTER_LEFT", 6);
+		if(!prefs.containsKey("SHOOTER_RIGHT"))
+			prefs.putDouble("SHOOTER_RIGHT", 7);
+		
 		// Motors
 		rightFront = new VictorSP(0);
 		leftFront = new VictorSP(2);
 		rightBack = new VictorSP(1);
 		leftBack = new VictorSP(3);
+		shooterRight = new VictorSP((int)prefs.getDouble("RIGHT", 7));
+		shooterLeft = new VictorSP((int)prefs.getDouble("LEFT", 6));
 		
 		//Right front and back are inverted because of how they are wired.
 		rightBack.setInverted(true);
 		rightFront.setInverted(true);
+		shooterLeft.setInverted(true);
 		
 		
 		intake = new VictorSP(4);
@@ -124,6 +138,10 @@ public class Robot extends IterativeRobot {
 		cam2 = new Cam2("OtherView",1);
 		cam2.start();
 		
+		//Initialize the chooser
+		testMode = new TestChooser();
+		
+		SmartDashboard.putData("Test Chooser", testMode);
 	}
 
 	public void autonomousInit() {
@@ -163,8 +181,6 @@ public class Robot extends IterativeRobot {
 	}
 	public void teleopPeriodic() {
 		
-		// Print out the distance detected by the ultrasonic. Used for testing purposes. May be useful to the driver.
-		System.out.printf("Dist: %.2f\n\n", ultrasonic.getRangeInches());
 
 		// The input from the driver. Deadzones are used to make the robot less twitchy.
 		moveRequest = deadzone(-flightStick.getY(), 0.15);
@@ -223,11 +239,23 @@ public class Robot extends IterativeRobot {
 	}
 	
 	public void testInit(){
-		outreachInit();
+		switch(testMode.getSelected()) {
+		case "outreach":
+			outreachInit();
+			break;
+		default:
+			break;
+		}
 	}
 	
 	public void testPeriodic() {
-		outreachPeriodic();
+		switch(testMode.getSelected()) {
+		case "outreach":
+			outreachPeriodic();
+			break;
+		case "shooter":
+			shooterPeriodic();
+		}
 	}
 	
 	/**
@@ -319,6 +347,21 @@ public class Robot extends IterativeRobot {
 		}
 		if(outreachDisabled) {
 			arcadeDrive(0,0,1);
+		}
+	}
+	
+	/**
+	 * Test the shooter
+	 */
+	void shooterPeriodic() {
+		double throttle = 1-(flightStick.getThrottle()+1)/2;
+		if(flightStick.getRawButton(12)){
+			System.out.println("Throttle: " + throttle);
+			shooterLeft.set(throttle);
+			shooterRight.set(throttle);
+		} else {
+			shooterLeft.set(0);
+			shooterRight.set(0);
 		}
 	}
 
