@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 public class TestChooser extends SendableChooser<String> {
 	TestChooser(){
 		super();
-		addObject("Outreach","outreach");
 		addDefault("Shooter", "shooter");
 	}
 }

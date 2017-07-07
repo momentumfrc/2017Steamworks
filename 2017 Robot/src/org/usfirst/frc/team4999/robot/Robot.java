@@ -161,7 +161,7 @@ public class Robot extends IterativeRobot {
 			tankDrive(prefs.getDouble("AUTO_LEFT",1),prefs.getDouble("AUTO_RIGHT", 1),prefs.getDouble("AUTO_MULT", 0.25));
 		} else {
 			// After the time has elapsed, don't move
-			tankDrive (0,0,0);
+			tankDrive(0,0,0);
 		}
 			
 	}
@@ -238,10 +238,17 @@ public class Robot extends IterativeRobot {
 		}
 	}
 	
+	public void practiceInit() {
+		outreachInit();
+	}
+	public void practicePeriodic() {
+		outreachPeriodic();
+	}
+	
+	
 	public void testInit(){
 		switch(testMode.getSelected()) {
-		case "outreach":
-			outreachInit();
+		case "shooter":
 			break;
 		default:
 			break;
@@ -250,11 +257,10 @@ public class Robot extends IterativeRobot {
 	
 	public void testPeriodic() {
 		switch(testMode.getSelected()) {
-		case "outreach":
-			outreachPeriodic();
-			break;
 		case "shooter":
 			shooterPeriodic();
+		default:
+			break;
 		}
 	}
 	
