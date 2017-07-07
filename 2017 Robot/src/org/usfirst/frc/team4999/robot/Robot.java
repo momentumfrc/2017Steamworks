@@ -32,7 +32,10 @@ public class Robot extends IterativeRobot {
 	private XboxController xboxController = new XboxController(0);
 	
 	// Motors
-	private VictorSP leftFront, leftBack, rightFront, rightBack, intake, winch, shooterRight, shooterLeft;
+	private VictorSP intake, winch, shooterLeft, shooterRight;
+	
+	// Drive System
+	driveSystem drive;
 	
 	// Booleans used to invert the front/back of the robot.
 	boolean isInverted = false; // True if inverted
@@ -88,11 +91,9 @@ public class Robot extends IterativeRobot {
 			{"SHOOTER_RIGHT", 7}
 		});
 		
+		// DriveSystem
+		drive = new driveSystem(2,3,0,1);
 		// Motors
-		rightFront = new VictorSP(0);
-		leftFront = new VictorSP(2);
-		rightBack = new VictorSP(1);
-		leftBack = new VictorSP(3);
 		shooterRight = new VictorSP((int)prefs.getDouble("RIGHT", 7));
 		shooterLeft = new VictorSP((int)prefs.getDouble("LEFT", 6));
 		
@@ -147,10 +148,10 @@ public class Robot extends IterativeRobot {
 		// For AUTO_TIME milliseconds...
 		if (System.currentTimeMillis() - timer_auto <= prefs.getDouble("AUTO_TIME", 5000)) {
 			// Drive forward using the tank drive. Drive with AUTO_LEFT on the left and AUTO_RIGHT on the right. Speed limiter is AUTO_MULT.
-			tankDrive(prefs.getDouble("AUTO_LEFT",1),prefs.getDouble("AUTO_RIGHT", 1),prefs.getDouble("AUTO_MULT", 0.25));
+			drive.tankDrive(prefs.getDouble("AUTO_LEFT",1),prefs.getDouble("AUTO_RIGHT", 1),prefs.getDouble("AUTO_MULT", 0.25));
 		} else {
 			// After the time has elapsed, don't move
-			tankDrive(0,0,0);
+			drive.tankDrive (0,0,0);
 		}
 			
 	}
@@ -168,7 +169,7 @@ public class Robot extends IterativeRobot {
 		// Throttle
 		double speedLimiter = (-flightStick.getThrottle() + 1) / 2;
 		
-		arcadeDrive(moveRequest, turnRequest, speedLimiter);
+		drive.arcadeDrive(moveRequest, turnRequest, speedLimiter);
 		
 		// Drive the intake
 		if(xboxController.getRawButton(5)){
@@ -257,7 +258,7 @@ public class Robot extends IterativeRobot {
 			// Throttle
 			double speedLimiter = map((-flightStick.getThrottle() + 1) / 2,0,1,0,prefs.getDouble("OUTREACH_SPEED",.25));
 			
-			arcadeDrive(moveRequest, turnRequest, speedLimiter);
+			drive.arcadeDrive(moveRequest, turnRequest, speedLimiter);
 			
 			// Drive the intake
 			if(xboxController.getRawButton(5)){
@@ -328,7 +329,7 @@ public class Robot extends IterativeRobot {
 			triggeredY = false;
 		}
 		if(outreachDisabled) {
-			arcadeDrive(0,0,1);
+			drive.stop();
 		}
 	}
 	
@@ -345,38 +346,6 @@ public class Robot extends IterativeRobot {
 			shooterLeft.set(0);
 			shooterRight.set(0);
 		}
-	}
-
-	/**
-	 * Moves the robot in arcade-drive fashion with given joystick input. Input values are expected to be
-	 * within the range of -1 and 1.
-	 *
-	 * @param moveRequest The value used to drive the robot forwards and backwards (usually y-axis of joystick).
-	 * @param turnRequest The value used to turn the robot (usually x-axis or z-axis of the joystick). Positive is left.
-	 * @param speedLimiter A multiplier used to slow down the robot. Set this to 1 for no limitation.
-	 */
-	private void arcadeDrive(double moveRequest, double turnRequest, double speedLimiter) {
-		double leftDrive = speedLimiter * (moveRequest + turnRequest);
-		double rightDrive = speedLimiter * (moveRequest - turnRequest);
-
-		leftFront.set(leftDrive);
-		leftBack.set(leftDrive);
-		rightFront.set(rightDrive);
-		rightBack.set(rightDrive);
-	}
-	
-	/**
-	 * Moves the robot in a tank-drive fashion according to given inputs. All values are within the range of [-1,1].
-	 * @param left The value to drive the left side
-	 * @param right The value to drive the right side
-	 * @param multiplier The speed multiplier
-	 */
-	
-	public void tankDrive(double left, double right, double multiplier){
-		leftFront.set(left * multiplier);
-		leftBack.set(left * multiplier);
-		rightFront.set(right * multiplier);
-		rightBack.set(right * multiplier);
 	}
 
 	/**
