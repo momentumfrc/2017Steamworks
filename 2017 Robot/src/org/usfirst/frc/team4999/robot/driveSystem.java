@@ -31,6 +31,9 @@ public class driveSystem implements PIDOutput {
 		this.leftBack = leftBack;
 		this.rightFront = rightFront;
 		this.rightBack = rightBack;
+		
+		this.rightBack.setInverted(true);
+		this.rightFront.setInverted(true);
 	}
 	/**
 	 * Moves the robot in arcade-drive fashion with given joystick input. Input values are expected to be
@@ -84,7 +87,7 @@ public class driveSystem implements PIDOutput {
 		if(pidMode == PIDMove) {
 			this.arcadeDrive(output, 0, 0.2);
 		} else if(pidMode == PIDTurn) {
-			this.arcadeDrive(1, output, 0.2);
+			this.arcadeDrive(0, output, 0.2);
 		}
 	}
 }
