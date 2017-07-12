@@ -155,19 +155,6 @@ public class Robot extends IterativeRobot {
 			
 	}
 	
-	/**
-	 * Check if a value is within the desired deadzone, and return zero if so. Used to create a deadzone on the controllers.
-	 * @param value The value to check.
-	 * @param zone The desired deadzone.
-	 * @return The value if outside the deadzone, or 0 if within the deadzone.
-	 */
-	public double deadZone(double value, double zone) {
-		if(Math.abs(value) < zone) {
-			return 0;
-		} else {
-			return value;
-		}
-	}
 	public void teleopPeriodic() {
 		
 
