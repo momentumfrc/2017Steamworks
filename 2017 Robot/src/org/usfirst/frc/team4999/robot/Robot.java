@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Preferences;
 
 /**
@@ -27,7 +26,7 @@ public class Robot extends IterativeRobot {
 	DefaultPreferences defaults;
 	
 	// Controllers used to receive input from the driver.
-	private Joystick flightStick;
+	private BetterFlightStick flightStick;
 	private XboxController xboxController = new XboxController(0);
 	
 	// Motors
@@ -36,9 +35,8 @@ public class Robot extends IterativeRobot {
 	// Drive System
 	driveSystem drive;
 	
-	// Booleans used to invert the front/back of the robot.
+	// Boolean used to invert the front/back of the robot.
 	boolean isInverted = false; // True if inverted
-	boolean triggered2 = false; // True while the button is held down. Prevents rapid oscillation from back to front while the button is held down.
 	
 	//Boolean to disable outreach driving
 	boolean outreachDisabled = false;
@@ -114,7 +112,7 @@ public class Robot extends IterativeRobot {
 		piston = new DoubleSolenoid(2,0);
 		
 		// Flight stick for user input
-		flightStick = new Joystick(1);
+		flightStick = new BetterFlightStick(1);
 		
 		// Initialize the timers to zero. This is probably not necessary.
 		timer_gear = 0;
@@ -158,7 +156,7 @@ public class Robot extends IterativeRobot {
 			drive.tankDrive(prefs.getDouble("AUTO_LEFT",1),prefs.getDouble("AUTO_RIGHT", 1),prefs.getDouble("AUTO_MULT", 0.25));
 		} else {
 			// After the time has elapsed, don't move
-			drive.tankDrive (0,0,0);
+			drive.stop();
 		}
 			
 	}
@@ -188,14 +186,9 @@ public class Robot extends IterativeRobot {
 		}
 		
 		// Switch front and back on the push of button 2.
-		if(flightStick.getRawButton(2)){
-			if(!triggered2){
-				triggered2 = true;
-				isInverted = !isInverted;
-				cam2.reversed = isInverted;
-			}
-		} else {
-			triggered2 = false;
+		if(flightStick.isFirstPush(2)){
+			isInverted = !isInverted;
+			cam2.reversed = isInverted;
 		}
 		
 		// Drive the winch.
@@ -283,14 +276,9 @@ public class Robot extends IterativeRobot {
 			}
 			
 			// Switch front and back on the push of button 2.
-			if(flightStick.getRawButton(2)){
-				if(!triggered2){
-					triggered2 = true;
-					isInverted = !isInverted;
-					cam2.reversed = isInverted;
-				}
-			} else {
-				triggered2 = false;
+			if(flightStick.isFirstPush(2)){
+				isInverted = !isInverted;
+				cam2.reversed = isInverted;
 			}
 			
 			// Drive the winch.
@@ -365,7 +353,12 @@ public class Robot extends IterativeRobot {
 	 * Test various autonomous methods
 	 */
 	void autoTestPeriodic() {
-		autoCont.turn(45);
+		if(flightStick.isFirstPush(1)) {
+			autoCont.turn(45);
+		}
+		if(flightStick.isFirstPush(8)) {
+			autoCont.writePIDValues();
+		}
 	}
 
 	/**

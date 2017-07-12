@@ -14,28 +14,24 @@ public class beachBlitzAutoCode {
 	driveSystem drive;
 	Preferences prefs;
 	ADIS16448_IMU adis;
+	PIDController turnCont;
 	
 	beachBlitzAutoCode(driveSystem drive){
 		prefs = Preferences.getInstance();
+		DefaultPreferences dprefs = new DefaultPreferences();
 		
-		// The max speed the bot can travel in autonomous mode
-		if(!prefs.containsKey("AUTO_SPEED_LIMIT"))
-			prefs.putDouble("AUTO_SPEED_LIMIT", 0.2);
-
-		// The distance that corresponds to one pulse of the encoder
-		if(!prefs.containsKey("AUTO_DIST_PER_PULSE"))
-			prefs.putDouble("AUTO_DIST_PER_PULSE", -1);
-		
-		// Kp, Ki, and Kd for turn PID
-		if(!prefs.containsKey("AUTO_TURN_KP"))
-			prefs.putDouble("AUTO_TURN_KP", 0);
-		if(!prefs.containsKey("AUTO_TURN_KI"))
-			prefs.putDouble("AUTO_TURN_KI", 0);
-		if(!prefs.containsKey("AUTO_TURN_KD"))
-			prefs.putDouble("AUTO_TURN_KD", 0);
-		// Percent tolerance. If the turn PID is within this range, the pid will turn off
-		if(!prefs.containsKey("AUTO_TURN_TOLERANCE"))
-			prefs.putDouble("AUTO_TURN_TOLERANCE", 10.0);
+		dprefs.addKeys(new Object[][] {
+			// The max speed the bot can travel in autonomous mode
+			{"AUTO_SPEED_LIMIT", 0.2},
+			// The distance that corresponds to one pulse of the encoder
+			{"AUTO_DIST_PER_PULSE", -1},
+			// Kp, Ki, and Kd for turn PID
+			{"AUTO_TURN_KP", 0},
+			{"AUTO_TURN_KI", 0},
+			{"AUTO_TURN_KD", 0},
+			// Percent tolerance. If the turn PID is within this range, the pid will turn off
+			{"AUTO_TURN_TOLERANCE", 10.0}
+		});
 		
 		//Instantiate the adis
 		adis = new ADIS16448_IMU();
@@ -51,6 +47,11 @@ public class beachBlitzAutoCode {
 		this.speedLimit = prefs.getDouble("AUTO_SPEED_LIMIT", 0.2);
 		
 		this.drive = drive;
+		
+		// Instantiate the turn PID
+		this.turnCont = new PIDController(prefs.getDouble("AUTO_TURN_KP", 0), prefs.getDouble("AUTO_TURN_KI", 0), prefs.getDouble("AUTO_TURN_KD", 0),adis,drive);
+		this.turnCont.setOutputRange(-1,1);
+		this.turnCont.setPercentTolerance(prefs.getDouble("AUTO_TURN_TOLERANCE", 10.0));
 	}
 	
 	/**
@@ -171,10 +172,7 @@ public class beachBlitzAutoCode {
 	 */
 	public void turn(double deg) {
 		drive.setPIDMode(driveSystem.PIDTurn);
-		PIDController turnCont = new PIDController(prefs.getDouble("AUTO_TURN_KP", 0), prefs.getDouble("AUTO_TURN_KI", 0), prefs.getDouble("AUTO_TURN_KD", 0),adis,drive);
-		turnCont.setOutputRange(-1,1);
-		turnCont.setPercentTolerance(prefs.getDouble("AUTO_TURN_TOLERANCE", 10.0));
-		turnCont.setSetpoint(deg);
+		turnCont.setSetpoint(adis.getAngle() + deg);
 		turnCont.enable();
 		while(!turnCont.onTarget()){
 			try {
@@ -195,10 +193,7 @@ public class beachBlitzAutoCode {
 		Thread turn = new Thread() {
 			public void run() {
 				drive.setPIDMode(driveSystem.PIDTurn);
-				PIDController turnCont = new PIDController(prefs.getDouble("AUTO_TURN_KP", 0), prefs.getDouble("AUTO_TURN_KI", 0), prefs.getDouble("AUTO_TURN_KD", 0),adis,drive);
-				turnCont.setOutputRange(-1,1);
-				turnCont.setPercentTolerance(prefs.getDouble("AUTO_TURN_TOLERANCE", 10.0));
-				turnCont.setSetpoint(deg);
+				turnCont.setSetpoint(adis.getAngle() + deg);
 				turnCont.enable();
 				while(!turnCont.onTarget()){
 					try {
@@ -216,6 +211,12 @@ public class beachBlitzAutoCode {
 		};
 		turn.start();
 		return turn;
+	}
+	
+	public void writePIDValues() {
+		prefs.putDouble("AUTO_TURN_KP", turnCont.getP());
+		prefs.putDouble("AUTO_TURN_KI", turnCont.getI());
+		prefs.putDouble("AUTO_TURN_KD", turnCont.getD());
 	}
 	
 	
