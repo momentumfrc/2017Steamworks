@@ -25,6 +25,7 @@ public class Robot extends IterativeRobot {
 	
 	// Used to store semi-permanent variables that can be easily changed via the smartdashboard. Good for tuning PID loops w/o having to change the code every time.
 	Preferences prefs;
+	DefaultPreferences defaults;
 	
 	// Controllers used to receive input from the driver.
 	private Joystick flightStick;
@@ -68,36 +69,24 @@ public class Robot extends IterativeRobot {
 		
 		prefs = Preferences.getInstance();
 		
-		// Make sure the values referenced later are contained within the preferences object.
-		// AUTO_LEFT and AUTO_RIGHT are the values given to the tank drive for the left and right sides of the robot during autonomous.
-		if(!prefs.containsKey("AUTO_LEFT"))
-			prefs.putDouble("AUTO_LEFT", 1);
-		if(!prefs.containsKey("AUTO_RIGHT"))
-			prefs.putDouble("AUTO_RIGHT", 1);
-		// AUTO_MULT is the speed limiter during autonomous.
-		if(!prefs.containsKey("AUTO_MULT"))
-			prefs.putDouble("AUTO_MULT", .25);
-		// AUTO_TIME is the amount time the robot will move forward for.
-		if(!prefs.containsKey("AUTO_TIME"))
-			prefs.putDouble("AUTO_TIME", 5000);
-		// OUTREACH_TIME is the number of seconds allowed for outreach driving
-		if(!prefs.containsKey("OUTREACH_TIME")) {
-			prefs.putDouble("OUTREACH_TIME", 30);
-		}
-		// OUTREACH_SPEED is the max speed of the outreach driving.
-		if(!prefs.containsKey("OUTREACH_SPEED")){
-			prefs.putDouble("OUTREACH_SPEED",.25);
-		}
-		// OUTREACH_TURN is the max turn speed of the outreach driving.
-		if(!prefs.containsKey("OUTREACH_TURN")){
-			prefs.putDouble("OUTREACH_TURN", .5);
-		}
-		
-		// The two pins the motors for the shooter are connected to
-		if(!prefs.containsKey("SHOOTER_LEEFT"))
-			prefs.putDouble("SHOOTER_LEFT", 6);
-		if(!prefs.containsKey("SHOOTER_RIGHT"))
-			prefs.putDouble("SHOOTER_RIGHT", 7);
+		defaults.addKeys(new Object[][]{
+			// AUTO_LEFT and AUTO_RIGHT are the values given to the tank drive for the left and right sides of the robot during autonomous.
+			{"AUTO_LEFT", 1},
+			{"AUTO_RIGHT", 1},
+			// AUTO_MULT is the speed limiter during autonomous.
+			{"AUTO_MULT", 0.25},
+			// AUTO_TIME is the amount time the robot will move forward for.
+			{"AUTO_TIME", 5000},
+			// OUTREACH_TIME is the number of seconds allowed for outreach driving
+			{"OUTREACH_TIME", 30},
+			// OUTREACH_SPEED is the max speed of the outreach driving.
+			{"OUTREACH_SPEED", 0.25},
+			// OUTREACH_TURN is the max turn speed of the outreach driving.
+			{"OUTREACH_TURN", 0.5},
+			// The two pins the motors for the shooter are connected to
+			{"SHOOTER_LEFT", 6},
+			{"SHOOTER_RIGHT", 7}
+		});
 		
 		// Motors
 		rightFront = new VictorSP(0);
