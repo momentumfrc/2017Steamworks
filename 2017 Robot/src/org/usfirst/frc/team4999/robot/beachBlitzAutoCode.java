@@ -203,13 +203,13 @@ public class beachBlitzAutoCode {
 				while(!turnCont.onTarget()){
 					try {
 						Thread.sleep(10);
+						if(Thread.interrupted()) {
+							throw new InterruptedException();
+						}
 					} catch (InterruptedException e) {
 						break;
 					}
-					if(Thread.interrupted()) {
-						turnCont.disable();
-						return;
-					}
+					
 				}
 				turnCont.disable();
 			}

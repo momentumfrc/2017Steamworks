@@ -99,9 +99,7 @@ public class Robot extends IterativeRobot {
 		shooterRight = new VictorSP((int)prefs.getDouble("RIGHT", 7));
 		shooterLeft = new VictorSP((int)prefs.getDouble("LEFT", 6));
 		
-		//Right front and back are inverted because of how they are wired.
 		shooterLeft.setInverted(true);
-		
 		
 		intake = new VictorSP(4);
 		winch = new VictorSP(5);
@@ -110,6 +108,7 @@ public class Robot extends IterativeRobot {
 		ultrasonic = new Ultrasonic(0,1);
 		// Have the ultrasonic continuously measure data
 		ultrasonic.setAutomaticMode(true);
+		
 		
 		// Piston for gear placement
 		piston = new DoubleSolenoid(2,0);
@@ -125,7 +124,7 @@ public class Robot extends IterativeRobot {
 		cam1 = CameraServer.getInstance().startAutomaticCapture("DriverView", 0);
 		
 		// Put text on the second camera to show if the robot is reversed
-		cam2 = new Cam2("OtherView",1);
+		cam2 = new Cam2("ProcessedView",1);
 		cam2.start();
 		
 		//Initialize the chooser
@@ -137,9 +136,14 @@ public class Robot extends IterativeRobot {
 		autoCont = new beachBlitzAutoCode(drive);
 	}
 
+	public void disabledInit() {
+		cam2.testProcess = false;
+	}
+	
 	public void autonomousInit() {
 		// Set the timer to the current time. We will use the difference between this time and the current time to calculate time elapsed.
 		timer_auto = System.currentTimeMillis();
+		cam2.testProcess = true;
 	}
 
 	/**
