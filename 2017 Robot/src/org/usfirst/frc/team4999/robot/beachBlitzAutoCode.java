@@ -169,13 +169,18 @@ public class beachBlitzAutoCode {
 	/**
 	 * Turns the robot the specified number of degrees
 	 * @param deg - Number of degrees to turn
+	 * @param debug - Print debug messages
 	 */
-	public void turn(double deg) {
+	public void turn(double deg, boolean debug) {
 		drive.setPIDMode(driveSystem.PIDTurn);
 		turnCont.setSetpoint(adis.getAngle() + deg);
+		if(debug)
+			System.out.format("Beginning turn. Setpoint set to: %.2f\n", turnCont.getSetpoint());
 		turnCont.enable();
 		while(!turnCont.onTarget()){
 			try {
+				if(debug)
+					System.out.format("Turn in progress! Current angle: %.2f. Using P:%.2f, I:%.2f, D:%.2f\n", adis.getAngle(), turnCont.getP(), turnCont.getI(), turnCont.getD());
 				Thread.sleep(10);
 			} catch (InterruptedException e) {
 				break;
@@ -183,21 +188,29 @@ public class beachBlitzAutoCode {
 		}
 		turnCont.disable();
 	}
+	public void turn(double deg) {
+		turn(deg, false);
+	}
 	
 	/**
 	 * Asynchronously turns the robot the specified number of degrees
 	 * @param deg - Number of degrees to turn
+	 * @param debug - Print debug messages
 	 * @return A thread object running the turn code. Rotation may be interrupted by calling the method interrupt() on this object
 	 */
-	public Thread asyncTurn(double deg) {
+	public Thread asyncTurn(double deg, boolean debug) {
 		Thread turn = new Thread() {
 			public void run() {
 				drive.setPIDMode(driveSystem.PIDTurn);
 				turnCont.setSetpoint(adis.getAngle() + deg);
+				if(debug)
+					System.out.format("Beginning turn. Setpoint set to: %.2f\n", turnCont.getSetpoint());
 				turnCont.enable();
 				while(!turnCont.onTarget()){
 					try {
 						Thread.sleep(10);
+						if(debug)
+							System.out.format("Turn in progress! Using P:%.2f, I:%.2f, D:%.2f\n", turnCont.getP(), turnCont.getI(), turnCont.getD());
 						if(Thread.interrupted()) {
 							throw new InterruptedException();
 						}
@@ -211,6 +224,9 @@ public class beachBlitzAutoCode {
 		};
 		turn.start();
 		return turn;
+	}
+	public Thread asyncTurn(double deg) {
+		return asyncTurn(deg, false);
 	}
 	
 	public void writePIDValues() {

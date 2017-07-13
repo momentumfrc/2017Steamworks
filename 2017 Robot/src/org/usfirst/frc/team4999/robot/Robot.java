@@ -355,7 +355,7 @@ public class Robot extends IterativeRobot {
 	Thread turn;
 	void autoTestPeriodic() {
 		if(flightStick.isFirstPush(1)) {
-			turn = autoCont.asyncTurn(45);
+			turn = autoCont.asyncTurn(45, true);
 		}
 		if(flightStick.isFirstPush(8)) {
 			autoCont.writePIDValues();
