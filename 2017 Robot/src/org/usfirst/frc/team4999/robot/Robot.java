@@ -352,12 +352,17 @@ public class Robot extends IterativeRobot {
 	/**
 	 * Test various autonomous methods
 	 */
+	Thread turn;
 	void autoTestPeriodic() {
 		if(flightStick.isFirstPush(1)) {
-			autoCont.turn(45);
+			turn = autoCont.asyncTurn(45);
 		}
 		if(flightStick.isFirstPush(8)) {
 			autoCont.writePIDValues();
+		}
+		if(flightStick.isFirstPush(7)) {
+			if(turn != null && !turn.isInterrupted() && turn.isAlive())
+				turn.interrupt();
 		}
 	}
 
