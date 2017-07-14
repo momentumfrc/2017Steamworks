@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Preferences;
 
 /**
@@ -62,8 +61,6 @@ public class Robot extends IterativeRobot {
 	// Sendable chooser for test mode
 	TestChooser testMode;
 	
-	// Autonomous code controller
-	beachBlitzAutoCode autoCont;
 
 	/**
 	 * This method is run once when the robot is turned on.
@@ -72,6 +69,7 @@ public class Robot extends IterativeRobot {
 		
 		prefs = Preferences.getInstance();
 		
+		defaults = new DefaultPreferences();
 		defaults.addKeys(new Object[][]{
 			// AUTO_LEFT and AUTO_RIGHT are the values given to the tank drive for the left and right sides of the robot during autonomous.
 			{"AUTO_LEFT", 1},
@@ -128,10 +126,6 @@ public class Robot extends IterativeRobot {
 		//Initialize the chooser
 		testMode = new TestChooser();
 		
-		SmartDashboard.putData("Test Chooser", testMode);
-		
-		// Initialize the autonomous code controller
-		autoCont = new beachBlitzAutoCode(drive);
 	}
 
 	public void disabledInit() {
@@ -222,25 +216,63 @@ public class Robot extends IterativeRobot {
 		outreachPeriodic();
 	}
 	
-	
 	public void testInit(){
 		switch(testMode.getSelected()) {
 		case "shooter":
 			break;
-		case "auto":
+		case "auto_turn":
+			break;
+		case "auto_move":
+			break;
+		case "adis":
+			teleopInit();
 			break;
 		default:
 			break;
 		}
 	}
 	
+	Thread turn, move;
 	public void testPeriodic() {
 		switch(testMode.getSelected()) {
 		case "shooter":
 			shooterPeriodic();
 			break;
-		case "auto":
-			autoTestPeriodic();
+		case "auto_turn":
+			if(flightStick.isFirstPush(1)) {
+				if(turn == null || !turn.isAlive())
+					turn = drive.asyncTurn(45, true);
+			}
+			if(flightStick.isFirstPush(8)) {
+				drive.writeTurnPIDValues();
+			}
+			if(flightStick.isFirstPush(7)) {
+				System.out.println("Trying to stop pid");
+				if(turn != null && !turn.isInterrupted() && turn.isAlive())
+					turn.interrupt();
+			}
+			break;
+		case "auto_move":
+			if(flightStick.isFirstPush(1)) {
+				if(move == null || !move.isAlive())
+					move = drive.asyncMove(10, true);
+			}
+			if(flightStick.isFirstPush(8)) {
+				drive.writeMovePIDValues();
+			}
+			if(flightStick.isFirstPush(7)) {
+				System.out.println("Trying to stop pid");
+				if(move != null && !move.isInterrupted() && move.isAlive())
+					move.interrupt();
+			}
+			break;
+		case "adis":
+			// USE getAngleZ IN PID
+			System.out.format("At: %.2f   %.2f   %.2f\n",drive.adis.getAngleX(),drive.adis.getAngleY(),drive.adis.getAngleZ());
+			if(flightStick.isFirstPush(12)) {
+				drive.adis.calibrate();
+			}
+			teleopPeriodic();
 			break;
 		default:
 			break;
@@ -346,23 +378,6 @@ public class Robot extends IterativeRobot {
 		} else {
 			shooterLeft.set(0);
 			shooterRight.set(0);
-		}
-	}
-	
-	/**
-	 * Test various autonomous methods
-	 */
-	Thread turn;
-	void autoTestPeriodic() {
-		if(flightStick.isFirstPush(1)) {
-			turn = autoCont.asyncTurn(45, true);
-		}
-		if(flightStick.isFirstPush(8)) {
-			autoCont.writePIDValues();
-		}
-		if(flightStick.isFirstPush(7)) {
-			if(turn != null && !turn.isInterrupted() && turn.isAlive())
-				turn.interrupt();
 		}
 	}
 
