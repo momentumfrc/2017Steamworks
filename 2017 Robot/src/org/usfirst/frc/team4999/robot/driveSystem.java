@@ -2,6 +2,7 @@ package org.usfirst.frc.team4999.robot;
 
 import org.usfirst.frc.analog.adis16448.ADIS16448_IMU;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
@@ -221,7 +222,8 @@ public class driveSystem extends Subsystem {
 				if(debug)
 					System.out.format("Beginning turn. Setpoint set to: %.2f\n", turnCont.getSetpoint());
 				turnCont.enable();
-				while(!turnCont.onTarget()){
+				DriverStation driver = DriverStation.getInstance();
+				while(!turnCont.onTarget() && !driver.isDisabled()){
 					try {
 						Thread.sleep(10);
 						if(debug)
@@ -282,7 +284,8 @@ public class driveSystem extends Subsystem {
 				if(debug)
 					System.out.format("Beginning move. Setpoint set to: %.2f\n", moveCont.getSetpoint());
 				moveCont.enable();
-				while(!moveCont.onTarget()){
+				DriverStation driver = DriverStation.getInstance();
+				while(!moveCont.onTarget() && !driver.isDisabled()){
 					try {
 						Thread.sleep(10);
 						if(debug)
