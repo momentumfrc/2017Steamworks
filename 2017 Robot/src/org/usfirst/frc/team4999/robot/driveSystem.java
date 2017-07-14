@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
+import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.VictorSP;
@@ -40,6 +41,43 @@ class moveInterface implements PIDOutput {
 	public void pidWrite(double output) {
 		drive.arcadeDrive(output, 0, Preferences.getInstance().getDouble("AUTO_SPEED_LIMIT", 0.2));
 	}
+}
+/**
+ * Implements the PIDSource interface to return the appropriate values from the ADIS.
+ * Can't use the ADIS's default implementation because it uses the method getAngle() which returns an inaccurate value
+ * @author jordan
+ *
+ */
+class adisPIDInterface implements PIDSource {
+	private PIDSourceType sourceType = PIDSourceType.kDisplacement;
+	ADIS16448_IMU adis;
+	
+	adisPIDInterface(ADIS16448_IMU adis) {
+		this.adis = adis;
+	}
+	
+	@Override
+	public void setPIDSourceType(PIDSourceType pidSource) {
+		this.sourceType = pidSource;
+	}
+
+	@Override
+	public PIDSourceType getPIDSourceType() {
+		return this.sourceType;
+	}
+
+	@Override
+	public double pidGet() {
+		switch (sourceType) {
+	      case kRate:
+	        return adis.getRateZ();
+	      case kDisplacement:
+	        return adis.getAngleZ();
+	      default:
+	        return 0.0;
+	    }
+	}
+	
 }
 /**
  * The drive system of the robot. Has pid controllers to move a specified distance or turn a specified number of degrees
@@ -94,6 +132,8 @@ public class driveSystem extends Subsystem {
 		
 		adis = new ADIS16448_IMU();
 		adis.setTiltCompYaw(false);
+		adisPIDInterface adisInt = new adisPIDInterface(adis);
+		adisInt.setPIDSourceType(PIDSourceType.kDisplacement);
 		
 		left = new Encoder(2,3);
 		right = new Encoder(4,5);
@@ -102,7 +142,7 @@ public class driveSystem extends Subsystem {
 		left.setPIDSourceType(PIDSourceType.kDisplacement);
 		right.setPIDSourceType(PIDSourceType.kDisplacement);
 		
-		turnCont = new PIDController(prefs.getDouble("AUTO_TURN_KP", 0), prefs.getDouble("AUTO_TURN_KI", 0), prefs.getDouble("AUTO_TURN_KD", 0), adis, new turnInterface(this));
+		turnCont = new PIDController(prefs.getDouble("AUTO_TURN_KP", 0), prefs.getDouble("AUTO_TURN_KI", 0), prefs.getDouble("AUTO_TURN_KD", 0), adisInt, new turnInterface(this));
 		moveCont = new PIDController(prefs.getDouble("AUTO_MOVE_KP",  0), prefs.getDouble("AUTO_MOVE_KI", 0), prefs.getDouble("AUTO_MOVE_KD", 0), left, new moveInterface(this));
 		
 		initLiveWindow();
