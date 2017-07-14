@@ -4,11 +4,13 @@ package org.usfirst.frc.team4999.robot;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.GenericHID.Hand;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.VictorSP;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.Preferences;
+import edu.wpi.first.wpilibj.Timer;
 
 /**
 * The VM is configured to automatically run this class, and to call the
@@ -26,7 +28,7 @@ public class Robot extends IterativeRobot {
 	
 	// Controllers used to receive input from the driver.
 	private BetterFlightStick flightStick;
-	private XboxController xboxController = new XboxController(0);
+	private BetterXBoxController xboxController = new BetterXBoxController(0);
 	
 	// Motors
 	private VictorSP intake, winch, shooterLeft, shooterRight;
@@ -49,7 +51,9 @@ public class Robot extends IterativeRobot {
 	Ultrasonic ultrasonic;
 	
 	// Timers. timer_gear ensures the piston is deployed for at least 0.75 seconds, and timer_auto ensures the robot drives for 5 seconds before stopping.
-	long timer_gear, timer_auto, timer_outreach;
+	long timer_outreach;
+	
+	Timer gear, auto, outreach;
 	
 	// The two cameras connected to the RoboRio.
 	UsbCamera cam1;
@@ -77,7 +81,7 @@ public class Robot extends IterativeRobot {
 			// AUTO_MULT is the speed limiter during autonomous.
 			{"AUTO_MULT", 0.25},
 			// AUTO_TIME is the amount time the robot will move forward for.
-			{"AUTO_TIME", 5000},
+			{"AUTO_TIME", 5},
 			// OUTREACH_TIME is the number of seconds allowed for outreach driving
 			{"OUTREACH_TIME", 30},
 			// OUTREACH_SPEED is the max speed of the outreach driving.
@@ -112,9 +116,9 @@ public class Robot extends IterativeRobot {
 		// Flight stick for user input
 		flightStick = new BetterFlightStick(1);
 		
-		// Initialize the timers to zero. This is probably not necessary.
-		timer_gear = 0;
-		timer_auto = 0;
+		auto = new Timer();
+		gear = new Timer();
+		outreach = new Timer();
 		
 		// Begin capturing video from the cameras and streaming it back to the smartDashboard
 		cam1 = CameraServer.getInstance().startAutomaticCapture("DriverView", 0);
@@ -134,7 +138,7 @@ public class Robot extends IterativeRobot {
 	
 	public void autonomousInit() {
 		// Set the timer to the current time. We will use the difference between this time and the current time to calculate time elapsed.
-		timer_auto = System.currentTimeMillis();
+		auto.reset();
 		cam2.testProcess = true;
 	}
 
@@ -144,8 +148,8 @@ public class Robot extends IterativeRobot {
 	public void autonomousPeriodic() {
 		// We use the smartDashboard to fine-tune the values so that the robot drives in a straight line, for just the right amount of time, at just the right speed.
 		
-		// For AUTO_TIME milliseconds...
-		if (System.currentTimeMillis() - timer_auto <= prefs.getDouble("AUTO_TIME", 5000)) {
+		// For AUTO_TIME seconds...
+		if (auto.hasPeriodPassed(prefs.getDouble("AUTO_TIME", 5))) {
 			// Drive forward using the tank drive. Drive with AUTO_LEFT on the left and AUTO_RIGHT on the right. Speed limiter is AUTO_MULT.
 			drive.tankDrive(prefs.getDouble("AUTO_LEFT",1),prefs.getDouble("AUTO_RIGHT", 1),prefs.getDouble("AUTO_MULT", 0.25));
 		} else {
@@ -171,11 +175,20 @@ public class Robot extends IterativeRobot {
 		drive.arcadeDrive(moveRequest, turnRequest, speedLimiter);
 		
 		// Drive the intake
-		if(xboxController.getRawButton(5)){
+		if(xboxController.getBumper(Hand.kLeft)){
+			xboxController.setRumble(RumbleType.kRightRumble, 0);
+			xboxController.setRumble(RumbleType.kLeftRumble, 0.5);
+			
 			intake.set(1);
-		} else if(xboxController.getRawButton(6)){
+		} else if(xboxController.getBumper(Hand.kRight)){
+			xboxController.setRumble(RumbleType.kLeftRumble, 0);
+			xboxController.setRumble(RumbleType.kRightRumble, 0.5);
+			
 			intake.set(-1);
 		} else {
+			xboxController.setRumble(RumbleType.kLeftRumble, 0);
+			xboxController.setRumble(RumbleType.kRightRumble, 0);
+			
 			intake.set(0);
 		}
 		
@@ -183,6 +196,7 @@ public class Robot extends IterativeRobot {
 		if(flightStick.isFirstPush(2)){
 			isInverted = !isInverted;
 			cam2.reversed = isInverted;
+			flightStick.pulseRumble(RumbleType.kRightRumble, 1, 0.25);
 		}
 		
 		// Drive the winch.
@@ -201,10 +215,13 @@ public class Robot extends IterativeRobot {
 		
 		// Drive the gear.
 		if( (flightStick.getRawButton(1) && (flightStick.getRawButton(7) || flightStick.getRawButton(8)) ) || xboxController.getBButton()){
-			timer_gear = System.currentTimeMillis();
+			if(xboxController.isFirstPushB()) {
+				xboxController.pulseRumble(RumbleType.kRightRumble, 0.7, 0.25);
+			}
+			gear.reset();
 			piston.set(DoubleSolenoid.Value.kForward);
 		}
-		if(System.currentTimeMillis() - timer_gear > 750){
+		if(gear.hasPeriodPassed(0.75)){
 			piston.set(DoubleSolenoid.Value.kReverse);
 		}
 	}
@@ -283,7 +300,7 @@ public class Robot extends IterativeRobot {
 	 * Runs driving code that is modified to be safer for novices to drive. This could potentially be used for outreach by selling time driving the robot.
 	 */
 	void outreachInit() {
-		timer_outreach = System.currentTimeMillis();
+		outreach.reset();
 	}
 	void outreachPeriodic() {
 		if(!outreachDisabled) {
@@ -330,39 +347,27 @@ public class Robot extends IterativeRobot {
 			
 			// Drive the gear.
 			if( (flightStick.getRawButton(1) && (flightStick.getRawButton(7) || flightStick.getRawButton(8)) ) || xboxController.getBButton()){
-				timer_gear = System.currentTimeMillis();
+				gear.reset();
 				piston.set(DoubleSolenoid.Value.kForward);
 			}
-			if(System.currentTimeMillis() - timer_gear > 750){
+			if(gear.hasPeriodPassed(0.5)){
 				piston.set(DoubleSolenoid.Value.kReverse);
 			}
+		} else {
+			drive.stop();
 		}
-		if(System.currentTimeMillis() - timer_outreach > prefs.getDouble("OUTREACH_TIME",30) * 1000) {
+		if(outreach.hasPeriodPassed(prefs.getDouble("OUTREACH_TIME",30))) {
 			outreachDisabled = true;
-			
 		}
 		
 		// Disable by pushing X
-		if(xboxController.getXButton()){
-			if(!triggeredX){
-				triggeredX = true;
-				outreachDisabled = !outreachDisabled;
-			}
-		} else {
-			triggeredX = false;
+		if(xboxController.isFirstPushX()) {
+			outreachDisabled = !outreachDisabled;
 		}
 		
 		// Reset time by pushing Y
-		if(xboxController.getYButton()) {
-			if(!triggeredY){
-				triggeredY = true;
-				timer_outreach = System.currentTimeMillis();
-			}
-		} else {
-			triggeredY = false;
-		}
-		if(outreachDisabled) {
-			drive.stop();
+		if(xboxController.isFirstPushY()) {
+			outreach.reset();
 		}
 	}
 	

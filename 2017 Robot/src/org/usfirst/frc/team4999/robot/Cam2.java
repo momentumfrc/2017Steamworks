@@ -1,7 +1,5 @@
 package org.usfirst.frc.team4999.robot;
 
-import org.opencv.core.Scalar;
-
 /**
  * An implementation of the Vision Class designed for camera 2
  * @author Jordan
@@ -33,7 +31,6 @@ public class Cam2 extends Vision {
 			
 			findContours(false);
 			
-			image.setTo(new Scalar(0,0,0));
 			drawContours(255,255,255);
 		}
 		

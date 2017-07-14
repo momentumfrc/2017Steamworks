@@ -46,15 +46,6 @@ public abstract class Vision extends Thread {
 	 * @param name The name of the camera
 	 * @param device The number of the device
 	 */
-	Vision(String name, int device) {
-		super("Process "+name);
-		this.cam = new UsbCamera(name,device);
-		cam.setResolution(640, 480); // Possible resolutions: 640x480, 320x240, 160x120
-		cameraInit();
-		imagesink = new CvSink(name+" Sink");
-		imagesink.setSource(cam);
-		imagesource = CameraServer.getInstance().putVideo(name + " Source", 640, 480);
-	}
 	Vision(String name, int device, int w, int h) {
 		super("Process "+name);
 		this.cam = new UsbCamera(name,device);
@@ -63,6 +54,11 @@ public abstract class Vision extends Thread {
 		imagesink = new CvSink(name+" Sink");
 		imagesink.setSource(cam);
 		imagesource = CameraServer.getInstance().putVideo(name + " Source", w, h);
+		// Prevent robot code from waiting for this thread to finish before exiting
+		setDaemon(true);
+	}
+	Vision(String name, int device) {
+		this(name, device, 640, 480);
 	}
 	
 	protected abstract void cameraInit();
