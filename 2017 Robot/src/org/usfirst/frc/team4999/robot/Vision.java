@@ -123,8 +123,8 @@ public abstract class Vision extends Thread {
 	 * @param g green
 	 * @param b blue
 	 */
-	void drawContours(double r, double g, double b) {
-		Imgproc.drawContours(image, contours, -1, new Scalar(r,g,b));
+	void drawContours(double r, double g, double b, int thickness) {
+		Imgproc.drawContours(image, contours, -1, new Scalar(r,g,b), thickness);
 	}
 	/**
 	 * Draws a specific contour onto the image
@@ -132,9 +132,10 @@ public abstract class Vision extends Thread {
 	 * @param r red
 	 * @param g green
 	 * @param b blue
+	 * @param thickness Thickness of the drawn contour
 	 */
-	void drawContour(int index, double r, double g, double b) {
-		Imgproc.drawContours(image, contours, index, new Scalar(r,g,b));
+	void drawContour(int index, double r, double g, double b, int thickness) {
+		Imgproc.drawContours(image, contours, index, new Scalar(r,g,b), thickness);
 	}
 	/**
 	 * Softens an image using one of several filters.
