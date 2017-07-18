@@ -9,16 +9,18 @@
 
 PIDTurnInterface::PIDTurnInterface(DriveSystem& drive) {
 	this->drive = drive;
+	this->prefs = frc::Preferences::GetInstance;
 }
 void PIDTurnInterface::PIDWrite(double output) {
-
+	drive->ArcadeDrive(0,output,prefs->GetDouble("AUTO_SPEED_LIMIT", 0.2));
 }
 
 PIDMoveInterface::PIDMoveInterface(DriveSystem& drive) {
 	this->drive = drive;
+	this->prefs = frc::Preferences::GetInstance;
 }
 void PIDMoveInterface::PIDWrite(double output) {
-
+	drive->ArcadeDrive(output,0,prefs->GetDouble("AUTO_SPEED_LIMIT", 0.2));
 }
 
 PIDADISInterface::PIDADISInterface(ADIS16448_IMU &adis) {

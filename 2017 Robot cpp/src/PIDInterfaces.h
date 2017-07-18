@@ -18,6 +18,7 @@ public:
 	virtual ~PIDTurnInterface();
 private:
 	DriveSystem *drive;
+	frc::Preferences *prefs;
 };
 class PIDMoveInterface: public frc::PIDOutput {
 public:
@@ -26,6 +27,7 @@ public:
 	virtual ~PIDMoveInterface();
 private:
 	DriveSystem *drive;
+	frc::Preferences *prefs;
 };
 
 class PIDADISInterface: protected frc::PIDSource {
