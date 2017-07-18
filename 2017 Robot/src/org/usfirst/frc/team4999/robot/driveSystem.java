@@ -142,8 +142,19 @@ public class driveSystem extends Subsystem {
 		left.setPIDSourceType(PIDSourceType.kDisplacement);
 		right.setPIDSourceType(PIDSourceType.kDisplacement);
 		
-		turnCont = new PIDController(prefs.getDouble("AUTO_TURN_KP", 0), prefs.getDouble("AUTO_TURN_KI", 0), prefs.getDouble("AUTO_TURN_KD", 0), adisInt, new turnInterface(this));
-		moveCont = new PIDController(prefs.getDouble("AUTO_MOVE_KP",  0), prefs.getDouble("AUTO_MOVE_KI", 0), prefs.getDouble("AUTO_MOVE_KD", 0), left, new moveInterface(this));
+		turnCont = new PIDController(
+				prefs.getDouble("AUTO_TURN_KP", 0),
+				prefs.getDouble("AUTO_TURN_KI", 0),
+				prefs.getDouble("AUTO_TURN_KD", 0),
+				adisInt,
+				new turnInterface(this)
+		);
+		moveCont = new PIDController(
+				prefs.getDouble("AUTO_MOVE_KP",  0),
+				prefs.getDouble("AUTO_MOVE_KI", 0),
+				prefs.getDouble("AUTO_MOVE_KD", 0),
+				left, new moveInterface(this)
+		);
 		
 		initLiveWindow();
 		
