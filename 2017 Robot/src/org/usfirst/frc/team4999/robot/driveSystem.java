@@ -4,14 +4,15 @@ import org.usfirst.frc.analog.adis16448.ADIS16448_IMU;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
 import edu.wpi.first.wpilibj.Preferences;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 /**
  * Implements the PIDOutput interface to turn the robot
  * @author jordan
@@ -93,7 +94,7 @@ public class driveSystem extends Subsystem {
 	public ADIS16448_IMU adis;
 	Encoder right, left;
 	
-	PIDController turnCont, moveCont;
+	MomentumPIDController turnCont, moveCont;
 	
 	/**
 	 * Initiates the robot drive system object
@@ -109,18 +110,17 @@ public class driveSystem extends Subsystem {
 		prefs = Preferences.getInstance();
 		dprefs = new DefaultPreferences();
 		
-		dprefs.addKeys(new Object[][] {
-			{"AUTO_TURN_KP", 0},
-			{"AUTO_TURN_KI", 0},
-			{"AUTO_TURN_KD", 0},
-			{"AUTO_PID_TURN_TOLERANCE", 5.0},
-			{"AUTO_MOVE_KP", 0},
-			{"AUTO_MOVE_KI", 0},
-			{"AUTO_MOVE_KD", 0},
-			{"AUTO_PID_MOVE_TOLERANCE", 2},
-			{"ENC_DIST_PER_PULSE", -1},
-			{"AUTO_SPEED_LIMIT", 0.2},
-		});
+		dprefs.addKey("AUTO_TURN_KP", 0);
+		dprefs.addKey("AUTO_TURN_KI", 0);
+		dprefs.addKey("AUTO_TURN_KD", 0);
+		dprefs.addKey("AUTO_PID_TURN_TOLERANCE", 5.0);
+		dprefs.addKey("AUTO_TURN_TARGET_TIME", 1.0);
+		dprefs.addKey("AUTO_MOVE_KP", 0);
+		dprefs.addKey("AUTO_MOVE_KI", 0);
+		dprefs.addKey("AUTO_MOVE_KD", 0);
+		dprefs.addKey("AUTO_PID_MOVE_TOLERANCE", 2);
+		dprefs.addKey("ENC_DIST_PER_PULSE", -1);
+		dprefs.addKey("AUTO_SPEED_LIMIT", 0.2);
 		
 		this.leftFront = leftFront;
 		this.leftBack = leftBack;
@@ -142,8 +142,19 @@ public class driveSystem extends Subsystem {
 		left.setPIDSourceType(PIDSourceType.kDisplacement);
 		right.setPIDSourceType(PIDSourceType.kDisplacement);
 		
-		turnCont = new PIDController(prefs.getDouble("AUTO_TURN_KP", 0), prefs.getDouble("AUTO_TURN_KI", 0), prefs.getDouble("AUTO_TURN_KD", 0), adisInt, new turnInterface(this));
-		moveCont = new PIDController(prefs.getDouble("AUTO_MOVE_KP",  0), prefs.getDouble("AUTO_MOVE_KI", 0), prefs.getDouble("AUTO_MOVE_KD", 0), left, new moveInterface(this));
+		turnCont = new MomentumPIDController(
+				prefs.getDouble("AUTO_TURN_KP", 0),
+				prefs.getDouble("AUTO_TURN_KI", 0),
+				prefs.getDouble("AUTO_TURN_KD", 0),
+				adisInt,
+				new turnInterface(this)
+		);
+		moveCont = new MomentumPIDController(
+				prefs.getDouble("AUTO_MOVE_KP",  0),
+				prefs.getDouble("AUTO_MOVE_KI", 0),
+				prefs.getDouble("AUTO_MOVE_KD", 0),
+				left, new moveInterface(this)
+		);
 		
 		initLiveWindow();
 		
@@ -263,11 +274,27 @@ public class driveSystem extends Subsystem {
 					System.out.format("Beginning turn. Setpoint set to: %.2f\n", turnCont.getSetpoint());
 				turnCont.enable();
 				DriverStation driver = DriverStation.getInstance();
-				while(!turnCont.onTarget() && !driver.isDisabled()){
+				Timer onTarget = new Timer();
+				onTarget.start();
+				boolean firstOnTarget = true;
+				while(!driver.isDisabled()){
 					try {
 						Thread.sleep(10);
-						if(debug)
+						if(debug) {
 							System.out.format("Turn in progress! Currently at %.2f and set to %.2f\n", adis.getAngleZ(), turnCont.getSetpoint());
+							SmartDashboard.putNumber("Adis Reading", adis.getAngleZ());
+						}
+						if(turnCont.onTarget()) {
+							if(firstOnTarget){
+								onTarget.reset();
+								firstOnTarget = false;
+							}
+							if(onTarget.hasPeriodPassed(prefs.getFloat("AUTO_TURN_TARGET_TIME", 1))) {
+								break;
+							}
+						} else {
+							firstOnTarget = true;
+						}
 						if(Thread.interrupted()) {
 							throw new InterruptedException();
 						}
@@ -328,8 +355,9 @@ public class driveSystem extends Subsystem {
 				while(!moveCont.onTarget() && !driver.isDisabled()){
 					try {
 						Thread.sleep(10);
-						if(debug)
+						if(debug) {
 							System.out.format("Move in progress! Currently at %.2f and set to %.2f\n", left.getDistance(), moveCont.getSetpoint());
+						}
 						if(Thread.interrupted()) {
 							throw new InterruptedException();
 						}

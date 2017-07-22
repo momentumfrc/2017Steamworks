@@ -93,6 +93,9 @@ public class Robot extends IterativeRobot {
 			{"SHOOTER_RIGHT", 7}
 		});
 		
+		
+		defaults.addKey("TEST_TURN_PID_DEG", 45);
+		
 		// DriveSystem
 		drive = new driveSystem(2,3,0,1);
 		// Motors
@@ -119,6 +122,9 @@ public class Robot extends IterativeRobot {
 		auto = new Timer();
 		gear = new Timer();
 		outreach = new Timer();
+		auto.start();
+		gear.start();
+		outreach.start();
 		
 		// Begin capturing video from the cameras and streaming it back to the smartDashboard
 		cam1 = CameraServer.getInstance().startAutomaticCapture("DriverView", 0);
@@ -215,9 +221,6 @@ public class Robot extends IterativeRobot {
 		
 		// Drive the gear.
 		if( (flightStick.getRawButton(1) && (flightStick.getRawButton(7) || flightStick.getRawButton(8)) ) || xboxController.getBButton()){
-			if(xboxController.isFirstPushB()) {
-				xboxController.pulseRumble(RumbleType.kRightRumble, 0.7, 0.25);
-			}
 			gear.reset();
 			piston.set(DoubleSolenoid.Value.kForward);
 		}
@@ -258,7 +261,7 @@ public class Robot extends IterativeRobot {
 		case "auto_turn":
 			if(flightStick.isFirstPush(1)) {
 				if(turn == null || !turn.isAlive())
-					turn = drive.asyncTurn(45, true);
+					turn = drive.asyncTurn(prefs.getInt("TEST_TURN_PID_DEG", 45), true);
 			}
 			if(flightStick.isFirstPush(8)) {
 				drive.writeTurnPIDValues();
