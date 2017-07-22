@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.Timer;
@@ -24,7 +23,7 @@ public class Robot extends IterativeRobot {
 	
 	// Used to store semi-permanent variables that can be easily changed via the smartdashboard. Good for tuning PID loops w/o having to change the code every time.
 	Preferences prefs;
-	DefaultPreferences defaults;
+	DefaultPreferences dprefs;
 	
 	// Controllers used to receive input from the driver.
 	private BetterFlightStick flightStick;
@@ -34,24 +33,16 @@ public class Robot extends IterativeRobot {
 	private VictorSP intake, winch, shooterLeft, shooterRight;
 	
 	// Drive System
-	driveSystem drive;
+	DriveSystem drive;
 	
 	// Boolean used to invert the front/back of the robot.
 	boolean isInverted = false; // True if inverted
 	
 	//Boolean to disable outreach driving
 	boolean outreachDisabled = false;
-	boolean triggeredX = false;
-	boolean triggeredY = false;
 	
 	// Piston used to deploy gears.
 	DoubleSolenoid piston;
-	
-	// Ultrasonic sensor used to detect the distance to the closest object in front of the robot.
-	Ultrasonic ultrasonic;
-	
-	// Timers. timer_gear ensures the piston is deployed for at least 0.75 seconds, and timer_auto ensures the robot drives for 5 seconds before stopping.
-	long timer_outreach;
 	
 	Timer gear, auto, outreach;
 	
@@ -73,51 +64,44 @@ public class Robot extends IterativeRobot {
 		
 		prefs = Preferences.getInstance();
 		
-		defaults = new DefaultPreferences();
-		defaults.addKeys(new Object[][]{
-			// AUTO_LEFT and AUTO_RIGHT are the values given to the tank drive for the left and right sides of the robot during autonomous.
-			{"AUTO_LEFT", 1},
-			{"AUTO_RIGHT", 1},
-			// AUTO_MULT is the speed limiter during autonomous.
-			{"AUTO_MULT", 0.25},
-			// AUTO_TIME is the amount time the robot will move forward for.
-			{"AUTO_TIME", 5},
-			// OUTREACH_TIME is the number of seconds allowed for outreach driving
-			{"OUTREACH_TIME", 30},
-			// OUTREACH_SPEED is the max speed of the outreach driving.
-			{"OUTREACH_SPEED", 0.25},
-			// OUTREACH_TURN is the max turn speed of the outreach driving.
-			{"OUTREACH_TURN", 0.5},
-			// The two pins the motors for the shooter are connected to
-			{"SHOOTER_LEFT", 6},
-			{"SHOOTER_RIGHT", 7}
-		});
+		dprefs = new DefaultPreferences();
+		// AUTO_LEFT and AUTO_RIGHT are the values given to the tank drive for the left and right sides of the robot during autonomous.
+		dprefs.addKey("AUTO_LEFT", 1);
+		dprefs.addKey("AUTO_RIGHT", 1);
+		// AUTO_MULT is the speed limiter during autonomous.
+		dprefs.addKey("AUTO_MULT", 0.25);
+		// AUTO_TIME is the amount time the robot will move forward for.
+		dprefs.addKey("AUTO_TIME", 5);
+		// OUTREACH_TIME is the number of seconds allowed for outreach driving
+		dprefs.addKey("OUTREACH_TIME", 30);
+		// OUTREACH_SPEED is the max speed of the outreach driving.
+		dprefs.addKey("OUTREACH_SPEED", 0.25);
+		// OUTREACH_TURN is the max turn speed of the outreach driving.
+		dprefs.addKey("OUTREACH_TURN", 0.5);
+		// The two pins the motors for the shooter are connected to
+		dprefs.addKey("SHOOTER_LEFT", 6);
+		dprefs.addKey("SHOOTER_RIGHT", 7);
 		
-		
-		defaults.addKey("TEST_TURN_PID_DEG", 45);
+		dprefs.addKey("TEST_TURN_PID_DEG", 45);
 		
 		// DriveSystem
-		drive = new driveSystem(2,3,0,1);
+		drive = new DriveSystem(2,3,0,1);
 		// Motors
-		shooterRight = new VictorSP((int)prefs.getDouble("RIGHT", 7));
-		shooterLeft = new VictorSP((int)prefs.getDouble("LEFT", 6));
+		shooterRight = new VictorSP(prefs.getInt("RIGHT", 7));
+		shooterLeft = new VictorSP(prefs.getInt("LEFT", 6));
 		
 		shooterLeft.setInverted(true);
 		
 		intake = new VictorSP(4);
 		winch = new VictorSP(5);
 		
-		// The ultrasonic sensor, used to measure distance
-		ultrasonic = new Ultrasonic(0,1);
-		// Have the ultrasonic continuously measure data
-		ultrasonic.setAutomaticMode(true);
-		
-		
 		// Piston for gear placement
 		piston = new DoubleSolenoid(2,0);
 		
 		// Flight stick for user input
 		flightStick = new BetterFlightStick(1);
+		flightStick.setDeadzoneY(0.15);
+		flightStick.setDeadzoneTwist(0.20);
 		
 		auto = new Timer();
 		gear = new Timer();
@@ -140,6 +124,7 @@ public class Robot extends IterativeRobot {
 
 	public void disabledInit() {
 		cam2.testProcess = false;
+		drive.STOP();
 	}
 	
 	public void autonomousInit() {
@@ -169,8 +154,8 @@ public class Robot extends IterativeRobot {
 		
 
 		// The input from the driver. Deadzones are used to make the robot less twitchy.
-		moveRequest = deadzone(-flightStick.getY(), 0.15);
-		turnRequest = deadzone(flightStick.getTwist(), 0.20);
+		moveRequest = -flightStick.getCalibratedY();
+		turnRequest = flightStick.getCalibratedTwist();
 		
 		// Allow the driver to switch back and front.
 		moveRequest = (isInverted)? -moveRequest: moveRequest;
@@ -202,29 +187,34 @@ public class Robot extends IterativeRobot {
 		if(flightStick.isFirstPush(2)){
 			isInverted = !isInverted;
 			cam2.reversed = isInverted;
-			flightStick.pulseRumble(RumbleType.kRightRumble, 1, 0.25);
 		}
 		
 		// Drive the winch.
 		if(flightStick.getRawButton(5)){
 			winch.set(1);
-		} else {
+		} else if(flightStick.getRawButton(3)) {
+			winch.set(.50);
+		} else if(flightStick.getRawButton(6)) {
+			winch.set(-.25);
+		}else {
 			winch.set(0);
 		}
-
-		if(flightStick.getRawButton(3)){
-			winch.set(.50);
-		}
-		if(flightStick.getRawButton(6)){
-			winch.set(-.25);
+		
+		if(flightStick.getRawButton(7) && flightStick.getRawButton(8)) {
+			flightStick.calibrateY();
+			flightStick.calibrateTwist();
 		}
 		
 		// Drive the gear.
 		if( (flightStick.getRawButton(1) && (flightStick.getRawButton(7) || flightStick.getRawButton(8)) ) || xboxController.getBButton()){
+			xboxController.setRumble(RumbleType.kRightRumble, 0.9);
 			gear.reset();
 			piston.set(DoubleSolenoid.Value.kForward);
+		} else if(piston.get() == DoubleSolenoid.Value.kForward) {
+			xboxController.setRumble(RumbleType.kRightRumble, 0.6);
 		}
 		if(gear.hasPeriodPassed(0.75)){
+			xboxController.setRumble(RumbleType.kRightRumble, 0);
 			piston.set(DoubleSolenoid.Value.kReverse);
 		}
 	}
@@ -238,57 +228,53 @@ public class Robot extends IterativeRobot {
 	
 	public void testInit(){
 		switch(testMode.getSelected()) {
-		case "shooter":
+		case shooter:
 			break;
-		case "auto_turn":
+		case auto_turn:
 			break;
-		case "auto_move":
+		case auto_move:
 			break;
-		case "adis":
-			teleopInit();
+		case adis:
 			break;
 		default:
 			break;
 		}
 	}
 	
-	Thread turn, move;
 	public void testPeriodic() {
 		switch(testMode.getSelected()) {
-		case "shooter":
+		case shooter:
 			shooterPeriodic();
 			break;
-		case "auto_turn":
+		case auto_turn:
 			if(flightStick.isFirstPush(1)) {
-				if(turn == null || !turn.isAlive())
-					turn = drive.asyncTurn(prefs.getInt("TEST_TURN_PID_DEG", 45), true);
+				drive.turn(prefs.getInt("TEST_TURN_PID_DEG", 45), true);
 			}
 			if(flightStick.isFirstPush(8)) {
 				drive.writeTurnPIDValues();
 			}
 			if(flightStick.isFirstPush(7)) {
 				System.out.println("Trying to stop pid");
-				if(turn != null && !turn.isInterrupted() && turn.isAlive())
-					turn.interrupt();
+				drive.maintainCurrentHeading(false);
 			}
 			break;
-		case "auto_move":
+		case auto_move:
 			if(flightStick.isFirstPush(1)) {
-				if(move == null || !move.isAlive())
-					move = drive.asyncMove(10, true);
+				drive.move(10, true);
 			}
 			if(flightStick.isFirstPush(8)) {
 				drive.writeMovePIDValues();
 			}
 			if(flightStick.isFirstPush(7)) {
 				System.out.println("Trying to stop pid");
-				if(move != null && !move.isInterrupted() && move.isAlive())
-					move.interrupt();
+				drive.maintainCurrentPosition(false);
 			}
 			break;
-		case "adis":
+		case adis:
 			// USE getAngleZ IN PID
-			System.out.format("At: %.2f   %.2f   %.2f\n",drive.adis.getAngleX(),drive.adis.getAngleY(),drive.adis.getAngleZ());
+			System.out.format("Angle X: %.2f  AngleY: %.2f  AngleZ: %.2f\n",drive.adis.getAngleX(),drive.adis.getAngleY(),drive.adis.getAngleZ());
+			System.out.format("Complementary angle: %.2f\n", drive.adis.getAngle());
+			System.out.println("---------------------------------------");
 			if(flightStick.isFirstPush(12)) {
 				drive.adis.calibrate();
 			}
@@ -307,8 +293,8 @@ public class Robot extends IterativeRobot {
 	}
 	void outreachPeriodic() {
 		if(!outreachDisabled) {
-			moveRequest = deadzone(-flightStick.getY(), 0.15);
-			turnRequest = map(deadzone(flightStick.getTwist(), 0.20),0,1,0,prefs.getDouble("OUTREACH_TURN", .5));
+			moveRequest = flightStick.getCalibratedY();
+			turnRequest = map(flightStick.getCalibratedTwist(),0,1,0,prefs.getDouble("OUTREACH_TURN", .5));
 			
 			// Allow the driver to switch back and front.
 			moveRequest = (isInverted)? -moveRequest: moveRequest;
@@ -401,37 +387,6 @@ public class Robot extends IterativeRobot {
 	 */
 	public static double map(double input, double minIn, double maxIn, double minOut, double maxOut) {
 		return minOut + (maxOut - minOut) * ((input - minIn) / (maxIn - minIn));
-	}
-
-	/**
-	 * Clips a value to be within a given range.
-	 *
-	 * @param input The value to clip.
-	 * @param max The maximum possible value for the output.
-	 * @param min The minimum possible value for the output.
-	 * @return The input value, clipped to be within the given max and min range.
-	 */
-	public static double clip(double input, double max, double min) {
-		if(input > max)
-			return max;
-		else if(input < min)
-			return min;
-		else
-			return input;
-	}
-
-	/**
-	 * Takes the output value of a joystick axis, and applies a deadzone if it is within -0.1 and 0.1
-	 *
-	 * @param input The output value of the joystick axis.
-	 * @return The joystick axis value, or 0 if the input value is within the deadzone.
-	 */
-	public static double deadzone(double input) {
-		double zone = 0.1;
-		if(input < zone && input > -zone)
-			return 0;
-		else
-			return input;
 	}
 
 	/**

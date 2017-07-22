@@ -56,6 +56,7 @@ public class BetterXBoxController extends XboxController {
 			Timer len;
 			public void run() {
 				len = new Timer();
+				len.start();
 				len.reset();
 				setRumble(type, value);
 				while(!len.hasPeriodPassed(sec)){
