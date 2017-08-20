@@ -1,6 +1,8 @@
 
 package org.usfirst.frc.team4999.robot;
 
+import org.usfirst.frc.team4999.utils.DefaultPreferences;
+
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
@@ -236,6 +238,9 @@ public class Robot extends IterativeRobot {
 			break;
 		case adis:
 			break;
+		case outreach:
+			outreachInit();
+			break;
 		default:
 			break;
 		}
@@ -280,6 +285,8 @@ public class Robot extends IterativeRobot {
 			}
 			teleopPeriodic();
 			break;
+		case outreach:
+			outreachPeriodic();
 		default:
 			break;
 		}

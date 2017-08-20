@@ -1,10 +1,10 @@
-package org.usfirst.frc.team4999.robot;
+package org.usfirst.frc.team4999.utils;
 
 import edu.wpi.first.wpilibj.Preferences;
 
 public class DefaultPreferences {
 	private Preferences instance;
-	DefaultPreferences() {
+	public DefaultPreferences() {
 		instance = Preferences.getInstance();
 	}
 	
