@@ -28,6 +28,7 @@ class turnInterface implements PIDOutput {
 	@Override
 	public void pidWrite(double output) {
 		drive.arcadeDrive(0, output, Preferences.getInstance().getDouble("AUTO_SPEED_LIMIT", 0.2));
+		drive.pidArcadeTurnDrive(output);
 	}
 }
 /**
@@ -42,7 +43,7 @@ class moveInterface implements PIDOutput {
 	}
 	@Override
 	public void pidWrite(double output) {
-		drive.arcadeDrive(output, 0, Preferences.getInstance().getDouble("AUTO_SPEED_LIMIT", 0.2));
+		drive.pidArcadeMoveDrive(output);
 	}
 }
 /**
@@ -210,6 +211,18 @@ public class DriveSystem extends Subsystem {
 		rightBack.set(rightDrive);
 	}
 	
+	
+	private double move, turn;
+	public synchronized void pidArcadeMoveDrive(double moveRequest) {
+		move = moveRequest;
+		arcadeDrive(move,turn,prefs.getDouble("AUTO_SPEED_LIMIT", 0.25));
+	}
+	public synchronized void pidArcadeTurnDrive(double turnRequest) {
+		turn = turnRequest;
+		arcadeDrive(move,turn,prefs.getDouble("AUTO_SPEED_LIMIT", 0.25));
+	}
+	
+	
 	/**
 	 * Moves the robot in a tank-drive fashion according to given inputs. All values are within the range of [-1,1].
 	 * @param left The value to drive the left side
@@ -329,13 +342,13 @@ public class DriveSystem extends Subsystem {
 	 * @param debug - Print debug messages
 	 */
 	public void move(double dist, boolean debug) {
-		turnCont.setSetpoint(left.getDistance() + dist);
+		moveCont.setSetpoint(left.getDistance() + dist);
 		if(debug)
 			System.out.format("Beginning move. Setpoint set to: %.2f\n", moveCont.getSetpoint());
 		moveCont.enable();
 	}
 	public void move(double dist) {
-		turn(dist, false);
+		move(dist, false);
 	}
 	
 	/**
