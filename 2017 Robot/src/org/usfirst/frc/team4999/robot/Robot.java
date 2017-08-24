@@ -236,7 +236,7 @@ public class Robot extends IterativeRobot {
 			break;
 		case auto_move:
 			break;
-		case adis:
+		case rotate:
 			break;
 		case outreach:
 			outreachInit();
@@ -262,6 +262,10 @@ public class Robot extends IterativeRobot {
 				System.out.println("Trying to stop pid");
 				drive.maintainCurrentHeading(false);
 			}
+			if(flightStick.isFirstPush(9)) {
+				System.out.println("Turning using encoders");
+				drive.turn(prefs.getInt("TEST_TURN_PID_DEG", 45), true, true);
+			}
 			break;
 		case auto_move:
 			if(flightStick.isFirstPush(1)) {
@@ -275,13 +279,18 @@ public class Robot extends IterativeRobot {
 				drive.maintainCurrentPosition(false);
 			}
 			break;
-		case adis:
+		case rotate:
 			// USE getAngleZ IN PID
+			System.out.format("Encoder angle: %.2f\n", drive.getEncAngle());
 			System.out.format("Angle X: %.2f  AngleY: %.2f  AngleZ: %.2f\n",drive.adis.getAngleX(),drive.adis.getAngleY(),drive.adis.getAngleZ());
 			System.out.format("Complementary angle: %.2f\n", drive.adis.getAngle());
 			System.out.println("---------------------------------------");
 			if(flightStick.isFirstPush(12)) {
 				drive.adis.calibrate();
+			}
+			if(flightStick.isFirstPush(8)) {
+				drive.left.reset();
+				drive.right.reset();
 			}
 			teleopPeriodic();
 			break;

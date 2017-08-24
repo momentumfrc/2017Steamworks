@@ -83,6 +83,43 @@ class adisPIDInterface implements PIDSource {
 	}
 	
 }
+
+/**
+ * Implements the PIDSource interface to return an angle calculated by the encoders
+ * @author jordan
+ */
+class EncoderRotatePIDInterface implements PIDSource {
+	private PIDSourceType sourceType = PIDSourceType.kDisplacement;
+	Encoder left, right;
+	
+	EncoderRotatePIDInterface(Encoder left, Encoder right) {
+		this.left = left;
+		this.right = right;
+	}
+
+	@Override
+	public void setPIDSourceType(PIDSourceType pidSource) {
+		this.sourceType = pidSource;
+	}
+
+	@Override
+	public PIDSourceType getPIDSourceType() {
+		return sourceType;
+	}
+
+	@Override
+	public double pidGet() {
+		switch(sourceType) {
+		case kDisplacement:
+			return Math.toDegrees((left.getDistance() - right.getDistance()) / Preferences.getInstance().getDouble("DIST_BTW_WHEELS", 20));
+		case kRate:
+			return Math.toDegrees((left.getRate() - right.getRate()) / Preferences.getInstance().getDouble("DIST_BTW_WHEELS", 20));
+		}
+		return 0;
+	}
+	
+}
+
 /**
  * The drive system of the robot. Has pid controllers to move a specified distance or turn a specified number of degrees
  * @author jordan
@@ -97,7 +134,7 @@ public class DriveSystem extends Subsystem {
 	public ADIS16448_IMU adis;
 	Encoder right, left;
 	
-	MomentumPIDController turnCont, moveCont;
+	MomentumPIDController turnCont, moveCont, turnEncCont;
 	
 	/**
 	 * Initiates the robot drive system object
@@ -123,8 +160,9 @@ public class DriveSystem extends Subsystem {
 		dprefs.addKey("AUTO_MOVE_KD", 0);
 		dprefs.addKey("AUTO_PID_MOVE_TOLERANCE", 2);
 		dprefs.addKey("AUTO_MOVE_TARGET_TIME", 1.0);
-		dprefs.addKey("ENC_DIST_PER_PULSE", -1);
+		dprefs.addKey("ENC_DIST_PER_PULSE", 0.20943951023);
 		dprefs.addKey("AUTO_SPEED_LIMIT", 0.2);
+		dprefs.addKey("DIST_BTW_WHEELS", 20);
 		
 		this.leftFront = leftFront;
 		this.leftBack = leftBack;
@@ -141,8 +179,8 @@ public class DriveSystem extends Subsystem {
 		
 		left = new Encoder(2,3);
 		right = new Encoder(4,5);
-		left.setDistancePerPulse(prefs.getDouble("ENC_DIST_PER_PULSE", -1));
-		right.setDistancePerPulse(prefs.getDouble("ENC_DIST_PER_PULSE", -1));
+		left.setDistancePerPulse(prefs.getDouble("ENC_DIST_PER_PULSE", 0.20943951023));
+		right.setDistancePerPulse(prefs.getDouble("ENC_DIST_PER_PULSE", 0.20943951023));
 		left.setPIDSourceType(PIDSourceType.kDisplacement);
 		right.setPIDSourceType(PIDSourceType.kDisplacement);
 		
@@ -151,6 +189,13 @@ public class DriveSystem extends Subsystem {
 				prefs.getDouble("AUTO_TURN_KI", 0),
 				prefs.getDouble("AUTO_TURN_KD", 0),
 				adisInt,
+				new turnInterface(this)
+		);
+		turnEncCont = new MomentumPIDController(
+				prefs.getDouble("AUTO_TURN_KP", 0),
+				prefs.getDouble("AUTO_TURN_KI", 0),
+				prefs.getDouble("AUTO_TURN_KD", 0),
+				new EncoderRotatePIDInterface(left, right),
 				new turnInterface(this)
 		);
 		moveCont = new MomentumPIDController(
@@ -212,14 +257,14 @@ public class DriveSystem extends Subsystem {
 	}
 	
 	
-	private double move, turn;
+	private double PIDmove, PIDturn;
 	public synchronized void pidArcadeMoveDrive(double moveRequest) {
-		move = moveRequest;
-		arcadeDrive(move,turn,prefs.getDouble("AUTO_SPEED_LIMIT", 0.25));
+		PIDmove= moveRequest;
+		arcadeDrive(PIDmove,PIDturn,prefs.getDouble("AUTO_SPEED_LIMIT", 0.25));
 	}
 	public synchronized void pidArcadeTurnDrive(double turnRequest) {
-		turn = turnRequest;
-		arcadeDrive(move,turn,prefs.getDouble("AUTO_SPEED_LIMIT", 0.25));
+		PIDturn = turnRequest;
+		arcadeDrive(PIDmove,PIDturn,prefs.getDouble("AUTO_SPEED_LIMIT", 0.25));
 	}
 	
 	
@@ -251,6 +296,12 @@ public class DriveSystem extends Subsystem {
 		stop();
 		turnCont.disable();
 		moveCont.disable();
+		PIDmove= 0;
+		PIDturn = 0;
+	}
+	
+	public double getEncAngle() {
+		return Math.toDegrees((left.getDistance() - right.getDistance()) / prefs.getDouble("DIST_BTW_WHEELS", 20));
 	}
 	
 	@Override
@@ -272,6 +323,16 @@ public class DriveSystem extends Subsystem {
 		turn(deg, false);
 	}
 	
+	public void turn(double deg, boolean debug, boolean useEnc) {
+		if(!useEnc) {
+			turn(deg, debug);
+			return;
+		}
+		turnEncCont.setSetpoint(getEncAngle() + deg);
+		if(debug)
+			System.out.format("Beginning turn. Setpoint set to: %.2f\n", turnEncCont.getSetpoint());
+		turnCont.enable();
+	}
 	/**
 	 * Asynchronously turns the robot the specified number of degrees
 	 * @param deg - Number of degrees to turn
@@ -316,6 +377,8 @@ public class DriveSystem extends Subsystem {
 					
 				}
 				turnCont.disable();
+				PIDmove = 0;
+				PIDturn = 0;
 			}
 		};
 		turn.start();
@@ -332,6 +395,8 @@ public class DriveSystem extends Subsystem {
 				turnCont.enable();
 			} else {
 				turnCont.disable();
+				PIDmove = 0;
+				PIDturn = 0;
 			}
 		}
 	}
@@ -394,6 +459,8 @@ public class DriveSystem extends Subsystem {
 					
 				}
 				moveCont.disable();
+				PIDmove= 0;
+				PIDturn = 0;
 			}
 		};
 		move.start();
@@ -411,6 +478,8 @@ public class DriveSystem extends Subsystem {
 				moveCont.enable();
 			} else {
 				moveCont.disable();
+				PIDmove= 0;
+				PIDturn = 0;
 			}
 		}
 	}

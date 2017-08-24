@@ -3,15 +3,15 @@ package org.usfirst.frc.team4999.robot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-enum TestMode {outreach, shooter, auto_turn, auto_move, adis};
+enum TestMode {outreach, shooter, auto_turn, auto_move, rotate};
 
 public class TestChooser extends SendableChooser<TestMode> {
 	TestChooser(){
 		super();
-		addDefault("Shooter", TestMode.shooter);
-		addObject("Autonomous Turn Pid", TestMode.auto_turn);
+		addObject("Shooter", TestMode.shooter);
+		addDefault("Autonomous Turn Pid", TestMode.auto_turn);
 		addObject("Autonomous Move Pid", TestMode.auto_move);
-		addObject("Adis values", TestMode.adis);
+		addObject("Rotation Values", TestMode.rotate);
 		addObject("Outreach", TestMode.outreach);
 		
 		SmartDashboard.putData("Test Chooser", this);
