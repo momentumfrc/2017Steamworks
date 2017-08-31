@@ -232,6 +232,8 @@ public class Robot extends IterativeRobot {
 		switch(testMode.getSelected()) {
 		case shooter:
 			break;
+		case encoders:
+			break;
 		case auto_turn:
 			break;
 		case auto_move:
@@ -250,6 +252,14 @@ public class Robot extends IterativeRobot {
 		switch(testMode.getSelected()) {
 		case shooter:
 			shooterPeriodic();
+			break;
+		case encoders:
+			System.out.format("Left: %.2f    Right: %.2f", drive.left.get(), drive.right.get());
+			if(flightStick.isFirstPush(8)) {
+				drive.left.reset();
+				drive.right.reset();
+			}
+			teleopPeriodic();
 			break;
 		case auto_turn:
 			if(flightStick.isFirstPush(1)) {
