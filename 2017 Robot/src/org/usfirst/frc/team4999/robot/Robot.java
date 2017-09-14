@@ -254,7 +254,7 @@ public class Robot extends IterativeRobot {
 			shooterPeriodic();
 			break;
 		case encoders:
-			System.out.format("Left: %.2f    Right: %.2f", drive.left.get(), drive.right.get());
+			System.out.format("Left: %d    Right: %d\n", drive.left.get(), drive.right.get());
 			if(flightStick.isFirstPush(8)) {
 				drive.left.reset();
 				drive.right.reset();
