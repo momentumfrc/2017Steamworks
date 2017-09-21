@@ -272,22 +272,8 @@ public class Robot extends IterativeRobot {
 				System.out.println("Trying to stop pid");
 				drive.maintainCurrentHeading(false);
 			}
-			if(flightStick.isFirstPush(9)) {
-				System.out.println("Turning using encoders");
-				drive.turn(prefs.getInt("TEST_TURN_PID_DEG", 45), true, true);
-			}
 			break;
 		case auto_move:
-			if(flightStick.isFirstPush(1)) {
-				drive.move(10, true);
-			}
-			if(flightStick.isFirstPush(8)) {
-				drive.writeMovePIDValues();
-			}
-			if(flightStick.isFirstPush(7)) {
-				System.out.println("Trying to stop pid");
-				drive.maintainCurrentPosition(false);
-			}
 			break;
 		case rotate:
 			// USE getAngleZ IN PID

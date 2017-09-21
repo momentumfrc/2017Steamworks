@@ -2,6 +2,7 @@ package org.usfirst.frc.team4999.robot;
 
 import org.usfirst.frc.analog.adis16448.ADIS16448_IMU;
 import org.usfirst.frc.team4999.utils.DefaultPreferences;
+import org.usfirst.frc.team4999.utils.MoPrefs;
 import org.usfirst.frc.team4999.utils.MomentumPIDController;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -31,21 +32,7 @@ class turnInterface implements PIDOutput {
 		drive.pidArcadeTurnDrive(output);
 	}
 }
-/**
- * Implements the PIDOutput interface to move the robot
- * @author jordan
- *
- */
-class moveInterface implements PIDOutput {
-	DriveSystem drive;
-	moveInterface(DriveSystem drive) {
-		this.drive = drive;
-	}
-	@Override
-	public void pidWrite(double output) {
-		drive.pidArcadeMoveDrive(output);
-	}
-}
+
 /**
  * Implements the PIDSource interface to return the appropriate values from the ADIS.
  * Can't use the ADIS's default implementation because it uses the method getAngle() which returns an inaccurate value
@@ -84,41 +71,6 @@ class adisPIDInterface implements PIDSource {
 	
 }
 
-/**
- * Implements the PIDSource interface to return an angle calculated by the encoders
- * @author jordan
- */
-class EncoderRotatePIDInterface implements PIDSource {
-	private PIDSourceType sourceType = PIDSourceType.kDisplacement;
-	Encoder left, right;
-	
-	EncoderRotatePIDInterface(Encoder left, Encoder right) {
-		this.left = left;
-		this.right = right;
-	}
-
-	@Override
-	public void setPIDSourceType(PIDSourceType pidSource) {
-		this.sourceType = pidSource;
-	}
-
-	@Override
-	public PIDSourceType getPIDSourceType() {
-		return sourceType;
-	}
-
-	@Override
-	public double pidGet() {
-		switch(sourceType) {
-		case kDisplacement:
-			return Math.toDegrees((left.getDistance() - right.getDistance()) / Preferences.getInstance().getDouble("DIST_BTW_WHEELS", 20));
-		case kRate:
-			return Math.toDegrees((left.getRate() - right.getRate()) / Preferences.getInstance().getDouble("DIST_BTW_WHEELS", 20));
-		}
-		return 0;
-	}
-	
-}
 
 /**
  * The drive system of the robot. Has pid controllers to move a specified distance or turn a specified number of degrees
@@ -130,11 +82,12 @@ public class DriveSystem extends Subsystem {
 	
 	Preferences prefs;
 	DefaultPreferences dprefs;
+	MoPrefs moprefs;
 	
 	public ADIS16448_IMU adis;
 	Encoder right, left;
 	
-	MomentumPIDController turnCont, moveCont, turnEncCont;
+	MomentumPIDController turnCont;
 	
 	/**
 	 * Initiates the robot drive system object
@@ -149,18 +102,13 @@ public class DriveSystem extends Subsystem {
 		super("Drive System");
 		prefs = Preferences.getInstance();
 		dprefs = new DefaultPreferences();
+		moprefs = new MoPrefs();
 		
 		dprefs.addKey("AUTO_TURN_KP", 0);
 		dprefs.addKey("AUTO_TURN_KI", 0);
 		dprefs.addKey("AUTO_TURN_KD", 0);
 		dprefs.addKey("AUTO_PID_TURN_TOLERANCE", 5.0);
 		dprefs.addKey("AUTO_TURN_TARGET_TIME", 1.0);
-		dprefs.addKey("AUTO_MOVE_KP", 0);
-		dprefs.addKey("AUTO_MOVE_KI", 0);
-		dprefs.addKey("AUTO_MOVE_KD", 0);
-		dprefs.addKey("AUTO_PID_MOVE_TOLERANCE", 2);
-		dprefs.addKey("AUTO_MOVE_TARGET_TIME", 1.0);
-		dprefs.addKey("ENC_DIST_PER_PULSE", 0.20943951023);
 		dprefs.addKey("AUTO_SPEED_LIMIT", 0.2);
 		dprefs.addKey("DIST_BTW_WHEELS", 20);
 		
@@ -179,8 +127,8 @@ public class DriveSystem extends Subsystem {
 		
 		left = new Encoder(2,3);
 		right = new Encoder(4,5);
-		left.setDistancePerPulse(prefs.getDouble("ENC_DIST_PER_PULSE", 0.20943951023));
-		right.setDistancePerPulse(prefs.getDouble("ENC_DIST_PER_PULSE", 0.20943951023));
+		left.setDistancePerPulse(1/moprefs.getTicksPerMeter());
+		right.setDistancePerPulse(1/moprefs.getTicksPerMeter());
 		left.setPIDSourceType(PIDSourceType.kDisplacement);
 		right.setPIDSourceType(PIDSourceType.kDisplacement);
 		
@@ -191,26 +139,11 @@ public class DriveSystem extends Subsystem {
 				adisInt,
 				new turnInterface(this)
 		);
-		turnEncCont = new MomentumPIDController(
-				prefs.getDouble("AUTO_TURN_KP", 0),
-				prefs.getDouble("AUTO_TURN_KI", 0),
-				prefs.getDouble("AUTO_TURN_KD", 0),
-				new EncoderRotatePIDInterface(left, right),
-				new turnInterface(this)
-		);
-		moveCont = new MomentumPIDController(
-				prefs.getDouble("AUTO_MOVE_KP", 0),
-				prefs.getDouble("AUTO_MOVE_KI", 0),
-				prefs.getDouble("AUTO_MOVE_KD", 0),
-				left, new moveInterface(this)
-		);
 		
 		initLiveWindow();
 		
 		turnCont.setAbsoluteTolerance(prefs.getDouble("AUTO_PID_TURN_TOLERANCE", 5.0));
-		moveCont.setAbsoluteTolerance(prefs.getDouble("AUTO_PID_MOVE_TOLERANCE", 2));
 		turnCont.setOutputRange(-1,1);
-		moveCont.setOutputRange(-1,1);
 	}
 	
 	private void initLiveWindow() {
@@ -219,7 +152,6 @@ public class DriveSystem extends Subsystem {
 		LiveWindow.addActuator("Drive System", "LeftBack Motor", leftBack);
 		LiveWindow.addActuator("Drive System", "RightBack Motor", rightBack);
 		LiveWindow.addActuator("Drive System", "Turn PID", turnCont);
-		LiveWindow.addActuator("Drive System", "Move PID", moveCont);
 		LiveWindow.addSensor("Drive System", "ADIS", adis);
 		LiveWindow.addSensor("Drive System", "Left Encoder", left);
 		LiveWindow.addSensor("Drive System", "Right Encoder", right);
@@ -231,12 +163,6 @@ public class DriveSystem extends Subsystem {
 		prefs.putDouble("AUTO_TURN_KD", turnCont.getD());
 	}
 	
-
-	public void writeMovePIDValues() {
-		prefs.putDouble("AUTO_MOVE_KP", moveCont.getP());
-		prefs.putDouble("AUTO_MOVE_KI", moveCont.getI());
-		prefs.putDouble("AUTO_MOVE_KD", moveCont.getD());
-	}
 	
 	/**
 	 * Moves the robot in arcade-drive fashion with given joystick input. Input values are expected to be
@@ -295,7 +221,6 @@ public class DriveSystem extends Subsystem {
 	public synchronized void STOP() {
 		stop();
 		turnCont.disable();
-		moveCont.disable();
 		PIDmove= 0;
 		PIDturn = 0;
 	}
@@ -323,16 +248,6 @@ public class DriveSystem extends Subsystem {
 		turn(deg, false);
 	}
 	
-	public void turn(double deg, boolean debug, boolean useEnc) {
-		if(!useEnc) {
-			turn(deg, debug);
-			return;
-		}
-		turnEncCont.setSetpoint(getEncAngle() + deg);
-		if(debug)
-			System.out.format("Beginning turn. Setpoint set to: %.2f\n", turnEncCont.getSetpoint());
-		turnCont.enable();
-	}
 	/**
 	 * Asynchronously turns the robot the specified number of degrees
 	 * @param deg - Number of degrees to turn
@@ -401,87 +316,5 @@ public class DriveSystem extends Subsystem {
 		}
 	}
 	
-	/**
-	 * Moves the robot the specified distance (units are specified in the distance per encoder tick setting)
-	 * @param dist - Distance to move 
-	 * @param debug - Print debug messages
-	 */
-	public void move(double dist, boolean debug) {
-		moveCont.setSetpoint(left.getDistance() + dist);
-		if(debug)
-			System.out.format("Beginning move. Setpoint set to: %.2f\n", moveCont.getSetpoint());
-		moveCont.enable();
-	}
-	public void move(double dist) {
-		move(dist, false);
-	}
-	
-	/**
-	 * Asynchronously moves the robot the specified distance (units are specified in the distance per encoder tick setting)
-	 * @param deg - Number of degrees to turn
-	 * @param debug - Print debug messages
-	 * @return A thread object running the turn code. Rotation may be interrupted by calling the method interrupt() on this object
-	 */
-	public Thread asyncMove(double dist, boolean debug) {
-		Thread move = new Thread() {
-			public void run() {
-				moveCont.setSetpoint(left.getDistance() + dist);
-				if(debug)
-					System.out.format("Beginning move. Setpoint set to: %.2f\n", moveCont.getSetpoint());
-				moveCont.enable();
-				DriverStation driver = DriverStation.getInstance();
-				Timer onTarget = new Timer();
-				onTarget.start();
-				boolean firstOnTarget = true;
-				while(!driver.isDisabled()){
-					try {
-						Thread.sleep(10);
-						if(debug) {
-							System.out.format("Move in progress! Currently at %.2f and set to %.2f\n", left.getDistance(), moveCont.getSetpoint());
-						}
-						if(moveCont.onTarget()) {
-							if(firstOnTarget) {
-								onTarget.reset();
-								firstOnTarget = false;
-							}
-							if(onTarget.hasPeriodPassed(prefs.getDouble("AUTO_MOVE_TARGET_TIME", 1))) {
-								break;
-							}
-						} else {
-							firstOnTarget = true;
-						}
-						if(Thread.interrupted()) {
-							throw new InterruptedException();
-						}
-					} catch (InterruptedException e) {
-						break;
-					}
-					
-				}
-				moveCont.disable();
-				PIDmove= 0;
-				PIDturn = 0;
-			}
-		};
-		move.start();
-		return move;
-	}
-	
-	public Thread asyncMove(double dist) {
-		return asyncMove(dist);
-	}
-	
-	public void maintainCurrentPosition(boolean value) {
-		if(moveCont.isEnabled() != value) {
-			if(value) {
-				moveCont.setSetpoint(left.getDistance());
-				moveCont.enable();
-			} else {
-				moveCont.disable();
-				PIDmove= 0;
-				PIDturn = 0;
-			}
-		}
-	}
 	
 }
