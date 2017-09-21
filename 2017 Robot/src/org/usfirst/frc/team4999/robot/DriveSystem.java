@@ -23,12 +23,15 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 class turnInterface implements PIDOutput {
 	DriveSystem drive;
+	MoPrefs moprefs;
+	
 	turnInterface(DriveSystem drive) {
 		this.drive = drive;
+		moprefs = new MoPrefs();
 	}
 	@Override
 	public void pidWrite(double output) {
-		drive.arcadeDrive(0, output, Preferences.getInstance().getDouble("AUTO_SPEED_LIMIT", 0.2));
+		drive.arcadeDrive(0, output, moprefs.getDefaultAutoSpeedLimit());
 		drive.pidArcadeTurnDrive(output);
 	}
 }
@@ -89,6 +92,8 @@ public class DriveSystem extends Subsystem {
 	
 	MomentumPIDController turnCont;
 	
+	double currentMovePower = 0;
+	
 	/**
 	 * Initiates the robot drive system object
 	 */
@@ -109,7 +114,6 @@ public class DriveSystem extends Subsystem {
 		dprefs.addKey("AUTO_TURN_KD", 0);
 		dprefs.addKey("AUTO_PID_TURN_TOLERANCE", 5.0);
 		dprefs.addKey("AUTO_TURN_TARGET_TIME", 1.0);
-		dprefs.addKey("AUTO_SPEED_LIMIT", 0.2);
 		dprefs.addKey("DIST_BTW_WHEELS", 20);
 		
 		this.leftFront = leftFront;
@@ -186,11 +190,11 @@ public class DriveSystem extends Subsystem {
 	private double PIDmove, PIDturn;
 	public synchronized void pidArcadeMoveDrive(double moveRequest) {
 		PIDmove= moveRequest;
-		arcadeDrive(PIDmove,PIDturn,prefs.getDouble("AUTO_SPEED_LIMIT", 0.25));
+		arcadeDrive(PIDmove,PIDturn,moprefs.getDefaultAutoSpeedLimit());
 	}
 	public synchronized void pidArcadeTurnDrive(double turnRequest) {
 		PIDturn = turnRequest;
-		arcadeDrive(PIDmove,PIDturn,prefs.getDouble("AUTO_SPEED_LIMIT", 0.25));
+		arcadeDrive(PIDmove,PIDturn,moprefs.getDefaultAutoSpeedLimit());
 	}
 	
 	
@@ -202,6 +206,12 @@ public class DriveSystem extends Subsystem {
 	 */
 	
 	public synchronized void tankDrive(double left, double right, double multiplier){
+		if(Math.abs(left) > 1 ) {
+			left = Math.abs(left) / left;
+		}
+		if(Math.abs(right) > 1 ) {
+			right = Math.abs(right)/right;
+		}
 		leftFront.set(left * multiplier);
 		leftBack.set(left * multiplier);
 		rightFront.set(right * multiplier);
@@ -315,6 +325,55 @@ public class DriveSystem extends Subsystem {
 			}
 		}
 	}
+	
+	
+	int lEncStart = 0;
+	int rEncStart = 0;
+	double lMovePower = 0;
+	double rMovePower = 0;
+	
+	private void move() {
+		double lEnc = left.get();
+		double rEnc = right.get();
+		double lChange = lEnc - lEncStart;
+		double rChange = rEnc - rEncStart;
+		double moveError = lChange - rChange;
+		
+		// How to resolve error:
+		// - Set one motor to full movePower and reduce the other one.
+		// - Select motor to reduce using this table:
+		// error+ error-
+		// power+ left right
+		// power- right left
+		//
+		// which reduces to:
+		// - if the sign of (p*e) is positive, reduce the left
+		// - if the sign of (p*e) is negative, reduce the right
+		 if(currentMovePower * moveError > 0) {
+			// Left is getting ahead:
+			// subtract positive error from positive power
+			// or negative error from negative power
+			lMovePower = currentMovePower - (moveError * moprefs.getMoveErrGain());
+			rMovePower = currentMovePower;
+			
+		 } else {
+			// Right is getting ahead:
+			// add negative error to positive power
+			// or positive error to negative power
+			lMovePower = currentMovePower;
+			rMovePower = currentMovePower + (moveError * moprefs.getMoveErrGain());
+			
+			}
+		 tankDrive(lMovePower, rMovePower, moprefs.getDefaultAutoSpeedLimit());
+	}
+	
+	public void moveDistance(double drive) {
+		
+	}
+	public void moveUltrasonic(double untilDist) {
+		// Unimplemented
+	}
+	
 	
 	
 }
