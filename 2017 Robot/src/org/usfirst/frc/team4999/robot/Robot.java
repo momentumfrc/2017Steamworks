@@ -248,6 +248,8 @@ public class Robot extends IterativeRobot {
 		}
 	}
 	
+	Thread moveThread;
+	
 	public void testPeriodic() {
 		switch(testMode.getSelected()) {
 		case shooter:
@@ -274,6 +276,16 @@ public class Robot extends IterativeRobot {
 			}
 			break;
 		case auto_move:
+			if(flightStick.isFirstPush(1)) {
+				moveThread = drive.moveDistance(4, 1);
+			}
+			if(flightStick.isFirstPush(7) && moveThread != null && moveThread.isAlive()) {
+				moveThread.interrupt();
+			}
+			if(flightStick.isFirstPush(8)) {
+				drive.left.reset();
+				drive.right.reset();
+			}
 			break;
 		case rotate:
 			// USE getAngleZ IN PID

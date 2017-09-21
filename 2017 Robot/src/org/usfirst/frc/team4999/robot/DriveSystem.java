@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
 import edu.wpi.first.wpilibj.Preferences;
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.command.Subsystem;
@@ -364,12 +365,38 @@ public class DriveSystem extends Subsystem {
 			rMovePower = currentMovePower + (moveError * moprefs.getMoveErrGain());
 			
 			}
-		 tankDrive(lMovePower, rMovePower, moprefs.getDefaultAutoSpeedLimit());
+		 System.out.format("LeftMove: %.2f, RightMove: %.2f\n ", lMovePower, rMovePower);
+		 //tankDrive(lMovePower, rMovePower, moprefs.getDefaultAutoSpeedLimit());
 	}
 	
-	public void moveDistance(double drive) {
+	private double averageDistance(){
+		return (left.getDistance() + right.getDistance()) / 2;
+	}
+	
+	public Thread moveDistance(double dist, double power) {
+		lEncStart = left.get();
+		rEncStart = right.get();
+		currentMovePower = power;
+		Thread checkerThread = new Thread() {
+			@Override
+			public void run() {
+				while(averageDistance() < dist && !Thread.interrupted() && RobotState.isAutonomous() && !RobotState.isDisabled()){
+					move();
+					try {
+						Thread.sleep(50);
+					} catch (InterruptedException e) {
+						break;
+					}
+				}
+			}
+		};
+		checkerThread.start();
+		return checkerThread;
 		
 	}
+	
+	
+	
 	public void moveUltrasonic(double untilDist) {
 		// Unimplemented
 	}
