@@ -366,7 +366,7 @@ public class DriveSystem extends Subsystem {
 			
 			}
 		 System.out.format("LeftMove: %.2f, RightMove: %.2f\n ", lMovePower, rMovePower);
-		 //tankDrive(lMovePower, rMovePower, moprefs.getDefaultAutoSpeedLimit());
+		 tankDrive(lMovePower, rMovePower, moprefs.getDefaultAutoSpeedLimit());
 	}
 	
 	private double averageDistance(){
@@ -380,7 +380,11 @@ public class DriveSystem extends Subsystem {
 		Thread checkerThread = new Thread() {
 			@Override
 			public void run() {
-				while(averageDistance() < dist && !Thread.interrupted() && RobotState.isAutonomous() && !RobotState.isDisabled()){
+				//System.out.println("Starting");
+				//System.out.println((averageDistance() < dist) + " " + !Thread.interrupted() +" " + RobotState.isAutonomous() + "  " + !RobotState.isDisabled());
+				while(averageDistance() < dist && !Thread.interrupted() /*&& RobotState.isAutonomous()*/ && !RobotState.isDisabled()){
+					//System.out.println("Moving");
+					System.out.format("Left dist: %.2f, Right dist: %.2f\n", left.getDistance(), right.getDistance());
 					move();
 					try {
 						Thread.sleep(50);
@@ -404,3 +408,4 @@ public class DriveSystem extends Subsystem {
 	
 	
 }
+ 
