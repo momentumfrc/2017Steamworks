@@ -333,6 +333,9 @@ public class DriveSystem extends Subsystem {
 	double lMovePower = 0;
 	double rMovePower = 0;
 	
+	/**
+	 * Called in a loop, drives the robot forward. Checks for robot drift and corrects.
+	 */
 	private void move() {
 		double lEnc = left.get();
 		double rEnc = right.get();
@@ -369,21 +372,31 @@ public class DriveSystem extends Subsystem {
 		 tankDrive(lMovePower, rMovePower, moprefs.getDefaultAutoSpeedLimit());
 	}
 	
+	/**
+	 * Gets the average of the distances reported by the left and right encoders
+	 * @return The average distance the robot has traveled
+	 */
 	private double averageDistance(){
 		return (left.getDistance() + right.getDistance()) / 2;
 	}
 	
+	/**
+	 * Moves the robot the specified distance at the specified power. Distance is in meters	
+	 * @param dist The distance to travel in meters
+	 * @param power The power level at which to drive. Between 0 and 1
+	 * @return The thread checking if the robot has traveled the specified distance. Call interrupt() on this object to stop the robot movement
+	 */
 	public Thread moveDistance(double dist, double power) {
+		if (power <= 0 || power > 1) {
+			throw new IllegalArgumentException(power + " is not in the range (0, 1]");
+		}
 		lEncStart = left.get();
 		rEncStart = right.get();
 		currentMovePower = power;
 		Thread checkerThread = new Thread() {
 			@Override
 			public void run() {
-				//System.out.println("Starting");
-				//System.out.println((averageDistance() < dist) + " " + !Thread.interrupted() +" " + RobotState.isAutonomous() + "  " + !RobotState.isDisabled());
-				while(averageDistance() < dist && !Thread.interrupted() /*&& RobotState.isAutonomous()*/ && !RobotState.isDisabled()){
-					//System.out.println("Moving");
+				while(averageDistance() < dist && !Thread.interrupted() && !RobotState.isDisabled()){
 					System.out.format("Left dist: %.2f, Right dist: %.2f\n", left.getDistance(), right.getDistance());
 					move();
 					try {
@@ -392,6 +405,7 @@ public class DriveSystem extends Subsystem {
 						break;
 					}
 				}
+				DriveSystem.this.stop();
 			}
 		};
 		checkerThread.start();
