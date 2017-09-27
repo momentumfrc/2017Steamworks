@@ -368,7 +368,7 @@ public class DriveSystem extends Subsystem {
 			rMovePower = currentMovePower + (moveError * moprefs.getMoveErrGain());
 			
 			}
-		 System.out.format("LeftMove: %.2f, RightMove: %.2f\n ", lMovePower, rMovePower);
+		 //System.out.format("LeftMove: %.2f, RightMove: %.2f\n ", lMovePower, rMovePower);
 		 tankDrive(lMovePower, rMovePower, moprefs.getDefaultAutoSpeedLimit());
 	}
 	
@@ -379,6 +379,9 @@ public class DriveSystem extends Subsystem {
 	private double averageDistance(){
 		return (left.getDistance() + right.getDistance()) / 2;
 	}
+	private double averageDistance(double left, double right) {
+		return(left + right) / 2;
+	}
 	
 	/**
 	 * Moves the robot the specified distance at the specified power. Distance is in meters	
@@ -387,6 +390,7 @@ public class DriveSystem extends Subsystem {
 	 * @return The thread checking if the robot has traveled the specified distance. Call interrupt() on this object to stop the robot movement
 	 */
 	public Thread moveDistance(double dist, double power) {
+
 		if (power <= 0 || power > 1) {
 			throw new IllegalArgumentException(power + " is not in the range (0, 1]");
 		}
@@ -396,8 +400,10 @@ public class DriveSystem extends Subsystem {
 		Thread checkerThread = new Thread() {
 			@Override
 			public void run() {
-				while(averageDistance() < dist && !Thread.interrupted() && !RobotState.isDisabled()){
-					System.out.format("Left dist: %.2f, Right dist: %.2f\n", left.getDistance(), right.getDistance());
+				double startDist = averageDistance();
+				while(Math.abs(averageDistance() - startDist) < dist && !Thread.interrupted() && !RobotState.isDisabled()){
+					//System.out.format("Left dist: %.2f, Right dist: %.2f\n", left.getDistance(), right.getDistance());
+					System.out.format("Left: %d, Right: %d, Difference: %d\n", Math.abs(left.get() - lEncStart), Math.abs(right.get() - rEncStart), Math.abs(left.get() - lEncStart) - Math.abs(right.get() - rEncStart));
 					move();
 					try {
 						Thread.sleep(50);
