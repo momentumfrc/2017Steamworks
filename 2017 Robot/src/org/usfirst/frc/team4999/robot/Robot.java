@@ -58,6 +58,8 @@ public class Robot extends IterativeRobot {
 	// Sendable chooser for test mode
 	TestChooser testMode;
 	
+	TurnPIDChooser testPIDChooser;
+	
 
 	/**
 	 * This method is run once when the robot is turned on.
@@ -121,6 +123,8 @@ public class Robot extends IterativeRobot {
 		
 		//Initialize the chooser
 		testMode = new TestChooser();
+		testPIDChooser = new TurnPIDChooser();
+		
 		
 	}
 
@@ -139,6 +143,8 @@ public class Robot extends IterativeRobot {
 	 * This method runs in a loop during autonomous mode.
 	 */
 	public void autonomousPeriodic() {
+		//TODO: Mode chooser. One mode for each possible starting position. One mode for driving forward to pass the line, according to the encoders. One mode to drive forward to pass the line, according to a timer.
+		
 		// We use the smartDashboard to fine-tune the values so that the robot drives in a straight line, for just the right amount of time, at just the right speed.
 		
 		// For AUTO_TIME seconds...
@@ -264,15 +270,32 @@ public class Robot extends IterativeRobot {
 			teleopPeriodic();
 			break;
 		case auto_turn:
+			// Turn 45 degs
 			if(flightStick.isFirstPush(1)) {
 				drive.turn(prefs.getInt("TEST_TURN_PID_DEG", 45), true);
 			}
+			// Write the set pid values
 			if(flightStick.isFirstPush(8)) {
 				drive.writeTurnPIDValues();
 			}
+			// Stop pid
 			if(flightStick.isFirstPush(7)) {
 				System.out.println("Trying to stop pid");
 				drive.maintainCurrentHeading(false);
+			}
+			// Use pid values from preferences
+			if(flightStick.isFirstPush(11)) {
+				System.out.println("Using preferences values");
+				drive.turnCont.setPID(
+						prefs.getDouble("AUTO_TURN_KP", 0),
+						prefs.getDouble("AUTO_TURN_KI", 0),
+						prefs.getDouble("AUTO_TURN_KD", 0)
+						);
+			}
+			// Use pid values from the enum
+			if(flightStick.isFirstPush(12)) {
+				System.out.println("Using enum values");
+				testPIDChooser.updatePIDController(drive.turnCont);
 			}
 			break;
 		case auto_move:
