@@ -2,6 +2,7 @@
 package org.usfirst.frc.team4999.robot;
 
 import org.usfirst.frc.team4999.utils.DefaultPreferences;
+import org.usfirst.frc.team4999.utils.MoPrefs;
 
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
@@ -26,6 +27,7 @@ public class Robot extends IterativeRobot {
 	// Used to store semi-permanent variables that can be easily changed via the smartdashboard. Good for tuning PID loops w/o having to change the code every time.
 	Preferences prefs;
 	DefaultPreferences dprefs;
+	MoPrefs moprefs;
 	
 	// Controllers used to receive input from the driver.
 	private BetterFlightStick flightStick;
@@ -67,6 +69,8 @@ public class Robot extends IterativeRobot {
 	public void robotInit() {
 		
 		prefs = Preferences.getInstance();
+		
+		moprefs = new MoPrefs();
 		
 		dprefs = new DefaultPreferences();
 		// AUTO_LEFT and AUTO_RIGHT are the values given to the tank drive for the left and right sides of the robot during autonomous.
@@ -123,7 +127,7 @@ public class Robot extends IterativeRobot {
 		
 		//Initialize the chooser
 		testMode = new TestChooser();
-		testPIDChooser = new TurnPIDChooser();
+		testPIDChooser = new TurnPIDChooser(drive.turnCont);
 		
 		
 	}
@@ -272,7 +276,7 @@ public class Robot extends IterativeRobot {
 		case auto_turn:
 			// Turn 45 degs
 			if(flightStick.isFirstPush(1)) {
-				drive.turn(prefs.getInt("TEST_TURN_PID_DEG", 45), true);
+				drive.turn(moprefs.getTestTurn(), true);
 			}
 			// Write the set pid values
 			if(flightStick.isFirstPush(8)) {
@@ -282,20 +286,6 @@ public class Robot extends IterativeRobot {
 			if(flightStick.isFirstPush(7)) {
 				System.out.println("Trying to stop pid");
 				drive.maintainCurrentHeading(false);
-			}
-			// Use pid values from preferences
-			if(flightStick.isFirstPush(11)) {
-				System.out.println("Using preferences values");
-				drive.turnCont.setPID(
-						prefs.getDouble("AUTO_TURN_KP", 0),
-						prefs.getDouble("AUTO_TURN_KI", 0),
-						prefs.getDouble("AUTO_TURN_KD", 0)
-						);
-			}
-			// Use pid values from the enum
-			if(flightStick.isFirstPush(12)) {
-				System.out.println("Using enum values");
-				testPIDChooser.updatePIDController(drive.turnCont);
 			}
 			break;
 		case auto_move:

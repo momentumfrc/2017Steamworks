@@ -110,9 +110,6 @@ public class DriveSystem extends Subsystem {
 		dprefs = new DefaultPreferences();
 		moprefs = new MoPrefs();
 		
-		dprefs.addKey("AUTO_TURN_KP", 0);
-		dprefs.addKey("AUTO_TURN_KI", 0);
-		dprefs.addKey("AUTO_TURN_KD", 0);
 		dprefs.addKey("AUTO_PID_TURN_TOLERANCE", 5.0);
 		dprefs.addKey("AUTO_TURN_TARGET_TIME", 1.0);
 		dprefs.addKey("DIST_BTW_WHEELS", 20);
