@@ -1,5 +1,6 @@
 package org.usfirst.frc.team4999.robot;
 
+import java.util.HashMap;
 import java.util.HashSet;
 
 import edu.wpi.first.wpilibj.Timer;
@@ -7,6 +8,7 @@ import edu.wpi.first.wpilibj.XboxController;
 
 public class BetterXBoxController extends XboxController {
 	HashSet<Integer> held;
+	
 	public BetterXBoxController(int port) {
 		super(port);
 		held = new HashSet<Integer>();

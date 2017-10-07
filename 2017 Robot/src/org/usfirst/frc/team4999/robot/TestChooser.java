@@ -3,7 +3,7 @@ package org.usfirst.frc.team4999.robot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-enum TestMode {outreach, shooter, encoders, auto_turn, auto_move, rotate};
+enum TestMode {outreach, shooter, encoders, auto_turn, auto_move, rotate, xbox};
 
 public class TestChooser extends SendableChooser<TestMode> {
 	TestChooser(){
@@ -14,6 +14,7 @@ public class TestChooser extends SendableChooser<TestMode> {
 		addObject("Autonomous Move Pid", TestMode.auto_move);
 		addObject("Rotation Values", TestMode.rotate);
 		addObject("Outreach", TestMode.outreach);
+		addObject("Controller", TestMode.xbox);
 		
 		SmartDashboard.putData("Test Chooser", this);
 	}

@@ -292,7 +292,15 @@ public class Robot extends IterativeRobot {
 		
 		switch(driveMode.getSelected()) {
 		case tankDrive:
-			System.out.println("xbox unimplemented");
+			System.out.println("xbox untestesd");
+			
+			moveRequest = xboxController.getY(BetterXBoxController.Hand.kRight);
+			turnRequest = xboxController.getX(BetterXBoxController.Hand.kLeft);
+			
+			System.out.format("Move: %.2f   Turn: %.2f");
+			
+			drive.arcadeDrive(moveRequest, turnRequest, 1);
+			
 			//break;
 		case arcadeDrive:
 		default:
@@ -386,6 +394,8 @@ public class Robot extends IterativeRobot {
 		case outreach:
 			outreachInit();
 			break;
+		case xbox:
+			break;
 		default:
 			break;
 		}
@@ -397,7 +407,7 @@ public class Robot extends IterativeRobot {
 			shooterPeriodic();
 			break;
 		case encoders:
-			System.out.format("Left: %d    Right: %d\n", drive.left.get(), drive.right.get());
+			System.out.format("Left count: %d, dist: %.2f    Right count: %d, dist: %.2f\n", drive.left.get(), drive.left.getDistance(), drive.right.get(), drive.right.getDistance());
 			if(flightStick.isFirstPush(8)) {
 				drive.left.reset();
 				drive.right.reset();
@@ -448,6 +458,13 @@ public class Robot extends IterativeRobot {
 			break;
 		case outreach:
 			outreachPeriodic();
+			break;
+		case xbox:
+			moveRequest = xboxController.getY(BetterXBoxController.Hand.kRight);
+			turnRequest = xboxController.getX(BetterXBoxController.Hand.kLeft);
+			
+			System.out.format("Move: %.2f   Turn: %.2f");
+			break;
 		default:
 			break;
 		}
