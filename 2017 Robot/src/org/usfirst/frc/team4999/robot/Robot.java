@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.Preferences;
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
@@ -61,6 +62,10 @@ public class Robot extends IterativeRobot {
 	TestChooser testMode;
 	
 	TurnPIDChooser testPIDChooser;
+	
+	AutoModeChooser autoMode;
+	
+	public Thread moveThread;
 	
 
 	/**
@@ -128,6 +133,7 @@ public class Robot extends IterativeRobot {
 		//Initialize the chooser
 		testMode = new TestChooser();
 		testPIDChooser = new TurnPIDChooser(drive.turnCont);
+		autoMode = new AutoModeChooser();
 		
 		
 	}
@@ -137,28 +143,145 @@ public class Robot extends IterativeRobot {
 		drive.STOP();
 	}
 	
+	boolean doOnce = true;
 	public void autonomousInit() {
 		// Set the timer to the current time. We will use the difference between this time and the current time to calculate time elapsed.
 		auto.reset();
-		cam2.testProcess = true;
+		moveThread = null;
+		doOnce = true;
+		/*cam2.testProcess = true; // I don't recognize this, so I'm comenting it out */
 	}
 
 	/**
 	 * This method runs in a loop during autonomous mode.
 	 */
+	
+	
 	public void autonomousPeriodic() {
-		//TODO: Mode chooser. One mode for each possible starting position. One mode for driving forward to pass the line, according to the encoders. One mode to drive forward to pass the line, according to a timer.
 		
-		// We use the smartDashboard to fine-tune the values so that the robot drives in a straight line, for just the right amount of time, at just the right speed.
-		
-		// For AUTO_TIME seconds...
-		if (auto.hasPeriodPassed(prefs.getDouble("AUTO_TIME", 5))) {
-			// Drive forward using the tank drive. Drive with AUTO_LEFT on the left and AUTO_RIGHT on the right. Speed limiter is AUTO_MULT.
-			drive.tankDrive(prefs.getDouble("AUTO_LEFT",1),prefs.getDouble("AUTO_RIGHT", 1),prefs.getDouble("AUTO_MULT", 0.25));
-		} else {
-			// After the time has elapsed, don't move
-			drive.stop();
+		switch(autoMode.getSelected()) {
+		case left:
+			if(doOnce) {
+				doOnce = false;
+				moveThread = drive.moveDistance(3.5, 1);
+				while(!moveThread.isAlive()) {
+					if(RobotState.isDisabled() || !RobotState.isAutonomous()) {
+						return;
+					}
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						return;
+					}
+					
+				}
+				drive.turn(90, true);
+				while(drive.turnCont.isEnabled()) {
+					if(RobotState.isDisabled() || !RobotState.isAutonomous()) {
+						return;
+					}
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						return;
+					}
+					
+				}
+				drive.maintainCurrentHeading(false);
+				moveThread = drive.moveDistance(1.5, 1);
+				while(!moveThread.isAlive()) {
+					if(RobotState.isDisabled() || !RobotState.isAutonomous()) {
+						return;
+					}
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						return;
+					}
+					
+				}
+			}
+			break;
+		case center:
+			if(doOnce) {
+				doOnce = false;
+				moveThread = drive.moveDistance(2.153, 1);
+				while(!moveThread.isAlive()) {
+					if(RobotState.isDisabled() || !RobotState.isAutonomous()) {
+						return;
+					}
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						return;
+					}
+					
+				}
+			}
+			break;
+		case right:
+			if(doOnce) {
+				doOnce = false;
+				moveThread = drive.moveDistance(3.5, 1);
+				while(!moveThread.isAlive()) {
+					if(RobotState.isDisabled() || !RobotState.isAutonomous()) {
+						return;
+					}
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						return;
+					}
+					
+				}
+				drive.turn(-90, true);
+				while(drive.turnCont.isEnabled()) {
+					if(RobotState.isDisabled() || !RobotState.isAutonomous()) {
+						return;
+					}
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						return;
+					}
+					
+				}
+				drive.maintainCurrentHeading(false);
+				moveThread = drive.moveDistance(1.5, 1);
+				while(!moveThread.isAlive()) {
+					if(RobotState.isDisabled() || !RobotState.isAutonomous()) {
+						return;
+					}
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						return;
+					}
+					
+				}
+			}
+			break;
+		case fallbackDistance:
+			if(doOnce) {
+				doOnce = false;
+				moveThread = drive.moveDistance(3, 1);
+			}
+			break;
+		case fallbackTime:
+		default:
+			// For AUTO_TIME seconds...
+			if (auto.hasPeriodPassed(prefs.getDouble("AUTO_TIME", 5))) {
+				// Drive forward using the tank drive. Drive with AUTO_LEFT on the left and AUTO_RIGHT on the right. Speed limiter is AUTO_MULT.
+				drive.tankDrive(prefs.getDouble("AUTO_LEFT",1),prefs.getDouble("AUTO_RIGHT", 1),prefs.getDouble("AUTO_MULT", 0.25));
+			} else {
+				// After the time has elapsed, don't move
+				drive.stop();
+			}
+			break;
 		}
+		
+		
+		
 			
 	}
 	
@@ -257,8 +380,6 @@ public class Robot extends IterativeRobot {
 			break;
 		}
 	}
-	
-	Thread moveThread;
 	
 	public void testPeriodic() {
 		switch(testMode.getSelected()) {
