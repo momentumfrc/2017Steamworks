@@ -415,6 +415,44 @@ public class DriveSystem extends Subsystem {
 		return checkerThread;
 		
 	}
+	/**
+	 * Moves the robot the specified distance at the specified power. Distance is in meters	
+	 * @param dist The distance to travel in meters
+	 * @param power The power level at which to drive. Between 0 and 1
+	 * @return The thread checking if the robot has traveled the specified distance. Call interrupt() on this object to stop the robot movement
+	 */
+	public Thread moveDistanceWithRampUp(double dist, double power, double rampPerTick) {
+
+		if (power <= 0 || power > 1) {
+			throw new IllegalArgumentException(power + " is not in the range (0, 1]");
+		}
+		lEncStart = left.get();
+		rEncStart = right.get();
+		currentMovePower = rampPerTick;
+		Thread checkerThread = new Thread() {
+			@Override
+			public void run() {
+				double startDist = averageDistance();
+				while(Math.abs(averageDistance() - startDist) < dist && !Thread.interrupted() && !RobotState.isDisabled()){
+					//System.out.format("Left dist: %.2f, Right dist: %.2f\n", left.getDistance(), right.getDistance());
+					System.out.format("Left: %d, Right: %d, Difference: %d\n", Math.abs(left.get() - lEncStart), Math.abs(right.get() - rEncStart), Math.abs(left.get() - lEncStart) - Math.abs(right.get() - rEncStart));
+					move();
+					if(currentMovePower < power) {
+						currentMovePower += rampPerTick;
+					}
+					try {
+						Thread.sleep(50);
+					} catch (InterruptedException e) {
+						break;
+					}
+				}
+				DriveSystem.this.stop();
+			}
+		};
+		checkerThread.start();
+		return checkerThread;
+		
+	}
 	
 	
 	

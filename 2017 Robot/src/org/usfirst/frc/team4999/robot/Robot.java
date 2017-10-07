@@ -65,7 +65,10 @@ public class Robot extends IterativeRobot {
 	
 	AutoModeChooser autoMode;
 	
+	DriveModeChooser driveMode;
+	
 	public Thread moveThread;
+	
 	
 
 	/**
@@ -134,7 +137,7 @@ public class Robot extends IterativeRobot {
 		testMode = new TestChooser();
 		testPIDChooser = new TurnPIDChooser(drive.turnCont);
 		autoMode = new AutoModeChooser();
-		
+		driveMode = new DriveModeChooser();
 		
 	}
 
@@ -205,7 +208,7 @@ public class Robot extends IterativeRobot {
 		case center:
 			if(doOnce) {
 				doOnce = false;
-				moveThread = drive.moveDistance(2.153, 1);
+				moveThread = drive.moveDistanceWithRampUp(2.153, 1, 0.1);
 				while(!moveThread.isAlive()) {
 					if(RobotState.isDisabled() || !RobotState.isAutonomous()) {
 						return;
@@ -287,18 +290,25 @@ public class Robot extends IterativeRobot {
 	
 	public void teleopPeriodic() {
 		
-
-		// The input from the driver. Deadzones are used to make the robot less twitchy.
-		moveRequest = -flightStick.getCalibratedY();
-		turnRequest = flightStick.getCalibratedTwist();
-		
-		// Allow the driver to switch back and front.
-		moveRequest = (isInverted)? -moveRequest: moveRequest;
-		
-		// Throttle
-		double speedLimiter = (-flightStick.getThrottle() + 1) / 2;
-		
-		drive.arcadeDrive(moveRequest, turnRequest, speedLimiter);
+		switch(driveMode.getSelected()) {
+		case tankDrive:
+			System.out.println("xbox unimplemented");
+			//break;
+		case arcadeDrive:
+		default:
+			// The input from the driver. Deadzones are used to make the robot less twitchy.
+			moveRequest = -flightStick.getCalibratedY();
+			turnRequest = flightStick.getCalibratedTwist();
+			
+			// Allow the driver to switch back and front.
+			moveRequest = (isInverted)? -moveRequest: moveRequest;
+			
+			// Throttle
+			double speedLimiter = (-flightStick.getThrottle() + 1) / 2;
+			
+			drive.arcadeDrive(moveRequest, turnRequest, speedLimiter);
+			break;
+		}
 		
 		// Drive the intake
 		if(xboxController.getBumper(Hand.kLeft)){
