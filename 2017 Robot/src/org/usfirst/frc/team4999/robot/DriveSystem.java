@@ -33,7 +33,6 @@ class turnInterface implements PIDOutput {
 	@Override
 	public void pidWrite(double output) {
 		drive.arcadeDrive(0, output, moprefs.getDefaultAutoSpeedLimit());
-		drive.pidArcadeTurnDrive(output);
 	}
 }
 
@@ -77,7 +76,7 @@ class adisPIDInterface implements PIDSource {
 
 
 /**
- * The drive system of the robot. Has pid controllers to move a specified distance or turn a specified number of degrees
+ * The drive system of the robot. Has pid controller to turn a specified number of degrees
  * @author jordan
  *
  */
@@ -110,7 +109,6 @@ public class DriveSystem extends Subsystem {
 		dprefs = new DefaultPreferences();
 		moprefs = new MoPrefs();
 		
-		dprefs.addKey("AUTO_PID_TURN_TOLERANCE", 5.0);
 		dprefs.addKey("AUTO_TURN_TARGET_TIME", 1.0);
 		dprefs.addKey("DIST_BTW_WHEELS", 20);
 		
@@ -135,16 +133,16 @@ public class DriveSystem extends Subsystem {
 		right.setPIDSourceType(PIDSourceType.kDisplacement);
 		
 		turnCont = new MomentumPIDController(
-				prefs.getDouble("AUTO_TURN_KP", 0),
-				prefs.getDouble("AUTO_TURN_KI", 0),
-				prefs.getDouble("AUTO_TURN_KD", 0),
+				moprefs.getTurnP(),
+				moprefs.getTurnI(),
+				moprefs.getTurnD(),
 				adisInt,
 				new turnInterface(this)
 		);
 		
 		initLiveWindow();
 		
-		turnCont.setAbsoluteTolerance(prefs.getDouble("AUTO_PID_TURN_TOLERANCE", 5.0));
+		turnCont.setAbsoluteTolerance(moprefs.getTurnPIDTolerance());
 		turnCont.setOutputRange(-1,1);
 	}
 	
@@ -185,16 +183,6 @@ public class DriveSystem extends Subsystem {
 	}
 	
 	
-	private double PIDmove, PIDturn;
-	public synchronized void pidArcadeMoveDrive(double moveRequest) {
-		PIDmove= moveRequest;
-		arcadeDrive(PIDmove,PIDturn,moprefs.getDefaultAutoSpeedLimit());
-	}
-	public synchronized void pidArcadeTurnDrive(double turnRequest) {
-		PIDturn = turnRequest;
-		arcadeDrive(PIDmove,PIDturn,moprefs.getDefaultAutoSpeedLimit());
-	}
-	
 	
 	/**
 	 * Moves the robot in a tank-drive fashion according to given inputs. All values are within the range of [-1,1].
@@ -229,8 +217,6 @@ public class DriveSystem extends Subsystem {
 	public synchronized void STOP() {
 		stop();
 		turnCont.disable();
-		PIDmove= 0;
-		PIDturn = 0;
 	}
 	
 	public double getEncAngle() {
@@ -256,59 +242,25 @@ public class DriveSystem extends Subsystem {
 		turn(deg, false);
 	}
 	
-	/**
-	 * Asynchronously turns the robot the specified number of degrees
-	 * @param deg - Number of degrees to turn
-	 * @param debug - Print debug messages
-	 * @return A thread object running the turn code. Rotation may be interrupted by calling the method interrupt() on this object
-	 */
-	public Thread asyncTurn(double deg, boolean debug) {
-		Thread turn = new Thread() {
-			public void run() {
-				turnCont.setSetpoint(adis.getAngleZ() + deg);
-				if(debug)
-					System.out.format("Beginning turn. Setpoint set to: %.2f\n", turnCont.getSetpoint());
-				turnCont.enable();
-				DriverStation driver = DriverStation.getInstance();
-				Timer onTarget = new Timer();
-				onTarget.start();
-				boolean firstOnTarget = true;
-				while(!driver.isDisabled()){
-					try {
-						Thread.sleep(10);
-						if(debug) {
-							System.out.format("Turn in progress! Currently at %.2f and set to %.2f\n", adis.getAngleZ(), turnCont.getSetpoint());
-							SmartDashboard.putNumber("Adis Reading", adis.getAngleZ());
-						}
-						if(turnCont.onTarget()) {
-							if(firstOnTarget){
-								onTarget.reset();
-								firstOnTarget = false;
-							}
-							if(onTarget.hasPeriodPassed(prefs.getFloat("AUTO_TURN_TARGET_TIME", 1))) {
-								break;
-							}
-						} else {
-							firstOnTarget = true;
-						}
-						if(Thread.interrupted()) {
-							throw new InterruptedException();
-						}
-					} catch (InterruptedException e) {
-						break;
-					}
-					
+	public void blockingTurn(double deg, boolean debug) {
+		turn(deg, debug);
+		Timer timer = new Timer();
+		timer.start();
+		while(!RobotState.isDisabled()) {
+			if(turnCont.onTarget()) {
+				if(timer.hasPeriodPassed(moprefs.getPIDTargetTime())) {
+					break;
 				}
-				turnCont.disable();
-				PIDmove = 0;
-				PIDturn = 0;
+			} else {
+				timer.reset();
 			}
-		};
-		turn.start();
-		return turn;
-	}
-	public Thread asyncTurn(double deg) {
-		return asyncTurn(deg, false);
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				break;
+			}
+		}
+		turnCont.disable();
 	}
 	
 	public void maintainCurrentHeading(boolean value) {
@@ -318,8 +270,6 @@ public class DriveSystem extends Subsystem {
 				turnCont.enable();
 			} else {
 				turnCont.disable();
-				PIDmove = 0;
-				PIDturn = 0;
 			}
 		}
 	}
@@ -327,8 +277,6 @@ public class DriveSystem extends Subsystem {
 	
 	int lEncStart = 0;
 	int rEncStart = 0;
-	double lMovePower = 0;
-	double rMovePower = 0;
 	
 	/**
 	 * Called in a loop, drives the robot forward. Checks for robot drift and corrects.
@@ -339,6 +287,9 @@ public class DriveSystem extends Subsystem {
 		double lChange = lEnc - lEncStart;
 		double rChange = rEnc - rEncStart;
 		double moveError = lChange - rChange;
+		
+		double lMovePower = 0;
+		double rMovePower = 0;
 		
 		// How to resolve error:
 		// - Set one motor to full movePower and reduce the other one.
@@ -376,53 +327,15 @@ public class DriveSystem extends Subsystem {
 	private double averageDistance(){
 		return (left.getDistance() + right.getDistance()) / 2;
 	}
-	private double averageDistance(double left, double right) {
-		return(left + right) / 2;
-	}
 	
 	/**
-	 * Moves the robot the specified distance at the specified power. Distance is in meters	
+	 * Moves the robot the specified distance at the specified power, ramping up by the rampPerTick every 50ms until the power is at the limit specified. Distance is in meters	
 	 * @param dist The distance to travel in meters
 	 * @param power The power level at which to drive. Between 0 and 1
+	 * @param rampPerTick The amount to increase the power by every 50ms
 	 * @return The thread checking if the robot has traveled the specified distance. Call interrupt() on this object to stop the robot movement
 	 */
-	public Thread moveDistance(double dist, double power) {
-
-		if (power <= 0 || power > 1) {
-			throw new IllegalArgumentException(power + " is not in the range (0, 1]");
-		}
-		lEncStart = left.get();
-		rEncStart = right.get();
-		currentMovePower = power;
-		Thread checkerThread = new Thread() {
-			@Override
-			public void run() {
-				double startDist = averageDistance();
-				while(Math.abs(averageDistance() - startDist) < dist && !Thread.interrupted() && !RobotState.isDisabled()){
-					//System.out.format("Left dist: %.2f, Right dist: %.2f\n", left.getDistance(), right.getDistance());
-					System.out.format("Left: %d, Right: %d, Difference: %d\n", Math.abs(left.get() - lEncStart), Math.abs(right.get() - rEncStart), Math.abs(left.get() - lEncStart) - Math.abs(right.get() - rEncStart));
-					move();
-					try {
-						Thread.sleep(50);
-					} catch (InterruptedException e) {
-						break;
-					}
-				}
-				DriveSystem.this.stop();
-			}
-		};
-		checkerThread.start();
-		return checkerThread;
-		
-	}
-	/**
-	 * Moves the robot the specified distance at the specified power. Distance is in meters	
-	 * @param dist The distance to travel in meters
-	 * @param power The power level at which to drive. Between 0 and 1
-	 * @return The thread checking if the robot has traveled the specified distance. Call interrupt() on this object to stop the robot movement
-	 */
-	public Thread moveDistanceWithRampUp(double dist, double power, double rampPerTick) {
-
+	public Thread moveDistance(double dist, double power, double rampPerTick) {
 		if (power <= 0 || power > 1) {
 			throw new IllegalArgumentException(power + " is not in the range (0, 1]");
 		}
@@ -454,7 +367,84 @@ public class DriveSystem extends Subsystem {
 		
 	}
 	
+	/**
+	 * Moves the robot the specified distance at the specified power. Distance is in meters	
+	 * @param dist The distance to travel in meters
+	 * @param power The power level at which to drive. Between 0 and 1
+	 * @return The thread checking if the robot has traveled the specified distance. Call interrupt() on this object to stop the robot movement
+	 */
+	public Thread moveDistance(double dist, double power) {
+		return moveDistance(dist, power, power);
+	}
 	
+	/**
+	 * Moves the robot the specified distance at the specified power, ramping up by the rampPerTick every 50ms until the power is at the limit specified. Distance is in meters	
+	 * @param dist The distance to travel in meters
+	 * @param power The power level at which to drive. Between 0 and 1
+	 * @param rampPerTick The amount to increase the power by every 50ms
+	 */
+	public void blockingMoveDistance(double dist, double power, double rampPerTick) {
+		lEncStart = left.get();
+		rEncStart = right.get();
+		currentMovePower = rampPerTick;
+		double startDist = averageDistance();
+		while(Math.abs(averageDistance() - startDist) < dist && !Thread.interrupted() && !RobotState.isDisabled()){
+			move();
+			if(currentMovePower < power) {
+				currentMovePower += rampPerTick;
+			}
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException e) {
+				break;
+			}
+		}
+		stop();
+	}
+	/**
+	 * Moves the robot the specified distance at the specified power. Distance is in meters	
+	 * @param dist The distance to travel in meters
+	 * @param power The power level at which to drive. Between 0 and 1
+	 */
+	public void blockingMoveDistance(double dist, double power) {
+		blockingMoveDistance(dist, power, power);
+	}
+	
+	/**
+	 * Moves the robot at the specified power for the specified time, ramping up by the rampPerTick every 50ms until the power is at the limit specified
+	 * @param time The time to travel for
+	 * @param power The power level at which to drive. Between 0 and 1
+	 * @param rampPerTick The amount to increase the power by every 50ms
+	 */
+	public void blockingMoveTime(double time, double power, double rampPerTick) {
+		lEncStart = left.get();
+		rEncStart = right.get();
+		currentMovePower = rampPerTick;
+		Timer timer = new Timer();
+		timer.start();
+		while(!timer.hasPeriodPassed(time) && !Thread.interrupted() && !RobotState.isDisabled()) {
+			move();
+			if(currentMovePower < power) {
+				currentMovePower += rampPerTick;
+			}
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException e) {
+				break;
+			}
+		}
+		stop();
+	}
+	
+	/**
+	 * Moves the robot at the specified power for the specified time
+	 * @param time The time to travel for
+	 * @param power The power level at which to drive. Between 0 and 1
+	 * @param rampPerTick The amount to increase the power by every 50ms
+	 */
+	public void blockingMoveTime(double time, double power) {
+		blockingMoveTime(time, power, power);
+	}
 	
 	public void moveUltrasonic(double untilDist) {
 		// Unimplemented

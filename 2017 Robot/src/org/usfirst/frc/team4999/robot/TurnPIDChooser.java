@@ -46,6 +46,7 @@ public class TurnPIDChooser extends SendableChooser<TurnPIDMode>{
 		};
 		
 		table.addTableListener("selected",listener, true);
+		updatePIDController();
 	}
 	
 	public double getP() {

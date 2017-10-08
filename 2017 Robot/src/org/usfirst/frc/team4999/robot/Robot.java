@@ -49,11 +49,11 @@ public class Robot extends IterativeRobot {
 	// Piston used to deploy gears.
 	DoubleSolenoid piston;
 	
-	Timer gear, auto, outreach;
+	Timer gear, outreach;
 	
 	// The two cameras connected to the RoboRio.
 	UsbCamera cam1;
-	Cam2 cam2;
+	//Cam2 cam2;
 	
 	// Values to store user input
 	double moveRequest,turnRequest;
@@ -61,7 +61,7 @@ public class Robot extends IterativeRobot {
 	// Sendable chooser for test mode
 	TestChooser testMode;
 	
-	TurnPIDChooser testPIDChooser;
+	TurnPIDChooser turnPIDChooser;
 	
 	AutoModeChooser autoMode;
 	
@@ -81,13 +81,7 @@ public class Robot extends IterativeRobot {
 		moprefs = new MoPrefs();
 		
 		dprefs = new DefaultPreferences();
-		// AUTO_LEFT and AUTO_RIGHT are the values given to the tank drive for the left and right sides of the robot during autonomous.
-		dprefs.addKey("AUTO_LEFT", 1);
-		dprefs.addKey("AUTO_RIGHT", 1);
-		// AUTO_MULT is the speed limiter during autonomous.
-		dprefs.addKey("AUTO_MULT", 0.25);
-		// AUTO_TIME is the amount time the robot will move forward for.
-		dprefs.addKey("AUTO_TIME", 5);
+		
 		// OUTREACH_TIME is the number of seconds allowed for outreach driving
 		dprefs.addKey("OUTREACH_TIME", 30);
 		// OUTREACH_SPEED is the max speed of the outreach driving.
@@ -97,8 +91,6 @@ public class Robot extends IterativeRobot {
 		// The two pins the motors for the shooter are connected to
 		dprefs.addKey("SHOOTER_LEFT", 6);
 		dprefs.addKey("SHOOTER_RIGHT", 7);
-		
-		dprefs.addKey("TEST_TURN_PID_DEG", 45);
 		
 		// DriveSystem
 		drive = new DriveSystem(2,3,0,1);
@@ -119,189 +111,93 @@ public class Robot extends IterativeRobot {
 		flightStick.setDeadzoneY(0.15);
 		flightStick.setDeadzoneTwist(0.20);
 		
-		auto = new Timer();
 		gear = new Timer();
 		outreach = new Timer();
-		auto.start();
 		gear.start();
 		outreach.start();
 		
 		// Begin capturing video from the cameras and streaming it back to the smartDashboard
 		cam1 = CameraServer.getInstance().startAutomaticCapture("DriverView", 0);
+		cam1.setFPS(moprefs.getFPS());
 		
-		// Put text on the second camera to show if the robot is reversed
-		cam2 = new Cam2("ProcessedView",1);
-		cam2.start();
-		
-		//Initialize the chooser
+		//Initialize the choosers
 		testMode = new TestChooser();
-		testPIDChooser = new TurnPIDChooser(drive.turnCont);
+		turnPIDChooser = new TurnPIDChooser(drive.turnCont);
 		autoMode = new AutoModeChooser();
 		driveMode = new DriveModeChooser();
 		
 	}
 
 	public void disabledInit() {
-		cam2.testProcess = false;
 		drive.STOP();
 	}
 	
-	boolean doOnce = true;
 	public void autonomousInit() {
-		// Set the timer to the current time. We will use the difference between this time and the current time to calculate time elapsed.
-		auto.reset();
-		moveThread = null;
-		doOnce = true;
-		/*cam2.testProcess = true; // I don't recognize this, so I'm comenting it out */
+		switch(autoMode.getSelected()) {
+		case left:
+			drive.blockingMoveDistance(moprefs.getMoveBeforeTurn(), 1, 0.1);
+			drive.blockingTurn(moprefs.getTurn(), true);
+			drive.blockingMoveTime(moprefs.getMoveForTime(), moprefs.getDefaultAutoSpeedLimit(), 0.1);
+			break;
+		case center:
+			drive.blockingMoveTime(moprefs.getMoveForTime(), moprefs.getDefaultAutoSpeedLimit());
+			break;
+		case right:
+			drive.blockingMoveDistance(moprefs.getMoveBeforeTurn(), 1, 0.1);
+			drive.blockingTurn(moprefs.getTurn(), true);
+			drive.blockingMoveTime(moprefs.getMoveForTime(), moprefs.getDefaultAutoSpeedLimit(), 0.1);
+			break;
+		case fallbackDistance:
+			drive.blockingMoveDistance(2.153, 1, 0.1);
+		case fallbackTime:
+			drive.blockingMoveTime(5, 1, 0.1);
+		default:
+			break;
+		}
 	}
 
 	/**
 	 * This method runs in a loop during autonomous mode.
 	 */
-	
-	
 	public void autonomousPeriodic() {
 		
-		switch(autoMode.getSelected()) {
-		case left:
-			if(doOnce) {
-				doOnce = false;
-				moveThread = drive.moveDistance(3.5, 1);
-				while(!moveThread.isAlive()) {
-					if(RobotState.isDisabled() || !RobotState.isAutonomous()) {
-						return;
-					}
-					try {
-						Thread.sleep(10);
-					} catch (InterruptedException e) {
-						return;
-					}
-					
-				}
-				drive.turn(90, true);
-				while(drive.turnCont.isEnabled()) {
-					if(RobotState.isDisabled() || !RobotState.isAutonomous()) {
-						return;
-					}
-					try {
-						Thread.sleep(10);
-					} catch (InterruptedException e) {
-						return;
-					}
-					
-				}
-				drive.maintainCurrentHeading(false);
-				moveThread = drive.moveDistance(1.5, 1);
-				while(!moveThread.isAlive()) {
-					if(RobotState.isDisabled() || !RobotState.isAutonomous()) {
-						return;
-					}
-					try {
-						Thread.sleep(10);
-					} catch (InterruptedException e) {
-						return;
-					}
-					
-				}
-			}
-			break;
-		case center:
-			if(doOnce) {
-				doOnce = false;
-				moveThread = drive.moveDistanceWithRampUp(2.153, 1, 0.1);
-				while(!moveThread.isAlive()) {
-					if(RobotState.isDisabled() || !RobotState.isAutonomous()) {
-						return;
-					}
-					try {
-						Thread.sleep(10);
-					} catch (InterruptedException e) {
-						return;
-					}
-					
-				}
-			}
-			break;
-		case right:
-			if(doOnce) {
-				doOnce = false;
-				moveThread = drive.moveDistance(3.5, 1);
-				while(!moveThread.isAlive()) {
-					if(RobotState.isDisabled() || !RobotState.isAutonomous()) {
-						return;
-					}
-					try {
-						Thread.sleep(10);
-					} catch (InterruptedException e) {
-						return;
-					}
-					
-				}
-				drive.turn(-90, true);
-				while(drive.turnCont.isEnabled()) {
-					if(RobotState.isDisabled() || !RobotState.isAutonomous()) {
-						return;
-					}
-					try {
-						Thread.sleep(10);
-					} catch (InterruptedException e) {
-						return;
-					}
-					
-				}
-				drive.maintainCurrentHeading(false);
-				moveThread = drive.moveDistance(1.5, 1);
-				while(!moveThread.isAlive()) {
-					if(RobotState.isDisabled() || !RobotState.isAutonomous()) {
-						return;
-					}
-					try {
-						Thread.sleep(10);
-					} catch (InterruptedException e) {
-						return;
-					}
-					
-				}
-			}
-			break;
-		case fallbackDistance:
-			if(doOnce) {
-				doOnce = false;
-				moveThread = drive.moveDistance(3, 1);
-			}
-			break;
-		case fallbackTime:
-		default:
-			// For AUTO_TIME seconds...
-			if (auto.hasPeriodPassed(prefs.getDouble("AUTO_TIME", 5))) {
-				// Drive forward using the tank drive. Drive with AUTO_LEFT on the left and AUTO_RIGHT on the right. Speed limiter is AUTO_MULT.
-				drive.tankDrive(prefs.getDouble("AUTO_LEFT",1),prefs.getDouble("AUTO_RIGHT", 1),prefs.getDouble("AUTO_MULT", 0.25));
-			} else {
-				// After the time has elapsed, don't move
-				drive.stop();
-			}
-			break;
-		}
-		
-		
-		
-			
 	}
 	
 	public void teleopPeriodic() {
-		
+		double speedLimiter;
 		switch(driveMode.getSelected()) {
 		case tankDrive:
-			System.out.println("xbox untestesd");
 			
-			moveRequest = xboxController.getY(BetterXBoxController.Hand.kRight);
-			turnRequest = xboxController.getX(BetterXBoxController.Hand.kLeft);
+			moveRequest = expCurve(deadzone(xboxController.getY(Hand.kLeft), 0.1),3);
+			turnRequest = expCurve(deadzone(xboxController.getX(Hand.kRight), 0.1),3);
 			
-			System.out.format("Move: %.2f   Turn: %.2f");
+			moveRequest = (isInverted)? -moveRequest: moveRequest;
 			
-			drive.arcadeDrive(moveRequest, turnRequest, 1);
+			speedLimiter = (-flightStick.getThrottle() + 1) / 2;
 			
-			//break;
+			drive.arcadeDrive(moveRequest, turnRequest, speedLimiter);
+			
+			if(xboxController.getBumper(Hand.kLeft)) {
+				xboxController.setRumble(RumbleType.kRightRumble, 0);
+				xboxController.setRumble(RumbleType.kLeftRumble, 0.5);
+				
+				winch.set(1);
+			} else if(xboxController.getBumper(Hand.kRight)){
+				xboxController.setRumble(RumbleType.kRightRumble, 0.5);
+				xboxController.setRumble(RumbleType.kLeftRumble, 0);
+				
+				winch.set(0.5);
+			} else if(xboxController.getYButton()) {
+				xboxController.setRumble(RumbleType.kRightRumble, 0.5);
+				xboxController.setRumble(RumbleType.kLeftRumble, 0.5);
+				winch.set(-0.25);
+			} else {
+				xboxController.setRumble(RumbleType.kRightRumble, 0);
+				xboxController.setRumble(RumbleType.kLeftRumble, 0);
+				winch.set(0);
+			}
+			
+			break;
 		case arcadeDrive:
 		default:
 			// The input from the driver. Deadzones are used to make the robot less twitchy.
@@ -312,51 +208,28 @@ public class Robot extends IterativeRobot {
 			moveRequest = (isInverted)? -moveRequest: moveRequest;
 			
 			// Throttle
-			double speedLimiter = (-flightStick.getThrottle() + 1) / 2;
+			speedLimiter = (-flightStick.getThrottle() + 1) / 2;
 			
 			drive.arcadeDrive(moveRequest, turnRequest, speedLimiter);
+			
+			// Drive the winch.
+			if(flightStick.getRawButton(5)){
+				winch.set(1);
+			} else if(flightStick.getRawButton(3)) {
+				winch.set(.50);
+			} else if(flightStick.getRawButton(6)) {
+				winch.set(-.25);
+			}else {
+				winch.set(0);
+			}
 			break;
 		}
 		
-		// Drive the intake
-		if(xboxController.getBumper(Hand.kLeft)){
-			xboxController.setRumble(RumbleType.kRightRumble, 0);
-			xboxController.setRumble(RumbleType.kLeftRumble, 0.5);
-			
-			intake.set(1);
-		} else if(xboxController.getBumper(Hand.kRight)){
-			xboxController.setRumble(RumbleType.kLeftRumble, 0);
-			xboxController.setRumble(RumbleType.kRightRumble, 0.5);
-			
-			intake.set(-1);
-		} else {
-			xboxController.setRumble(RumbleType.kLeftRumble, 0);
-			xboxController.setRumble(RumbleType.kRightRumble, 0);
-			
-			intake.set(0);
-		}
-		
 		// Switch front and back on the push of button 2.
-		if(flightStick.isFirstPush(2)){
+		if(flightStick.isFirstPush(2) || xboxController.isFirstPushX()){
 			isInverted = !isInverted;
-			cam2.reversed = isInverted;
 		}
 		
-		// Drive the winch.
-		if(flightStick.getRawButton(5)){
-			winch.set(1);
-		} else if(flightStick.getRawButton(3)) {
-			winch.set(.50);
-		} else if(flightStick.getRawButton(6)) {
-			winch.set(-.25);
-		}else {
-			winch.set(0);
-		}
-		
-		if(flightStick.getRawButton(7) && flightStick.getRawButton(8)) {
-			flightStick.calibrateY();
-			flightStick.calibrateTwist();
-		}
 		
 		// Drive the gear.
 		if( (flightStick.getRawButton(1) && (flightStick.getRawButton(7) || flightStick.getRawButton(8)) ) || xboxController.getBButton()){
@@ -370,13 +243,6 @@ public class Robot extends IterativeRobot {
 			xboxController.setRumble(RumbleType.kRightRumble, 0);
 			piston.set(DoubleSolenoid.Value.kReverse);
 		}
-	}
-	
-	public void practiceInit() {
-		outreachInit();
-	}
-	public void practicePeriodic() {
-		outreachPeriodic();
 	}
 	
 	public void testInit(){
@@ -460,10 +326,10 @@ public class Robot extends IterativeRobot {
 			outreachPeriodic();
 			break;
 		case xbox:
-			moveRequest = xboxController.getY(BetterXBoxController.Hand.kRight);
-			turnRequest = xboxController.getX(BetterXBoxController.Hand.kLeft);
+			moveRequest = expCurve(deadzone(xboxController.getY(BetterXBoxController.Hand.kRight),0.1),3);
+			turnRequest = expCurve(deadzone(xboxController.getX(BetterXBoxController.Hand.kLeft),0.1),3);
 			
-			System.out.format("Move: %.2f   Turn: %.2f");
+			System.out.format("Move: %.2f   Turn: %.2f\n", moveRequest, turnRequest);
 			break;
 		default:
 			break;
@@ -501,7 +367,7 @@ public class Robot extends IterativeRobot {
 			// Switch front and back on the push of button 2.
 			if(flightStick.isFirstPush(2)){
 				isInverted = !isInverted;
-				cam2.reversed = isInverted;
+				//cam2.reversed = isInverted;
 			}
 			
 			// Drive the winch.
@@ -586,6 +452,14 @@ public class Robot extends IterativeRobot {
 			return 0;
 		else
 			return input;
+	}
+	public static double expCurve(double input, int pow) {
+		if(input == 0)
+			return input;
+		if(pow % 2 == 0)
+			return (input / Math.abs(input)) * Math.pow(input, pow);
+		else
+			return Math.pow(input, pow);
 	}
 
 }

@@ -17,6 +17,15 @@ public class MoPrefs {
 	
 	static private int defaultTestTurn = 45;
 	
+	static private int defaultFPS = 8;
+	
+	static private double defaultMoveBeforeTurn = 2.153;
+	static private int turnDegs = 30;
+	static private double defaultMoveTime = 3.0;
+	
+	static private double turnPIDTolerance = 2;
+	
+	static private double pidTargetTime = 1;
 	
 	public MoPrefs() {
 		prefs = Preferences.getInstance();
@@ -29,6 +38,12 @@ public class MoPrefs {
 		dprefs.addKey("AUTO_TURN_KI", defaultTurnI);
 		dprefs.addKey("AUTO_TURN_KD", defaultTurnD);
 		dprefs.addKey("TEST_TURN_PID_DEG", defaultTestTurn);
+		dprefs.addKey("CAM1_FPS", defaultFPS);
+		dprefs.addKey("MOVE_BEFORE_TURN", defaultMoveBeforeTurn);
+		dprefs.addKey("MOVE_FOR_TIME", defaultMoveTime);
+		dprefs.addKey("TURN", turnDegs);
+		dprefs.addKey("TURN_TOL", turnPIDTolerance);
+		dprefs.addKey("PID_ONTARGET_TIME", pidTargetTime);
 	}
 	
 	public double getTicksPerMeter() {
@@ -55,6 +70,26 @@ public class MoPrefs {
 	
 	public int getTestTurn() {
 		return prefs.getInt("TEST_TURN_PID_DEG", defaultTestTurn);
+	}
+	
+	public int getFPS() {
+		return prefs.getInt("CAM1_FPS", defaultFPS);
+	}
+	
+	public double getMoveBeforeTurn() {
+		return prefs.getDouble("MOVE_BEFORE_TURN", defaultMoveBeforeTurn);
+	}
+	public double getMoveForTime() {
+		return prefs.getDouble("MOVE_FOR_TIME", defaultMoveTime);
+	}
+	public int getTurn() {
+		return prefs.getInt("TURN", turnDegs);
+	}
+	public double getTurnPIDTolerance() {
+		return prefs.getDouble("TURN_TOL", turnPIDTolerance);
+	}
+	public double getPIDTargetTime() {
+		return prefs.getDouble("PID_ONTARGET_TIME", pidTargetTime);
 	}
 	
 	
