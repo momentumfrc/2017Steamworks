@@ -164,6 +164,8 @@ public class DriveSystem extends Subsystem {
 	}
 	
 	
+	boolean recentlyTurned = true;
+	
 	/**
 	 * Moves the robot in arcade-drive fashion with given joystick input. Input values are expected to be
 	 * within the range of -1 and 1.
@@ -173,6 +175,18 @@ public class DriveSystem extends Subsystem {
 	 * @param speedLimiter A multiplier used to slow down the robot. Set this to 1 for no limitation.
 	 */
 	public synchronized void arcadeDrive(double moveRequest, double turnRequest, double speedLimiter) {
+		if(turnRequest == 0) {
+			if(recentlyTurned) {
+				recentlyTurned = false;
+				lEncStart = left.get();
+				rEncStart = right.get();
+				System.out.println("Resetting Encoder Start positions");
+				System.out.format("R: %d, L:%d\n",right.get(),left.get());
+			}
+			move(moveRequest * speedLimiter);
+		} else {
+			recentlyTurned = true;
+		}
 		double leftDrive = speedLimiter * (moveRequest + turnRequest);
 		double rightDrive = speedLimiter * (moveRequest - turnRequest);
 
@@ -281,7 +295,7 @@ public class DriveSystem extends Subsystem {
 	/**
 	 * Called in a loop, drives the robot forward. Checks for robot drift and corrects.
 	 */
-	private void move() {
+	private void move(double speed) {
 		double lEnc = left.get();
 		double rEnc = right.get();
 		double lChange = lEnc - lEncStart;
@@ -317,7 +331,11 @@ public class DriveSystem extends Subsystem {
 			
 			}
 		 //System.out.format("LeftMove: %.2f, RightMove: %.2f\n ", lMovePower, rMovePower);
-		 tankDrive(lMovePower, rMovePower, moprefs.getDefaultAutoSpeedLimit());
+		 tankDrive(lMovePower, rMovePower, speed);
+	}
+	
+	private void move() {
+		move(moprefs.getDefaultAutoSpeedLimit());
 	}
 	
 	/**
@@ -417,12 +435,14 @@ public class DriveSystem extends Subsystem {
 	 * @param rampPerTick The amount to increase the power by every 50ms
 	 */
 	public void blockingMoveTime(double time, double power, double rampPerTick) {
+		//System.out.format("Moving for %.2f at %.2f speed with %.2f rampup\n", time,power,rampPerTick);
 		lEncStart = left.get();
 		rEncStart = right.get();
 		currentMovePower = rampPerTick;
 		Timer timer = new Timer();
 		timer.start();
 		while(!timer.hasPeriodPassed(time) && !Thread.interrupted() && !RobotState.isDisabled()) {
+			//System.out.format("Moving at %.2f power\n", currentMovePower);
 			move();
 			if(currentMovePower < power) {
 				currentMovePower += rampPerTick;

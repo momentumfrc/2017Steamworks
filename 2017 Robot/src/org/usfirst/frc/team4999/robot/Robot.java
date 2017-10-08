@@ -132,34 +132,43 @@ public class Robot extends IterativeRobot {
 		drive.STOP();
 	}
 	
+	boolean doOnce = true;
 	public void autonomousInit() {
-		switch(autoMode.getSelected()) {
-		case left:
-			drive.blockingMoveDistance(moprefs.getMoveBeforeTurn(), 1, 0.1);
-			drive.blockingTurn(moprefs.getTurn(), true);
-			drive.blockingMoveTime(moprefs.getMoveForTime(), moprefs.getDefaultAutoSpeedLimit(), 0.1);
-			break;
-		case center:
-			drive.blockingMoveTime(moprefs.getMoveForTime(), moprefs.getDefaultAutoSpeedLimit());
-			break;
-		case right:
-			drive.blockingMoveDistance(moprefs.getMoveBeforeTurn(), 1, 0.1);
-			drive.blockingTurn(moprefs.getTurn(), true);
-			drive.blockingMoveTime(moprefs.getMoveForTime(), moprefs.getDefaultAutoSpeedLimit(), 0.1);
-			break;
-		case fallbackDistance:
-			drive.blockingMoveDistance(2.153, 1, 0.1);
-		case fallbackTime:
-			drive.blockingMoveTime(5, 1, 0.1);
-		default:
-			break;
-		}
+		System.out.println("Beginning auto");
+		doOnce = true;
 	}
 
 	/**
 	 * This method runs in a loop during autonomous mode.
 	 */
 	public void autonomousPeriodic() {
+		if(doOnce) {
+			System.out.println("Switching automode");
+			doOnce = false;
+			switch(autoMode.getSelected()) {
+			case left:
+				drive.blockingMoveDistance(moprefs.getLMoveBeforeTurn(), 1, 0.1);
+				drive.blockingTurn(-1 * moprefs.getTurn(), true);
+				drive.blockingMoveTime(moprefs.getMoveForTime(), 1, 0.1);
+				break;
+			case center:
+				drive.blockingMoveTime(moprefs.getMoveForTime(), 1, 0.05);
+				break;
+			case right:
+				drive.blockingMoveDistance(moprefs.getRMoveBeforeTurn(), 1, 0.1);
+				drive.blockingTurn(moprefs.getTurn(), true);
+				drive.blockingMoveTime(moprefs.getMoveForTime(), 1, 0.1);
+				break;
+			case fallbackDistance:
+				drive.blockingMoveDistance(3, 1, 0.1);
+				break;
+			case fallbackTime:
+				drive.blockingMoveTime(5, 1, 0.1);
+				break;
+			default:
+				break;
+			}
+		}
 		
 	}
 	

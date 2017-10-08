@@ -7,8 +7,8 @@ enum DriveMode { tankDrive, arcadeDrive };
 
 public class DriveModeChooser extends SendableChooser<DriveMode> {
 	public DriveModeChooser() {
-		addDefault("Arcade Drive", DriveMode.arcadeDrive);
-		addObject("Tank Drive", DriveMode.tankDrive);
+		addObject("Flight Stick", DriveMode.arcadeDrive);
+		addDefault("XBox Controller", DriveMode.tankDrive);
 		
 		SmartDashboard.putData("Drive Controller", this);
 	}

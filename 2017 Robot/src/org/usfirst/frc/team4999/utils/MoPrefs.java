@@ -19,8 +19,9 @@ public class MoPrefs {
 	
 	static private int defaultFPS = 8;
 	
-	static private double defaultMoveBeforeTurn = 2.153;
-	static private int turnDegs = 30;
+	static private double defaultRightMoveBeforeTurn = 2.15;
+	static private double defaultLeftMoveBeforeTurn = 2.15;
+	static private int turnDegs = -60;
 	static private double defaultMoveTime = 3.0;
 	
 	static private double turnPIDTolerance = 2;
@@ -39,7 +40,8 @@ public class MoPrefs {
 		dprefs.addKey("AUTO_TURN_KD", defaultTurnD);
 		dprefs.addKey("TEST_TURN_PID_DEG", defaultTestTurn);
 		dprefs.addKey("CAM1_FPS", defaultFPS);
-		dprefs.addKey("MOVE_BEFORE_TURN", defaultMoveBeforeTurn);
+		dprefs.addKey("L_MOVE_BEFORE_TURN", defaultLeftMoveBeforeTurn);
+		dprefs.addKey("R_MOVE_BEFORE_TURN", defaultRightMoveBeforeTurn);
 		dprefs.addKey("MOVE_FOR_TIME", defaultMoveTime);
 		dprefs.addKey("TURN", turnDegs);
 		dprefs.addKey("TURN_TOL", turnPIDTolerance);
@@ -76,8 +78,11 @@ public class MoPrefs {
 		return prefs.getInt("CAM1_FPS", defaultFPS);
 	}
 	
-	public double getMoveBeforeTurn() {
-		return prefs.getDouble("MOVE_BEFORE_TURN", defaultMoveBeforeTurn);
+	public double getLMoveBeforeTurn() {
+		return prefs.getDouble("L_MOVE_BEFORE_TURN", defaultLeftMoveBeforeTurn);
+	}
+	public double getRMoveBeforeTurn() {
+		return prefs.getDouble("R_MOVE_BEFORE_TURN", defaultRightMoveBeforeTurn);
 	}
 	public double getMoveForTime() {
 		return prefs.getDouble("MOVE_FOR_TIME", defaultMoveTime);
