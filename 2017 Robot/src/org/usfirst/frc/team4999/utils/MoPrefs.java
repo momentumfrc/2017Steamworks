@@ -28,6 +28,9 @@ public class MoPrefs {
 	
 	static private double pidTargetTime = 1;
 	
+	static private double defaultXboxCurve = 2.5;
+	static private double defaultXboxDeadzone = 0.1;
+	
 	public MoPrefs() {
 		prefs = Preferences.getInstance();
 		dprefs = new DefaultPreferences();
@@ -46,6 +49,8 @@ public class MoPrefs {
 		dprefs.addKey("TURN", turnDegs);
 		dprefs.addKey("TURN_TOL", turnPIDTolerance);
 		dprefs.addKey("PID_ONTARGET_TIME", pidTargetTime);
+		dprefs.addKey("XBOX_CURVE_EXP", defaultXboxCurve);
+		dprefs.addKey("XBOX_DEADZONE", defaultXboxDeadzone);
 	}
 	
 	public double getTicksPerMeter() {
@@ -97,5 +102,11 @@ public class MoPrefs {
 		return prefs.getDouble("PID_ONTARGET_TIME", pidTargetTime);
 	}
 	
+	public double getXboxCurve() {
+		return prefs.getDouble("XBOX_CURVE_EXP", defaultXboxCurve);
+	}
+	public double getXboxDeadzone() {
+		return prefs.getDouble("XBOX_DEADZONE", defaultXboxDeadzone);
+	}
 	
 }

@@ -1,17 +1,32 @@
 package org.usfirst.frc.team4999.robot;
 
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.HashMap;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 
+class RumbleValue {
+	public XboxController.RumbleType hand;
+	public double value;
+	public RumbleValue(XboxController.RumbleType hand, double value) {
+		this.hand = hand;
+		this.value = value;
+	}
+}
+
 public class BetterXBoxController extends XboxController {
 	HashSet<Integer> held;
+	HashMap<String, RumbleValue> rumbles;
+	HashMap<Integer, Double> deadzones;
+	HashMap<Integer, Double> curves;
 	
 	public BetterXBoxController(int port) {
 		super(port);
 		held = new HashSet<Integer>();
+		rumbles = new HashMap<String, RumbleValue>();
+		deadzones = new HashMap<Integer, Double>();
+		curves = new HashMap<Integer, Double>();
 	}
 	public boolean isFirstPush(int button) {
 		if(this.getRawButton(button)) {
@@ -53,28 +68,98 @@ public class BetterXBoxController extends XboxController {
 		return isFirstPush(8);
 	}
 	
-	public Thread pulseRumble(RumbleType type, double value, double sec) {
-		Thread rumble = new Thread() {
-			Timer len;
-			public void run() {
-				len = new Timer();
-				len.start();
-				len.reset();
-				setRumble(type, value);
-				while(!len.hasPeriodPassed(sec)){
-					try {
-						Thread.sleep(10);
-						if(Thread.interrupted())
-							throw new InterruptedException();
-					} catch (InterruptedException e) {
-						break;
-					}
-				}
-				setRumble(type, 0);
+	@Override
+	public double getRawAxis(int axis) {
+		double value = super.getRawAxis(axis);
+		if(deadzones.containsKey(axis) && Math.abs(value) < deadzones.get(axis))
+			value = 0;
+		if(curves.containsKey(axis))
+			value = expCurve(value, curves.get(axis));
+		return value;
+	}
+	
+	public void setDeadzone(int axis, double value) {
+		deadzones.put(axis, value);
+	}
+	public void setDeadzoneX(Hand hand, double value) {
+		switch(hand) {
+		case kRight:
+			deadzones.put(4, value);
+			break;
+		case kLeft:
+			deadzones.put(0, value);
+			break;
+		}
+	}
+	public void setDeadzoneY(Hand hand, double value) {
+		switch(hand) {
+		case kRight:
+			deadzones.put(5, value);
+			break;
+		case kLeft:
+			deadzones.put(1, value);
+			break;
+		}
+	}
+	
+	public void setCurve(int axis, double value) {
+		curves.put(axis,  value);
+	}
+	
+	public void setCurveX(Hand hand, double value) {
+		switch(hand) {
+		case kRight:
+			curves.put(4, value);
+			break;
+		case kLeft:
+			curves.put(0, value);
+			break;
+		}
+	}
+	public void setCurveY(Hand hand, double value) {
+		switch(hand) {
+		case kRight:
+			curves.put(5, value);
+			break;
+		case kLeft:
+			curves.put(1, value);
+			break;
+		}
+	}
+	
+	public void refreshRumbles() {
+		double lHandRumble = 0;
+		double rHandRumble = 0;
+		for(String key: rumbles.keySet()) {
+			RumbleValue val = rumbles.get(key);
+			switch(val.hand) {
+			case kRightRumble:
+				lHandRumble = (val.value > lHandRumble)? val.value: lHandRumble;
+				break;
+			case kLeftRumble:
+				rHandRumble = (val.value > rHandRumble)? val.value: rHandRumble;
+				break;
 			}
-		};
-		rumble.start();
-		return rumble;
+		}
+		setRumble(RumbleType.kLeftRumble, lHandRumble);
+		setRumble(RumbleType.kRightRumble, rHandRumble);
+	}
+	public void addRumble(String name, RumbleType hand, double value) {
+		rumbles.put(name, new RumbleValue(hand, value));
+		refreshRumbles();
+	}
+	public void removeRumble(String name) {
+		rumbles.remove(name);
+		refreshRumbles();
+	}
+	
+	private double expCurve(double input, double pow) {
+		if(input == 0)
+			return input;
+		if(pow % 2 == 0)
+			return (input / Math.abs(input)) * Math.pow(input, pow);
+		else
+			return Math.pow(input, pow);
 	}
 
 }
