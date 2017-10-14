@@ -1,7 +1,6 @@
 
 package org.usfirst.frc.team4999.robot;
 
-import org.usfirst.frc.team4999.utils.DefaultPreferences;
 import org.usfirst.frc.team4999.utils.MoPrefs;
 
 import edu.wpi.cscore.UsbCamera;
@@ -12,7 +11,6 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.Preferences;
-import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
@@ -133,7 +131,7 @@ public class Robot extends IterativeRobot {
 			case center: // center just moves for the time specified in the preferences
 				drive.blockingMoveTime(moprefs.getMoveForTime(), 1, 0.05);
 				break;
-			case right:
+			case right: // Same as left
 				drive.blockingMoveDistance(moprefs.getRMoveBeforeTurn(), 1, 0.1);
 				drive.blockingTurn(moprefs.getTurn(), true);
 				drive.blockingMoveTime(moprefs.getMoveForTime(), 1, 0.1);
@@ -152,6 +150,8 @@ public class Robot extends IterativeRobot {
 	}
 	
 	public void teleopInit() {
+		// Get the deadzone and curves set in the robot preferences 
+		// This allows us to fine tune the feel of the robot according to the driver's preferences
 		xboxController.setDeadzoneX(Hand.kRight, moprefs.getXboxDeadzone());
 		xboxController.setCurveX(Hand.kRight, moprefs.getXboxCurve());
 		xboxController.setDeadzoneY(Hand.kLeft, moprefs.getXboxDeadzone());
@@ -170,22 +170,10 @@ public class Robot extends IterativeRobot {
 			break;
 		case arcadeDrive:
 		default:
+			
 			// The input from the driver. Deadzones are used to make the robot less twitchy.
 			moveRequest = -flightStick.getCalibratedY();
 			turnRequest = flightStick.getCalibratedTwist();
-			
-			
-			// Drive the winch.
-			if(flightStick.getRawButton(5)){
-				winch.set(1);
-			} else if(flightStick.getRawButton(3)) {
-				winch.set(.50);
-			} else if(flightStick.getRawButton(6)) {
-				winch.set(-.25);
-			}else {
-				winch.set(0);
-			}
-			break;
 		}
 		
 		// Allow the driver to switch back and front.
@@ -194,8 +182,10 @@ public class Robot extends IterativeRobot {
 		// Throttle
 		speedLimiter = (-flightStick.getThrottle() + 1) / 2;
 		
+		// Write the move and turn request calculated to the drive system
 		drive.arcadeDrive(moveRequest, turnRequest, speedLimiter);	
 		
+		// Drive the winch
 		if(xboxController.getBumper(Hand.kLeft) || flightStick.getRawButton(5)) {
 			xboxController.removeRumble("Winch Right");
 			xboxController.addRumble("Winch Left", RumbleType.kLeftRumble, 0.5);
@@ -216,7 +206,7 @@ public class Robot extends IterativeRobot {
 			winch.set(0);
 		}
 		
-		// Switch front and back on the push of button 2.
+		// Switch front and back on the push of button 2 or X.
 		if(flightStick.isFirstPush(2) || xboxController.isFirstPushX()){
 			isInverted = !isInverted;
 		}
