@@ -164,8 +164,8 @@ public class Robot extends IterativeRobot {
 		case tankDrive:
 			
 			// get the position of the sticks on the xbox controller
-			moveRequest = xboxController.getY(BetterXBoxController.Hand.kRight);
-			turnRequest = xboxController.getX(BetterXBoxController.Hand.kLeft);
+			moveRequest = xboxController.getY(BetterXBoxController.Hand.kLeft);
+			turnRequest = xboxController.getX(BetterXBoxController.Hand.kRight);
 			
 			break;
 		case arcadeDrive:

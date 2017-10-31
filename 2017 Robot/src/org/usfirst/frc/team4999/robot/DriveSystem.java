@@ -180,8 +180,6 @@ public class DriveSystem extends Subsystem {
 				recentlyTurned = false;
 				lEncStart = left.get();
 				rEncStart = right.get();
-				System.out.println("Resetting Encoder Start positions");
-				System.out.format("R: %d, L:%d\n",right.get(),left.get());
 			}
 			move(moveRequest * speedLimiter);
 		} else {

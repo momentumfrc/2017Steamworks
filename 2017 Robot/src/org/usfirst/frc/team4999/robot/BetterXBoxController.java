@@ -228,10 +228,11 @@ public class BetterXBoxController extends XboxController {
 	private double expCurve(double input, double pow) {
 		if(input == 0)
 			return input;
-		if(pow % 2 == 0)
-			return (input / Math.abs(input)) * Math.pow(input, pow);
+		double powed = Math.pow(Math.abs(input), pow);
+		if(input * powed > 0)
+			return powed;
 		else
-			return Math.pow(input, pow);
+			return -powed;
 	}
 
 }
