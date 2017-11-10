@@ -9,7 +9,9 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.VictorSP;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -58,7 +60,8 @@ public class Robot extends IterativeRobot {
 	TurnPIDChooser turnPIDChooser;
 	AutoModeChooser autoMode;
 	DriveModeChooser driveMode;
-		
+	
+	PowerDistributionPanel pdp;
 	
 
 	/**
@@ -101,6 +104,10 @@ public class Robot extends IterativeRobot {
 		turnPIDChooser = new TurnPIDChooser(drive.turnCont);
 		autoMode = new AutoModeChooser();
 		driveMode = new DriveModeChooser();
+		
+		pdp = new PowerDistributionPanel();
+		LiveWindow.addSensor("Robot Power", "PDP", pdp);
+		
 		
 	}
 
@@ -241,6 +248,9 @@ public class Robot extends IterativeRobot {
 			xboxController.setDeadzoneY(Hand.kLeft, moprefs.getXboxDeadzone());
 			xboxController.setCurveY(Hand.kLeft, moprefs.getXboxCurve());
 			break;
+		case pdp:
+			teleopInit();
+			break;
 		default:
 			break;
 		}
@@ -291,6 +301,9 @@ public class Robot extends IterativeRobot {
 			turnRequest = xboxController.getX(BetterXBoxController.Hand.kLeft);
 			
 			System.out.format("Move: %.2f   Turn: %.2f\n", moveRequest, turnRequest);
+			break;
+		case pdp:
+			teleopPeriodic();
 			break;
 		default:
 			break;
