@@ -8,9 +8,12 @@ public class Animator {
 	Display pixels;
 	
 	public Animator(int numberOfLights) {
+		this(numberOfLights, new NeoPixels());
+	}
+	
+	public Animator(int numberOfLights, Display pixels) {
 		currentState = new Color[numberOfLights];
-		//pixels = new NeoPixels();
-		pixels = new TestDisplay();
+		this.pixels = pixels;
 	}
 	
 	
