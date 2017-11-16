@@ -1,4 +1,4 @@
-package org.usfirst.frc.team4999.utils;
+package org.usfirst.frc.team4999.lights;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -9,6 +9,8 @@ import java.awt.Toolkit;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+
+import org.usfirst.frc.team4999.lights.animations.Blink;
 
 /**
  * Makes a JFrame displays lights on it, to test animations
@@ -86,14 +88,12 @@ public class TestDisplay {
 		
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		frame.pack();
-		frame.setVisible(true);
-		
 		Animator an = new Animator(32, tc);
 		
-		Color[] testColor = {new Color(0,0,0), new Color(255,0,0), new Color(255,0,255), new Color(255,255,255), new Color(0,0,0)};
-		tc.show(testColor);
+		an.setAnimation(new Blink(500, Color.BLUE));
 		
+		frame.pack();
+		frame.setVisible(true);
 		
 	}
 

@@ -1,4 +1,4 @@
-package org.usfirst.frc.team4999.utils;
+package org.usfirst.frc.team4999.lights;
 
 import java.awt.Color;
 
