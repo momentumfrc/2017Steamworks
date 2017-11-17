@@ -13,5 +13,5 @@ public interface Animation {
 	 * Gets time to wait before calling animate. Returns -1 to indicate animate() should only be called once
 	 * @return The delay to wait for in milliseconds
 	 */
-	int getDelayBetweenFrames();
+	int getDelayUntilNextFrame();
 }

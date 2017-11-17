@@ -10,7 +10,7 @@ import java.awt.Toolkit;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
-import org.usfirst.frc.team4999.lights.animations.Blink;
+import org.usfirst.frc.team4999.lights.animations.*;
 
 /**
  * Makes a JFrame displays lights on it, to test animations
@@ -90,10 +90,12 @@ public class TestDisplay {
 		
 		Animator an = new Animator(32, tc);
 		
-		an.setAnimation(new Blink(500, Color.BLUE));
-		
+
 		frame.pack();
 		frame.setVisible(true);
+		
+		an.setAnimation(new Fade(Fade.colorspace.RGB, Color.BLACK, Color.WHITE, 250, 0, 100));
+		
 		
 	}
 

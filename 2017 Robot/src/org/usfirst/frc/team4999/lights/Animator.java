@@ -2,6 +2,7 @@ package org.usfirst.frc.team4999.lights;
 
 import java.awt.Color;
 import org.usfirst.frc.team4999.lights.animations.Animation;
+import org.usfirst.frc.team4999.lights.animations.Solid;
 
 class AnimatorThread extends Thread {
 	private Color[] currentState;
@@ -21,7 +22,7 @@ class AnimatorThread extends Thread {
 			currentState = current.animate(currentState);
 			out.show(currentState);
 			try {
-				Thread.sleep(current.getDelayBetweenFrames());
+				Thread.sleep(current.getDelayUntilNextFrame());
 			} catch (InterruptedException e) {
 				break;
 			}
@@ -50,6 +51,8 @@ public class Animator {
 	public Animator(int numberOfLights, Display pixels) {
 		currentState = new Color[numberOfLights];
 		this.pixels = pixels;
+		
+		setAnimation(new Solid(Color.BLACK));
 	}
 	
 	public void setAnimation(Animation newAnimation) {
@@ -64,8 +67,9 @@ public class Animator {
 			this.currentState = animate.getColorState();
 		}
 		this.currentAnimation = newAnimation;
-		if(currentAnimation.getDelayBetweenFrames() < 0) {
+		if(currentAnimation.getDelayUntilNextFrame() < 0) {
 			currentState = currentAnimation.animate(currentState);
+			pixels.show(currentState);
 		} else {
 			animate = new AnimatorThread(pixels, currentState, currentAnimation);
 			animate.start();
