@@ -38,6 +38,10 @@ class AnimatorThread extends Thread {
 }
 
 public class Animator {
+	
+	public static final Color MOMENTUM_BLUE = new Color(6,206,255);
+	public static final Color MOMENTUM_PURPLE = new Color(159,1,255);
+	
 
 	Color[] currentState;
 	Display pixels;

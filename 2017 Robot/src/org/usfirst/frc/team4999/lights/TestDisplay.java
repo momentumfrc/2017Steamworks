@@ -94,8 +94,7 @@ public class TestDisplay {
 		frame.pack();
 		frame.setVisible(true);
 		
-		an.setAnimation(new Fade(Fade.colorspace.RGB, Color.BLACK, Color.WHITE, 250, 0, 100));
-		
+		an.setAnimation(Snake.twoColorSnake(Animator.MOMENTUM_PURPLE, Animator.MOMENTUM_BLUE, 1, 4, 2, 50));
 		
 	}
 
