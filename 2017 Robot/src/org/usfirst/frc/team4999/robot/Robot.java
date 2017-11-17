@@ -32,7 +32,8 @@ public class Robot extends IterativeRobot {
 	private BetterXBoxController xboxController = new BetterXBoxController(0);
 	
 	// Motors
-	private VictorSP intake, winch, shooterLeft, shooterRight;
+	private VictorSP intake, shooterLeft, shooterRight;
+	private VictorSP winch;
 	
 	// Drive System
 	DriveSystem drive;
@@ -95,7 +96,7 @@ public class Robot extends IterativeRobot {
 		shooterLeft.setInverted(true);
 		
 		intake = new VictorSP(4);
-		winch = new VictorSP(5);
+	//winch = new VictorSP(5);
 		
 		// Piston for gear placement
 		piston = new DoubleSolenoid(2,0);
@@ -192,15 +193,17 @@ public class Robot extends IterativeRobot {
 		}
 		
 		// Drive the winch.
-		if(flightStick.getRawButton(5)){
-			winch.set(1);
-		} else if(flightStick.getRawButton(3)) {
-			winch.set(.50);
-		} else if(flightStick.getRawButton(6)) {
-			winch.set(-.25);
-		}else {
-			winch.set(0);
-		}
+		/**
+	if(flightStick.getRawButton(5)){
+		winch.set(1);
+	} else if(flightStick.getRawButton(3)) {
+		winch.set(.50);
+	} else if(flightStick.getRawButton(6)) {
+		winch.set(-.25);
+	}else {
+		winch.set(0);
+	}
+	**/
 		
 		if(flightStick.getRawButton(7) && flightStick.getRawButton(8)) {
 			flightStick.calibrateY();
@@ -344,6 +347,7 @@ public class Robot extends IterativeRobot {
 			}
 			
 			// Drive the winch.
+			/**
 			if(flightStick.getRawButton(5)){
 				winch.set(1);
 			} else {
@@ -356,7 +360,7 @@ public class Robot extends IterativeRobot {
 			if(flightStick.getRawButton(6)){
 				winch.set(-.25);
 			}
-			
+			**/
 			
 			// Drive the gear.
 			if( (flightStick.getRawButton(1) && (flightStick.getRawButton(7) || flightStick.getRawButton(8)) ) || xboxController.getBButton()){
