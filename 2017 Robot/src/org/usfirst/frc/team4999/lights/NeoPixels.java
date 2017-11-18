@@ -11,7 +11,16 @@ public class NeoPixels implements Display {
 	
 	private I2C strip;
 	
-	public NeoPixels() {
+	private static NeoPixels instance;
+	
+	public static NeoPixels getInstance() {
+		if(instance == null) {
+			instance = new NeoPixels();
+		}
+		return instance;
+	}
+	
+	private NeoPixels() {
 		strip = new I2C(I2C.Port.kOnboard, 4);
 	}
 	
@@ -29,7 +38,7 @@ public class NeoPixels implements Display {
 		return out;
 	}
 	
-	public void show(Color[] currentState) {
+	synchronized public void show(Color[] currentState) {
 		strip.write(1, START_FRAME);
 		for(Color color : currentState) {
 			strip.write(1, safe(color.getRed()));

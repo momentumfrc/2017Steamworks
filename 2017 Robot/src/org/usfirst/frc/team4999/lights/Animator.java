@@ -49,7 +49,7 @@ public class Animator {
 	AnimatorThread animate;
 	
 	public Animator(int numberOfLights) {
-		this(numberOfLights, new NeoPixels());
+		this(numberOfLights, NeoPixels.getInstance());
 	}
 	
 	public Animator(int numberOfLights, Display pixels) {

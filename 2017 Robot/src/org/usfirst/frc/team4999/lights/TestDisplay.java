@@ -94,7 +94,12 @@ public class TestDisplay {
 		frame.pack();
 		frame.setVisible(true);
 		
-		an.setAnimation(Snake.twoColorSnake(Animator.MOMENTUM_PURPLE, Animator.MOMENTUM_BLUE, 1, 4, 2, 50));
+		Animation animations[] = {Snake.twoColorSnake(Animator.MOMENTUM_PURPLE, Animator.MOMENTUM_BLUE, 1, 4, 2, 50),
+				new Fade(Fade.colorspace.RGB, Animator.MOMENTUM_BLUE, Animator.MOMENTUM_PURPLE, 1000, 500, 200),
+				new Solid(Color.WHITE)
+		};
+		
+		an.setAnimation(new AnimationSequence(animations, 5000));
 		
 	}
 

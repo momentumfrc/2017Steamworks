@@ -1,4 +1,4 @@
-package org.usfirst.frc.team4999.robot;
+package org.usfirst.frc.team4999.robot.choosers;
 
 import org.usfirst.frc.team4999.utils.MoPrefs;
 import org.usfirst.frc.team4999.utils.MomentumPIDController;
@@ -8,9 +8,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.tables.ITable;
 import edu.wpi.first.wpilibj.tables.ITableListener;
 
-enum TurnPIDMode { carpet, cement, tile, preferences };
 
-public class TurnPIDChooser extends SendableChooser<TurnPIDMode>{
+public class TurnPIDChooser extends SendableChooser<TurnPIDChooser.TurnPIDMode>{
+	
+	public static enum TurnPIDMode { carpet, cement, tile, preferences };
 	
 	private double[] carpetVals = { 0.08, 0.01, 0.08 };
 	private double[] cementVals = { 0, 0, 0 };

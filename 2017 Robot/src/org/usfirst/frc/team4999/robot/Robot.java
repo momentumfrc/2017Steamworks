@@ -1,6 +1,7 @@
 
 package org.usfirst.frc.team4999.robot;
 
+import org.usfirst.frc.team4999.robot.choosers.*;
 import org.usfirst.frc.team4999.utils.MoPrefs;
 
 import edu.wpi.cscore.UsbCamera;
