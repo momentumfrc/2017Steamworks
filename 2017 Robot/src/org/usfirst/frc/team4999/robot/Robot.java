@@ -1,6 +1,7 @@
 
 package org.usfirst.frc.team4999.robot;
 
+import org.usfirst.frc.team4999.lights.Animator;
 import org.usfirst.frc.team4999.robot.choosers.*;
 import org.usfirst.frc.team4999.utils.MoPrefs;
 
@@ -25,6 +26,8 @@ import edu.wpi.first.wpilibj.Timer;
 */
 
 public class Robot extends IterativeRobot {
+	
+	static final int NUM_LIGHTS = 32;
 	
 	// Used to store semi-permanent variables that can be easily changed via the smartdashboard. Good for tuning PID loops w/o having to change the code every time.
 	Preferences prefs;
@@ -63,6 +66,9 @@ public class Robot extends IterativeRobot {
 	DriveModeChooser driveMode;
 	
 	PowerDistributionPanel pdp;
+	
+	Animator lights;
+	LightsChooser lightchooser;
 	
 
 	/**
@@ -105,10 +111,12 @@ public class Robot extends IterativeRobot {
 		turnPIDChooser = new TurnPIDChooser(drive.turnCont);
 		autoMode = new AutoModeChooser();
 		driveMode = new DriveModeChooser();
+		lightchooser = new LightsChooser();
 		
 		pdp = new PowerDistributionPanel();
 		LiveWindow.addSensor("Robot Power", "PDP", pdp);
 		
+		lights = new Animator(NUM_LIGHTS);
 		
 	}
 
