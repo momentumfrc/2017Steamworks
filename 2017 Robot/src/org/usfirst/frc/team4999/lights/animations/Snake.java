@@ -20,6 +20,18 @@ public class Snake implements Animation {
 		return new Snake(snake, msBetweenFrames);
 	}
 	
+	public static Snake rainbowSnake(int msBetweenFrames) {
+		Color[] snake = {
+				Color.RED,
+				new Color(255,127,0),
+				Color.YELLOW,
+				Color.GREEN,
+				Color.BLUE,
+				new Color(139,0,255)
+		};
+		return new Snake(snake, msBetweenFrames);
+	}
+	
 	Color[] snakes;
 	int offset;
 	int speed;
