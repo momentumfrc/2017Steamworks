@@ -20,7 +20,8 @@ public class AnimationSequence implements Animation {
 	}
 	
 	public AnimationSequence(Animation[] animations, int[] times) {
-		assert animations.length == times.length;
+		if (animations.length != times.length)
+			throw new IllegalArgumentException("Each animation must have a time set");
 		
 		this.animations = animations;
 		this.times = times;

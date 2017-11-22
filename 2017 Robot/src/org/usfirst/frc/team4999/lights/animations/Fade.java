@@ -2,87 +2,88 @@ package org.usfirst.frc.team4999.lights.animations;
 
 import java.awt.Color;
 
-
-public class Fade implements Animation {
+class MutableColor {
+	double[] color = new double[3];
+	double[] diffs = new double[3];
+	double[] to = new double[3];
+	
 	private final double CLOSE_ENOUGH = 0.005;
 	
-	public static enum colorspace { RGB, HSV };
+	public MutableColor(Color from) {
+		color[0] = from.getRed();
+		color[1] = from.getGreen();
+		color[2] = from.getBlue();
+	}
 	
-	private colorspace space;
-	private float[] color1, color2, current, diffs;
+	public void calculateDiffs(Color to, int steps) {
+		this.to[0] = to.getRed();
+		this.to[1] = to.getGreen();
+		this.to[2] = to.getBlue();
+		diffs[0] = (this.to[0] - color[0]) / steps;
+		diffs[1] = (this.to[1] - color[1]) / steps;
+		diffs[2] = (this.to[2] - color[2]) / steps;
+	}
 	
-	private boolean forward = true, hold = false;
+	public boolean applyDiffs() {
+		color[0] += diffs[0];
+		color[1] += diffs[1];
+		color[2] += diffs[2];
+		
+		return ((Math.abs(color[0] - to[0]) < CLOSE_ENOUGH) && (Math.abs(color[1] - to[1]) < CLOSE_ENOUGH) && (Math.abs(color[2] - to[2]) < CLOSE_ENOUGH));
+	}
 	
-	private int fadeTime, holdTime, steps;
+	public Color toColor() {
+		int[] out = new int[3];
+		
+		out[0] = (int) color[0];
+		out[1] = (int) color[1];
+		out[2] = (int) color[2];
+		
+		out[0] = (out[0] > 255) ? 255 : out[0];
+		out[1] = (out[1] > 255) ? 255 : out[1];
+		out[2] = (out[2] > 255) ? 255 : out[2];
+		
+		out[0] = (out[0] < 0) ? 0 : out[0];
+		out[1] = (out[1] < 0) ? 0 : out[1];
+		out[2] = (out[2] < 0) ? 0 : out[2];
+		
+		return new Color(out[0], out[1], out[2]);
+	}
 	
-	/**
-	 * Creates an animation object that is a fade between two colors
-	 * @param space The colorspace to fade across. Either colorspace.RGB or colorspace.HSV
-	 * @param color1 One of the colors
-	 * @param color2 The other color
-	 * @param fadeTime How long a fade should last
-	 * @param holdTime How long a color should be held before beginning the fade
-	 * @param steps How many times to change the color during a fade
-	 */
-	public Fade(colorspace space, Color color1, Color color2, int fadeTime, int holdTime, int steps) {
-		switch(space) {
-		case RGB:
-			this.color1 = color1.getRGBColorComponents(null);
-			this.color2 = color2.getRGBColorComponents(null);
-			break;
-		case HSV:
-			this.color1 = toHSV(color1);
-			this.color2 = toHSV(color2);
-			break;
-		}
-		this.space = space;
-		current = this.color1.clone();
-		diffs = new float[]{(this.color2[0] - this.color1[0]) / steps, (this.color2[1] - this.color1[1]) / steps, (this.color2[2] - this.color1[2]) / steps};
+	
+}
+
+public class Fade implements Animation {
+	private Color[] colors;
+	private MutableColor current;
+	private int fadeTime, holdTime;
+	
+	private int idx = 0;
+	private boolean hold = false;
+	
+	private final int STEPS = 100;
+	
+	public Fade(Color[] colors, int fadeTime, int holdTime) {
+		this.colors = colors;
+		current = new MutableColor(colors[0]);
+		current.calculateDiffs(colors[getNextIndex()], STEPS);
 		this.fadeTime = fadeTime;
 		this.holdTime = holdTime;
-		this.steps = steps;
+		
 	}
-
+	
 	@Override
 	public Color[] animate(Color[] pixels) {
-		
 		Color[] out = pixels.clone();
-		
-		if(forward) {
-			current[0] += diffs[0];
-			current[1] += diffs[1];
-			current[2] += diffs[2];
-			
-			if(isCloseTo(current,color2)) {
-				forward = false;
-				hold = true;
-			}
-			
-		} else {
-			current[0] -= diffs[0];
-			current[1] -= diffs[1];
-			current[2] -= diffs[2];
-			if(isCloseTo(current,color1)) {
-				forward = true;
-				hold = true;
-			}
+		if(current.applyDiffs()) {
+			idx = getNextIndex();
+			hold = true;
+			current.calculateDiffs(colors[idx], STEPS);
 		}
-		current = limit(current);
-		Color currentc = Color.BLACK;
-		switch(space) {
-		case RGB:
-			currentc = new Color(current[0], current[1], current[2]);
-			break;
-		case HSV:
-			currentc = Color.getHSBColor(current[0], current[1], current[2]);
-			break;
-		}
-		
-		
+		Color paint = current.toColor();
 		for(int i = 0; i < out.length; i++) {
-			out[i] = currentc;
+			out[i] = paint;
 		}
-		
 		return out;
 	}
 
@@ -92,34 +93,12 @@ public class Fade implements Animation {
 			hold = false;
 			return holdTime;
 		} else {
-			return fadeTime / steps;
+			return fadeTime/STEPS;
 		}
 	}
 	
-	private float[] toHSV(Color rgbColor) {
-		return Color.RGBtoHSB(rgbColor.getRed(), rgbColor.getGreen(), rgbColor.getBlue(), null);
+	private int getNextIndex() {
+		return (idx + 1 ) % colors.length;
 	}
-	
-	private float[] toRGB(Color rgbColor) {
-		return new float[] {rgbColor.getRed(), rgbColor.getGreen(), rgbColor.getBlue()};
-	}
-	
-	private boolean isCloseTo(float[] color1, float[] color2) {
-		return Math.abs(color1[0] - color2[0]) < CLOSE_ENOUGH && Math.abs(color1[1] - color2[1] ) < CLOSE_ENOUGH && Math.abs(color1[2] - color2[2]) < CLOSE_ENOUGH;
-	}
-	
-	private float[] limit(float[] in) {
-		float[] out = in.clone();
-		for(int i = 0; i < out.length; i++ ) {
-			out[i] = (out[i] < 0) ? 0 : out[i];
-			out[i] = (out[i] > 1) ? 1: out[i];
-		}
-		return out;
-	}
-	
-	private String cToString(float[] c) {
-		return String.format("[%f, %f, %f]", c[0], c[1], c[2]);
-	}
-	
 	
 }

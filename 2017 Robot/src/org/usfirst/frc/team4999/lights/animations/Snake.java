@@ -11,7 +11,6 @@ public class Snake implements Animation {
 			snake[i] = primary;
 		}
 		for(int i = head; i < head+tail; i++) {
-			//System.out.println(i + ": " + (i+1 - head)/(double)(tail+1));
 			snake[i] = blendInto(background, primary, (i+1 - head)/(double)(tail+1));
 		}
 		for(int i = head+tail; i < snake.length; i++) {
@@ -49,8 +48,7 @@ public class Snake implements Animation {
 		for(int i = 0; i < out.length; i++) {
 			out[i] = snakes[(i + offset) % snakes.length];
 		}
-		offset++;
-		
+		offset = (offset >= snakes.length) ? 0 : offset + 1;
 		return out;
 		
 	}

@@ -94,14 +94,15 @@ public class TestDisplay {
 		frame.pack();
 		frame.setVisible(true);
 		
-		Animation animations[] = {Snake.twoColorSnake(Animator.MOMENTUM_PURPLE, Animator.MOMENTUM_BLUE, 1, 4, 2, 50),
-				new Fade(Fade.colorspace.RGB, Animator.MOMENTUM_BLUE, Animator.MOMENTUM_PURPLE, 500, 100, 200),
+		Animation meta = new AnimationSequence(new Animation[]{Solid.rainbow(), Snake.rainbowSnake(50)}, new int[]{50, 6 * 50 * 5});
+		
+		Animation[] animations = {Snake.twoColorSnake(Animator.MOMENTUM_PURPLE, Animator.MOMENTUM_BLUE, 1, 4, 2, 50),
 				new Solid(Color.WHITE),
-				Solid.rainbow(),
-				Snake.rainbowSnake(50)
+				new Fade(new Color[]{Color.WHITE, Animator.MOMENTUM_PURPLE, Animator.MOMENTUM_BLUE},500,0),
+				meta
 		};
 		
-		an.setAnimation(new AnimationSequence(animations, 1000));
+		an.setAnimation(new AnimationSequence(animations, new int[] {2500,500,2500,2500}));
 	}
 
 }
