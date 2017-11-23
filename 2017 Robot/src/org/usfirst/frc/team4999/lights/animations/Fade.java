@@ -63,6 +63,17 @@ public class Fade implements Animation {
 	
 	private final int STEPS = 100;
 	
+	public static Fade RainbowFade(int fadeTime, int holdTime) {
+		return new Fade(new Color[]{
+				Color.RED,
+				new Color(255,127,0),
+				Color.YELLOW,
+				Color.GREEN,
+				Color.BLUE,
+				new Color(139,0,255)
+		}, fadeTime, holdTime);
+	}
+	
 	public Fade(Color[] colors, int fadeTime, int holdTime) {
 		this.colors = colors;
 		current = new MutableColor(colors[0]);

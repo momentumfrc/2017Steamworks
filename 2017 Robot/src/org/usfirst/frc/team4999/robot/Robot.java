@@ -27,8 +27,6 @@ import edu.wpi.first.wpilibj.Timer;
 
 public class Robot extends IterativeRobot {
 	
-	static final int NUM_LIGHTS = 32;
-	
 	// Used to store semi-permanent variables that can be easily changed via the smartdashboard. Good for tuning PID loops w/o having to change the code every time.
 	Preferences prefs;
 	MoPrefs moprefs; // Used to retrieve values from the preferences. Preferred over direct access to the preferences object
@@ -67,7 +65,6 @@ public class Robot extends IterativeRobot {
 	
 	PowerDistributionPanel pdp;
 	
-	Animator lights;
 	LightsChooser lightchooser;
 	
 
@@ -116,7 +113,6 @@ public class Robot extends IterativeRobot {
 		pdp = new PowerDistributionPanel();
 		LiveWindow.addSensor("Robot Power", "PDP", pdp);
 		
-		lights = new Animator(NUM_LIGHTS);
 		
 	}
 
