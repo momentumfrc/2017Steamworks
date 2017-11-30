@@ -1,6 +1,6 @@
 package org.usfirst.frc.team4999.lights;
 
-import java.awt.Color;
+import org.usfirst.frc.team4999.lights.Color;
 
 public interface Display {
 	void show(Color[] pixels);

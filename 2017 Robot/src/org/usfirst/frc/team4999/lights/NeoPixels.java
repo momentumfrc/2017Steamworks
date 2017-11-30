@@ -1,6 +1,6 @@
 package org.usfirst.frc.team4999.lights;
 
-import java.awt.Color;
+import org.usfirst.frc.team4999.lights.Color;
 
 import edu.wpi.first.wpilibj.I2C;
 

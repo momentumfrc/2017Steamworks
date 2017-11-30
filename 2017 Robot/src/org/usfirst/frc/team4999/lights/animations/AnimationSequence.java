@@ -1,6 +1,6 @@
 package org.usfirst.frc.team4999.lights.animations;
 
-import java.awt.Color;
+import org.usfirst.frc.team4999.lights.Color;
 
 public class AnimationSequence implements Animation {
 	

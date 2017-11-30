@@ -1,6 +1,6 @@
 package org.usfirst.frc.team4999.robot.choosers;
 
-import java.awt.Color;
+import org.usfirst.frc.team4999.lights.Color;
 
 import org.usfirst.frc.team4999.lights.Animator;
 import org.usfirst.frc.team4999.lights.animations.*;
@@ -27,6 +27,7 @@ class LightsListener implements ITableListener {
 	public void valueChanged(ITable source, String key, Object value, boolean isNew) {
 		if(key.equals("selected")) {
 			animator.setAnimation(this.chooser.getSelected());
+			System.out.println("Setting animation to " + value);
 		}
 	}
 	
