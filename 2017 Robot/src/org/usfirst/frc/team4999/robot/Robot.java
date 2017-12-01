@@ -173,19 +173,18 @@ public class Robot extends IterativeRobot {
 	public void teleopPeriodic() {
 		double speedLimiter;
 		switch(driveMode.getSelected()) { // get the selected controlelr
-		case tankDrive:
-			
-			// get the position of the sticks on the xbox controller
-			moveRequest = xboxController.getY(BetterXBoxController.Hand.kLeft);
-			turnRequest = xboxController.getX(BetterXBoxController.Hand.kRight);
-			
-			break;
-		case arcadeDrive:
-		default:
-			
-			// The input from the driver. Deadzones are used to make the robot less twitchy.
-			moveRequest = -flightStick.getCalibratedY();
-			turnRequest = flightStick.getCalibratedTwist();
+			case tankDrive:
+				// get the position of the sticks on the xbox controller
+				moveRequest = xboxController.getY(BetterXBoxController.Hand.kLeft);
+				turnRequest = xboxController.getX(BetterXBoxController.Hand.kRight);
+				
+				break;
+			case arcadeDrive:
+			default:
+				
+				// The input from the driver. Deadzones are used to make the robot less twitchy.
+				moveRequest = -flightStick.getCalibratedY();
+				turnRequest = flightStick.getCalibratedTwist();
 		}
 		
 		// Allow the driver to switch back and front.
