@@ -6,6 +6,10 @@ import org.usfirst.frc.team4999.lights.Color;
 public class Snake implements Animation {
 	
 	public static Snake twoColorSnake(Color primary, Color background, int head, int tail, int spaceBetween, int msBetweenFrames) {
+		return twoColorSnake(primary, background, head, tail, spaceBetween, msBetweenFrames, false);
+	}
+	
+	public static Snake twoColorSnake(Color primary, Color background, int head, int tail, int spaceBetween, int msBetweenFrames, boolean reversed) {
 		Color[] snake = new Color[head+tail+spaceBetween];
 		for(int i = 0; i < head; i++) {
 			snake[i] = primary;
@@ -16,7 +20,9 @@ public class Snake implements Animation {
 		for(int i = head+tail; i < snake.length; i++) {
 			snake[i] = background;
 		}
-		return new Snake(snake, msBetweenFrames);
+		Snake s = new Snake(snake, msBetweenFrames);
+		s.setReverse(reversed);
+		return s;
 	}
 	
 	public static Snake rainbowSnake(int msBetweenFrames) {
@@ -35,6 +41,13 @@ public class Snake implements Animation {
 	int offset;
 	int speed;
 	
+	private boolean reverse = false;
+	
+	public Snake(Color[] snakes, int msBetweenFrames, boolean reversed) {
+		this(snakes, msBetweenFrames);
+		this.reverse = reversed;
+	}
+	
 	public Snake(Color[] snakes, int msBetweenFrames) {
 		this.snakes = snakes;
 		offset = 0;
@@ -48,7 +61,10 @@ public class Snake implements Animation {
 		for(int i = 0; i < out.length; i++) {
 			out[i] = snakes[(i + offset) % snakes.length];
 		}
-		offset = (offset >= snakes.length) ? 0 : offset + 1;
+		offset = (reverse) ? offset-1 : offset+1;
+		offset = (offset >= snakes.length) ? 0 : offset;
+		offset = (offset < 0) ? 0 : snakes.length - 1;
+		
 		return out;
 		
 	}
@@ -63,6 +79,13 @@ public class Snake implements Animation {
 		int g = fg.getGreen() + (int)((bg.getGreen() - fg.getGreen()) * percentbg);
 		int b = fg.getBlue() + (int)((bg.getBlue() - fg.getBlue()) * percentbg);
 		return new Color(r,g,b);
+	}
+	
+	public void reverse() {
+		reverse = !reverse;
+	}
+	public void setReverse(boolean b) {
+		reverse = b;
 	}
 
 }

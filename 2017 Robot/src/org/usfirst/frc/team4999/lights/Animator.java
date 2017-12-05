@@ -12,6 +12,8 @@ class AnimatorThread extends Thread {
 	private Animation current;
 	private double brightness;
 	
+	private final int TIME_TO_SEND_FRAME = 50;
+	
 	
 	public AnimatorThread(Display out, Color[] currentState, Animation current, double brightness) {
 		if(brightness < 0 || brightness > 1) throw new IllegalArgumentException("Brightness must be within [0,1]"); 
@@ -41,7 +43,7 @@ class AnimatorThread extends Thread {
 			out.show(setBrightness(currentState));
 			int delay = current.getDelayUntilNextFrame();
 			//System.out.println("Expected: " + delay);
-			delay -= 50;
+			delay -= TIME_TO_SEND_FRAME;
 			delay = (delay < 0) ? 0 : delay;
 			if (delay > 0) Timer.delay(delay / 1000.0);
 		}

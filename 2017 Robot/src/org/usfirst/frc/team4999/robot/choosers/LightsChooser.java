@@ -2,6 +2,9 @@ package org.usfirst.frc.team4999.robot.choosers;
 
 import org.usfirst.frc.team4999.lights.Color;
 
+import java.util.HashMap;
+import java.util.Vector;
+
 import org.usfirst.frc.team4999.lights.Animator;
 import org.usfirst.frc.team4999.lights.animations.*;
 
@@ -14,8 +17,11 @@ class LightsListener implements ITableListener {
 	
 	private final int NUM_LIGHTS = 120;
 	
-	Animator animator;
-	SendableChooser<Animation> chooser;
+	private Animator animator;
+	private SendableChooser<Animation> chooser;
+	
+	HashMap<String, Animation> animationTable;
+	Vector<String> animations;
 	
 	public LightsListener(SendableChooser<Animation> chooser) {
 		animator = new Animator(NUM_LIGHTS);
@@ -25,9 +31,25 @@ class LightsListener implements ITableListener {
 	
 	@Override
 	public void valueChanged(ITable source, String key, Object value, boolean isNew) {
-		if(key.equals("selected")) {
+		if(key.equals("selected") && animations.isEmpty()) {
 			animator.setAnimation(this.chooser.getSelected());
 			System.out.println("Setting animation to " + value);
+		}
+	}
+	
+	public void pushAnimation(String key, Animation a) {
+		animationTable.put(key, a);
+		animations.add(key);
+		animator.setAnimation(animationTable.get(animations.lastElement()));
+	}
+	
+	public void popAnimation(String key) {
+		animations.remove(key);
+		animationTable.remove(key);
+		if(animations.isEmpty()) {
+			animator.setAnimation(chooser.getSelected());
+		} else {
+			animator.setAnimation(animationTable.get(animations.lastElement()));
 		}
 	}
 	
@@ -36,6 +58,10 @@ class LightsListener implements ITableListener {
 public class LightsChooser extends SendableChooser<Animation> {
 	
 	private LightsListener list;
+	
+	public final Animation blinkRed = new Blink(new Color[] {Color.RED, Color.BLACK}, 50);
+	public final Animation whiteSnake = new Snake(new Color[] {Color.WHITE, Color.BLACK}, 50);
+	public final Animation reverseWhiteSnake = new Snake(new Color[] {Color.WHITE, Color.BLACK}, 50, true);
 	
 	public LightsChooser() {
 		super();
@@ -72,6 +98,13 @@ public class LightsChooser extends SendableChooser<Animation> {
 		list = new LightsListener(this);
 		this.getTable().addTableListener("selected", list, true);
 		
+	}
+	
+	public void pushAnimation(String key, Animation a) {
+		list.pushAnimation(key, a);
+	}
+	public void popAnimation(String key) {
+		list.popAnimation(key);
 	}
 	
 }

@@ -202,19 +202,29 @@ public class Robot extends IterativeRobot {
 			xboxController.removeRumble("Winch Right");
 			xboxController.addRumble("Winch Left", RumbleType.kLeftRumble, 0.5);
 			
+			lightchooser.pushAnimation("winch", lightchooser.whiteSnake);
+			
 			winch.set(1);
 		} else if(xboxController.getBumper(Hand.kRight) || flightStick.getRawButton(3)){
 			xboxController.removeRumble("Winch Left");
 			xboxController.addRumble("Winch Right", RumbleType.kRightRumble, 0.5);
 			
+			lightchooser.pushAnimation("winch", lightchooser.whiteSnake);
+			
 			winch.set(0.5);
 		} else if(xboxController.getYButton() || flightStick.getRawButton(6)) {
 			xboxController.addRumble("Winch Left", RumbleType.kLeftRumble, 0.5);
 			xboxController.addRumble("Winch Right", RumbleType.kRightRumble, 0.5);
+			
+			lightchooser.pushAnimation("winch", lightchooser.reverseWhiteSnake);
+			
 			winch.set(-0.25);
 		} else {
 			xboxController.removeRumble("Winch Right");
 			xboxController.removeRumble("Winch Left");
+			
+			lightchooser.popAnimation("winch");
+			
 			winch.set(0);
 		}
 		
@@ -228,6 +238,7 @@ public class Robot extends IterativeRobot {
 		if( (flightStick.getRawButton(1) && (flightStick.getRawButton(7) || flightStick.getRawButton(8)) ) || xboxController.getBButton()){
 			xboxController.addRumble("Gear", RumbleType.kRightRumble, 0.9);
 			gear.reset();
+			lightchooser.pushAnimation("Gear", lightchooser.blinkRed);
 			piston.set(DoubleSolenoid.Value.kForward);
 		} else if(piston.get() == DoubleSolenoid.Value.kForward) {
 			xboxController.setRumble(RumbleType.kRightRumble, 0.6);
@@ -235,6 +246,7 @@ public class Robot extends IterativeRobot {
 		}
 		if(gear.hasPeriodPassed(0.75)){
 			xboxController.removeRumble("Gear");
+			lightchooser.popAnimation("Gear");
 			piston.set(DoubleSolenoid.Value.kReverse);
 		}
 	}
