@@ -191,7 +191,8 @@ public class Robot extends IterativeRobot {
 		moveRequest = (isInverted)? -moveRequest: moveRequest;
 		
 		// Throttle
-		speedLimiter = (-flightStick.getThrottle() + 1) / 2;
+		// speedLimiter = (-flightStick.getThrottle() + 1) / 2;
+		speedLimiter = moprefs.getThrottle();
 		
 		// Write the move and turn request calculated to the drive system
 		drive.arcadeDrive(moveRequest, turnRequest, speedLimiter);	

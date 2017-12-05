@@ -35,6 +35,8 @@ class LightsListener implements ITableListener {
 
 public class LightsChooser extends SendableChooser<Animation> {
 	
+	private LightsListener list;
+	
 	public LightsChooser() {
 		super();
 		
@@ -46,7 +48,7 @@ public class LightsChooser extends SendableChooser<Animation> {
 		}, 5000);
 		
 		AnimationSequence rainbow = new AnimationSequence(new Animation[] {
-				Snake.rainbowSnake(2),
+				Snake.rainbowSnake(10),
 				Fade.RainbowFade(50, 20),
 				Snake.rainbowSnake(10),
 				Fade.RainbowFade(500, 0)
@@ -67,7 +69,8 @@ public class LightsChooser extends SendableChooser<Animation> {
 		
 		SmartDashboard.putData("Lights Chooser", this);
 		
-		this.getTable().addTableListener("selected", new LightsListener(this), true);
+		list = new LightsListener(this);
+		this.getTable().addTableListener("selected", list, true);
 		
 	}
 	

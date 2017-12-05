@@ -31,6 +31,8 @@ public class MoPrefs {
 	static private double defaultXboxCurve = 2.5;
 	static private double defaultXboxDeadzone = 0.1;
 	
+	static private double defaultThrottle = 1;
+	
 	public MoPrefs() {
 		prefs = Preferences.getInstance();
 		dprefs = new DefaultPreferences();
@@ -51,6 +53,7 @@ public class MoPrefs {
 		dprefs.addKey("PID_ONTARGET_TIME", pidTargetTime);
 		dprefs.addKey("XBOX_CURVE_EXP", defaultXboxCurve);
 		dprefs.addKey("XBOX_DEADZONE", defaultXboxDeadzone);
+		dprefs.addKey("THROTTLE", defaultThrottle);
 	}
 	
 	public double getTicksPerMeter() {
@@ -109,4 +112,7 @@ public class MoPrefs {
 		return prefs.getDouble("XBOX_DEADZONE", defaultXboxDeadzone);
 	}
 	
+	public double getThrottle() {
+		return prefs.getDouble("THROTTLE", defaultThrottle);
+	}
 }

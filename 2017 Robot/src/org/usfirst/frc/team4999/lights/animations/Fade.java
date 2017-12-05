@@ -61,7 +61,7 @@ public class Fade implements Animation {
 	private int idx = 0;
 	private boolean hold = false;
 	
-	private final int STEPS = 100;
+	private final int STEPS = 50;
 	
 	public static Fade RainbowFade(int fadeTime, int holdTime) {
 		return new Fade(new Color[]{

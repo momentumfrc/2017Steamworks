@@ -4,11 +4,14 @@ import org.usfirst.frc.team4999.lights.Color;
 import org.usfirst.frc.team4999.lights.animations.Animation;
 import org.usfirst.frc.team4999.lights.animations.Solid;
 
+import edu.wpi.first.wpilibj.Timer;
+
 class AnimatorThread extends Thread {
 	private Color[] currentState;
 	private Display out;
 	private Animation current;
 	private double brightness;
+	
 	
 	public AnimatorThread(Display out, Color[] currentState, Animation current, double brightness) {
 		if(brightness < 0 || brightness > 1) throw new IllegalArgumentException("Brightness must be within [0,1]"); 
@@ -36,11 +39,11 @@ class AnimatorThread extends Thread {
 		while(!Thread.interrupted()) {
 			currentState = current.animate(currentState);
 			out.show(setBrightness(currentState));
-			try {
-				Thread.sleep(current.getDelayUntilNextFrame());
-			} catch (InterruptedException e) {
-				break;
-			}
+			int delay = current.getDelayUntilNextFrame();
+			//System.out.println("Expected: " + delay);
+			delay -= 50;
+			delay = (delay < 0) ? 0 : delay;
+			if (delay > 0) Timer.delay(delay / 1000.0);
 		}
 	}
 	
