@@ -43,7 +43,7 @@ public class NeoPixels implements Display {
 		return out;
 	}
 	
-	synchronized public void show(Color[] currentState) {
+	synchronized public long show(Color[] currentState) {
 		try {
 			/*
 			// System.out.println("Sending data");
@@ -117,11 +117,12 @@ public class NeoPixels implements Display {
 			
 			strip.write(1, SHOW_FRAME);
 			
-			System.out.println("WriteTime: " + (System.currentTimeMillis() - millis));
+			return(System.currentTimeMillis() - millis);
 			
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			System.out.println(e.getStackTrace());
+			return -1;
 		}
 		
 	}

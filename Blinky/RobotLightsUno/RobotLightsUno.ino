@@ -28,6 +28,7 @@
  *     - 0x01 should be pushed to 0x00
  *     - 0xfd and 0xfe should be pushed to 0xff.
  * - End frame and trigger display by sending value 0xfe
+ *   - Note: if not all LEDs have been updated when a frame is ended, the pattern sent will be repeated to the end of the strip
  * 
  * NeoPixels will hold the last value they received.  There is no required refresh rate.
  * 
@@ -60,6 +61,9 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(120, PIN, NEO_GRB + NEO_KHZ800);
 int ix = 0;
 uint32_t pixel = 0;
 
+int framel = 0;
+
+
 void setup() {
   strip.begin();
   for (int i = 0; i < strip.numPixels();)
@@ -78,6 +82,7 @@ void loop() {
   delay(100);
 }
 
+
 void onReceive(int howMany) {
   while (Wire.available())
   {
@@ -88,10 +93,14 @@ void onReceive(int howMany) {
     }
     else if (b == 0xfd)
     {
+      framel = 0;
       ix = 0;
     }
     else if (b == 0xfe)
     {
+      for(int i = framel-1; i < strip.numPixels(); i++) {
+       strip.setPixelColor(i,strip.getPixelColor((uint16_t) i % framel));
+      }
       strip.show();
     }
     else
@@ -104,6 +113,7 @@ void onReceive(int howMany) {
         if (ix%3 == 0)
         {
           strip.setPixelColor(ix/3 - 1, pixel);
+          ++framel;
           pixel = 0;
         }
       }

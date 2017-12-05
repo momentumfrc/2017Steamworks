@@ -66,21 +66,21 @@ public class LightsChooser extends SendableChooser<Animation> {
 	public LightsChooser() {
 		super();
 		
-		AnimationSequence momentum = new AnimationSequence(new Animation[] {
+		Animation momentum = new AnimationSequence(new Animation[] {
 				Snake.twoColorSnake(Animator.MOMENTUM_PURPLE, Animator.MOMENTUM_BLUE, 1, 5, 2, 5),
 				new Fade(new Color[]{Animator.MOMENTUM_BLUE, Animator.MOMENTUM_PURPLE}, 200, 0),
 				Snake.twoColorSnake(Animator.MOMENTUM_BLUE, Animator.MOMENTUM_PURPLE, 3, 0, 3, 50),
 				new Fade(new Color[]{Animator.MOMENTUM_BLUE, Animator.MOMENTUM_PURPLE}, 250,0),
 		}, 5000);
 		
-		AnimationSequence rainbow = new AnimationSequence(new Animation[] {
+		Animation rainbow = new AnimationSequence(new Animation[] {
 				Snake.rainbowSnake(10),
 				Fade.RainbowFade(50, 20),
 				Snake.rainbowSnake(10),
 				Fade.RainbowFade(500, 0)
 		}, new int[] {5000, 9000, 1000, 12000});
 		
-		AnimationSequence christmas = new AnimationSequence(new Animation[] {
+		Animation christmas = new AnimationSequence(new Animation[] {
 				Snake.twoColorSnake(Color.RED, Color.WHITE, 2, 0, 4, 5),
 				new Fade(new Color[] {Color.RED, new Color(60,141,13), Color.WHITE}, 0, 250),
 				new Snake(new Color[] {new Color(255,223,0), new Color(60,141,13), new Color(45,100,13), new Color(45,100,13), new Color(39,84,14), new Color(39,84,14) }, 50)

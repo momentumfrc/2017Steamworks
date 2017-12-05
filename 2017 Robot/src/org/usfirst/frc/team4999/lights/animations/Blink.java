@@ -28,10 +28,7 @@ public class Blink implements Animation {
 
 	@Override
 	public Color[] animate(Color[] pixels) {
-		Color[] out = pixels.clone();
-		for(int i = 0; i < pixels.length; i++) {
-			out[i] = colors[idx];
-		}
+		Color[] out = {colors[idx]};
 		idx = (idx++ > colors.length) ? 0 : idx;
 		return out;
 	}

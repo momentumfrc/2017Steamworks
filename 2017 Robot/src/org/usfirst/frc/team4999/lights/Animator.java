@@ -12,7 +12,7 @@ class AnimatorThread extends Thread {
 	private Animation current;
 	private double brightness;
 	
-	private final int TIME_TO_SEND_FRAME = 50;
+	private long timeToSend = 50;
 	
 	
 	public AnimatorThread(Display out, Color[] currentState, Animation current, double brightness) {
@@ -40,10 +40,14 @@ class AnimatorThread extends Thread {
 	public void run() {
 		while(!Thread.interrupted()) {
 			currentState = current.animate(currentState);
-			out.show(setBrightness(currentState));
+			timeToSend = out.show(setBrightness(currentState));
+			if(timeToSend < 0) {
+				System.out.println("Failed to write to neopixels, exiting animation thread");
+				break;
+			}
 			int delay = current.getDelayUntilNextFrame();
 			//System.out.println("Expected: " + delay);
-			delay -= TIME_TO_SEND_FRAME;
+			delay -= timeToSend;
 			delay = (delay < 0) ? 0 : delay;
 			if (delay > 0) Timer.delay(delay / 1000.0);
 		}

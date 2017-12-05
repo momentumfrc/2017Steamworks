@@ -37,9 +37,9 @@ public class Snake implements Animation {
 		return new Snake(snake, msBetweenFrames);
 	}
 	
-	Color[] snakes;
-	int offset;
-	int speed;
+	private Color[] snakes;
+	private int offset;
+	private int speed;
 	
 	private boolean reverse = false;
 	
@@ -56,7 +56,7 @@ public class Snake implements Animation {
 
 	@Override
 	public Color[] animate(Color[] pixels) {
-		Color[] out = pixels.clone();
+		Color[] out = snakes.clone();
 		
 		for(int i = 0; i < out.length; i++) {
 			out[i] = snakes[(i + offset) % snakes.length];

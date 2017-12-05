@@ -85,17 +85,13 @@ public class Fade implements Animation {
 	
 	@Override
 	public Color[] animate(Color[] pixels) {
-		Color[] out = pixels.clone();
 		if(current.applyDiffs()) {
 			idx = getNextIndex();
 			hold = true;
 			current.calculateDiffs(colors[idx], STEPS);
 		}
 		Color paint = current.toColor();
-		for(int i = 0; i < out.length; i++) {
-			out[i] = paint;
-		}
-		return out;
+		return new Color[] {paint};
 	}
 
 	@Override

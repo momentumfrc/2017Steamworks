@@ -28,12 +28,7 @@ public class Solid implements Animation {
 
 	@Override
 	public Color[] animate(Color[] pixels) {
-		Color[] out = pixels.clone();
-		
-		for(int i = 0; i < out.length; i++) {
-			out[i] = color[i % color.length];
-		}
-		return out;
+		return color;
 	}
 
 	@Override
