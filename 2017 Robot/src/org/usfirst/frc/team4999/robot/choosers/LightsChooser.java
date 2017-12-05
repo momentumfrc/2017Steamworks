@@ -88,10 +88,13 @@ public class LightsChooser extends SendableChooser<Animation> {
 		
 		Animation solid = new Solid(Color.WHITE);
 		
+		Animation random = new RandomColors(500);
+		
 		addDefault("Momentum", momentum);
 		addObject("Rainbow", rainbow);
 		addObject("Christmas",christmas);
 		addObject("Solid White", solid);
+		addObject("Random", random);
 		
 		SmartDashboard.putData("Lights Chooser", this);
 		

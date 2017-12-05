@@ -1,8 +1,6 @@
-package org.usfirst.frc.team4999.lights;
+package org.usfirst.frc.team4999.lights.animations;
 
 import org.usfirst.frc.team4999.lights.Color;
-
-import org.usfirst.frc.team4999.lights.animations.Animation;
 
 public class RandomColors implements Animation {
 	
