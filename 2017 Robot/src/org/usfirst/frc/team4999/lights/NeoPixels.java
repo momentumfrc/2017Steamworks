@@ -1,8 +1,5 @@
 package org.usfirst.frc.team4999.lights;
 
-import java.nio.ByteBuffer;
-
-import org.usfirst.frc.team4999.lights.Color;
 
 import edu.wpi.first.wpilibj.I2C;
 
@@ -12,6 +9,9 @@ public class NeoPixels implements Display {
 	private I2C strip;
 	
 	private static NeoPixels instance;
+	
+	private final int SYNC_FREQ = 100;
+	private int syncidx = 0;
 	
 	
 	public static NeoPixels getInstance() {
@@ -28,8 +28,10 @@ public class NeoPixels implements Display {
 	synchronized public long show(Packet[] packets) {
 		try {
 			long millis = System.currentTimeMillis();
+			if(syncidx == SYNC_FREQ) 
+				strip.writeBulk(Packet.syncPacket(), 16); // Send synchronize packet
+			syncidx = (++syncidx > SYNC_FREQ) ? 0 : syncidx;
 			
-			strip.writeBulk(Packet.syncPacket(), 16); // Send synchronize packet
 			for(Packet packet : packets) {
 				strip.writeBulk(packet.fillBuffer(), packet.getPacketSize());
 			}
