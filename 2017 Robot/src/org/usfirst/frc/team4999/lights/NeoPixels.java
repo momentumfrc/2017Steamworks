@@ -29,7 +29,7 @@ public class NeoPixels implements Display {
 		try {
 			long millis = System.currentTimeMillis();
 			
-			strip.writeBulk(Packet.syncBuffer(), 16); // Send synchronize packet
+			strip.writeBulk(Packet.syncPacket(), 16); // Send synchronize packet
 			for(Packet packet : packets) {
 				strip.writeBulk(packet.fillBuffer(), packet.getPacketSize());
 			}

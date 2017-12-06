@@ -16,23 +16,23 @@ public class Color {
 	}
 	
 	public int getRed() {
-		return dim(r);
-	}
-	public int getGreen() {
-		return dim(g);
-	}
-	public int getBlue() {
-		return dim(b);
-	}
-	
-	public int getFullRed() {
 		return r;
 	}
-	public int getFullGreen() {
+	public int getGreen() {
 		return g;
 	}
-	public int getFullBlue() {
+	public int getBlue() {
 		return b;
+	}
+	
+	public int getDimRed() {
+		return dim(r);
+	}
+	public int getDimGreen() {
+		return dim(g);
+	}
+	public int getDimBlue() {
+		return dim(b);
 	}
 
 	public static Color RED = new Color(255,0,0);

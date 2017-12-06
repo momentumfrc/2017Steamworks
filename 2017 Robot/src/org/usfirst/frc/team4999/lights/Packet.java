@@ -29,9 +29,9 @@ public class Packet {
 		command = SET_SINGLE;
 		data = new byte[] {
 				(byte) address, 
-				(byte) color.getRed(),
-				(byte) color.getGreen(),
-				(byte) color.getBlue()
+				(byte) color.getDimRed(),
+				(byte) color.getDimGreen(),
+				(byte) color.getDimBlue(),
 		};
 	}
 	/**
@@ -44,9 +44,9 @@ public class Packet {
 		command = SET_AREA;
 		data = new byte[] {
 				(byte) address, 
-				(byte) color.getRed(),
-				(byte) color.getGreen(),
-				(byte) color.getBlue(),
+				(byte) color.getDimRed(),
+				(byte) color.getDimGreen(),
+				(byte) color.getDimBlue(),
 				(byte) length
 		};
 	}
@@ -61,9 +61,9 @@ public class Packet {
 		command = SET_STRIDE;
 		data = new byte[] {
 				(byte) address, 
-				(byte) color.getRed(),
-				(byte) color.getGreen(),
-				(byte) color.getBlue(),
+				(byte) color.getDimRed(),
+				(byte) color.getDimGreen(),
+				(byte) color.getDimBlue(),
 				(byte) length,
 				(byte) stride
 		};
@@ -92,7 +92,7 @@ public class Packet {
 		return B_BUFFER;
 	}
 	
-	public static ByteBuffer syncBuffer() {
+	public static ByteBuffer syncPacket() {
 		B_BUFFER.rewind();
 		while(B_BUFFER.hasRemaining()) {
 			B_BUFFER.put((byte)0xFF);
