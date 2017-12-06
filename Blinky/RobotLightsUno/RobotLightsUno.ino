@@ -1,6 +1,5 @@
 #include <Wire.h>
 #include <Adafruit_NeoPixel.h>
-//#include <Serial.h>
 #ifdef __AVR__
 #include <avr/power.h>
 #endif
@@ -128,33 +127,21 @@ void parsePayload(int len) {
 
     case 2: // set single pixel
       if (len == 5)
-        if (address < strip.numPixels())
-          strip.setPixelColor(address, rgb);
+        paintPattern(address, rgb, 1, 0);
       break;
 
     case 3: // set run of pixels
       if (len == 6) {
         int count = payload[5];
-        for (int i = 0; i < count; ++i) {
-          int pixel = address + i;
-          if (pixel < strip.numPixels())
-            strip.setPixelColor(pixel, rgb);
-        }
+        paintPattern(address, rgb, count, 0);
       }
       break;
 
     case 4: // set run of pixels with stride
       if (len == 7) {
         int count = payload[5];
-        int stride = payload[6]; // stride of 0 will print once and exit instead of infinite loop
-        do {
-          for (int i = 0; i < count; ++i) {
-            int pixel = address + i;
-            if (pixel < strip.numPixels())
-              strip.setPixelColor(pixel, rgb);
-          }
-          address += stride;
-        } while (address < strip.numPixels() && stride > 0);
+        int stride = payload[6];
+        paintPattern(address, rgb, count, stride);
       }
       break;
 
@@ -170,5 +157,18 @@ uint32_t getRGB(uint8_t rgb[]) {
 
   // pack RGB in big-endian order
   return (red << 16) | (green << 8) | blue;
+}
+
+// stride of 0 will paint once and exit (instead of infinite loop)
+// stride >0 will repeat pattern until end of strip
+void paintPattern(int address, uint32_t rgb, int count, int stride) {
+  do {
+    for (int i = 0; i < count; ++i) {
+      int pixel = address + i;
+      if (pixel < strip.numPixels())
+        strip.setPixelColor(pixel, rgb);
+    }
+    address += stride;
+  } while (address < strip.numPixels() && stride > 0);
 }
 
