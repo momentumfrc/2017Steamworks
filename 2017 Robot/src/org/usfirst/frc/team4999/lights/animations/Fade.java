@@ -1,6 +1,7 @@
 package org.usfirst.frc.team4999.lights.animations;
 
 import org.usfirst.frc.team4999.lights.Color;
+import org.usfirst.frc.team4999.lights.Packet;
 
 class MutableColor {
 	double[] color = new double[3];
@@ -84,18 +85,14 @@ public class Fade implements Animation {
 	}
 	
 	@Override
-	public Color[] animate(Color[] pixels) {
-		Color[] out = pixels.clone();
+	public Packet[] animate() {
 		if(current.applyDiffs()) {
 			idx = getNextIndex();
 			hold = true;
 			current.calculateDiffs(colors[idx], STEPS);
 		}
 		Color paint = current.toColor();
-		for(int i = 0; i < out.length; i++) {
-			out[i] = paint;
-		}
-		return out;
+		return new Packet[] { new Packet(0, paint, 1, 1) };
 	}
 
 	@Override

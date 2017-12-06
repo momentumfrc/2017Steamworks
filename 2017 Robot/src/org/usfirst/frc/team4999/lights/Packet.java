@@ -20,6 +20,11 @@ public class Packet {
 		data = new byte[0];
 	}
 	
+	/**
+	 * Sets color of a single pixel
+	 * @param address pixel to set
+	 * @param color color to set to
+	 */
 	public Packet(int address, Color color) {
 		command = SET_SINGLE;
 		data = new byte[] {
@@ -29,6 +34,12 @@ public class Packet {
 				(byte) color.getBlue()
 		};
 	}
+	/**
+	 * Sets color of an area of pixels
+	 * @param address start of area
+	 * @param color color to set to
+	 * @param length number of pixels to set, starting at address
+	 */
 	public Packet(int address, Color color, int length) {
 		command = SET_AREA;
 		data = new byte[] {
@@ -39,6 +50,13 @@ public class Packet {
 				(byte) length
 		};
 	}
+	/**
+	 * Sets color of an area of pixels, and repeats this area, skipping stride steps
+	 * @param address start of area
+	 * @param color color to set
+	 * @param length number of pixels to set, starting at address
+	 * @param stride number to add to address to get start of next area
+	 */
 	public Packet(int address, Color color, int length, int stride) {
 		command = SET_STRIDE;
 		data = new byte[] {

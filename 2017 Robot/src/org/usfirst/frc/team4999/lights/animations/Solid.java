@@ -1,6 +1,7 @@
 package org.usfirst.frc.team4999.lights.animations;
 
 import org.usfirst.frc.team4999.lights.Color;
+import org.usfirst.frc.team4999.lights.Packet;
 
 public class Solid implements Animation {
 	
@@ -27,11 +28,11 @@ public class Solid implements Animation {
 	}
 
 	@Override
-	public Color[] animate(Color[] pixels) {
-		Color[] out = pixels.clone();
+	public Packet[] animate() {
+		Packet[] out = new Packet[color.length];
 		
 		for(int i = 0; i < out.length; i++) {
-			out[i] = color[i % color.length];
+			out[i] = new Packet(i, color[i % color.length], 1, color.length);
 		}
 		return out;
 	}

@@ -1,6 +1,7 @@
 package org.usfirst.frc.team4999.lights.animations;
 
 import org.usfirst.frc.team4999.lights.Color;
+import org.usfirst.frc.team4999.lights.Packet;
 
 
 public class Snake implements Animation {
@@ -55,11 +56,11 @@ public class Snake implements Animation {
 	}
 
 	@Override
-	public Color[] animate(Color[] pixels) {
-		Color[] out = pixels.clone();
+	public Packet[] animate() {
+		Packet[] out = new Packet[snakes.length];
 		
 		for(int i = 0; i < out.length; i++) {
-			out[i] = snakes[(i + offset) % snakes.length];
+			out[i] = new Packet(i, snakes[(i + offset) % snakes.length], 1, snakes.length);
 		}
 		offset = (reverse) ? offset-1 : offset+1;
 		offset = (offset >= snakes.length) ? 0 : offset;

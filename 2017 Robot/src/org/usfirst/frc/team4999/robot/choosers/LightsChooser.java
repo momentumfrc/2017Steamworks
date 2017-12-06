@@ -15,8 +15,6 @@ import edu.wpi.first.wpilibj.tables.ITableListener;
 
 class LightsListener implements ITableListener {
 	
-	private final int NUM_LIGHTS = 120;
-	
 	private Animator animator;
 	private SendableChooser<Animation> chooser;
 	
@@ -24,7 +22,7 @@ class LightsListener implements ITableListener {
 	Vector<String> animations;
 	
 	public LightsListener(SendableChooser<Animation> chooser) {
-		animator = new Animator(NUM_LIGHTS);
+		animator = new Animator();
 		this.chooser = chooser;
 		animator.setAnimation(this.chooser.getSelected());
 	}
@@ -88,7 +86,7 @@ public class LightsChooser extends SendableChooser<Animation> {
 		
 		Animation solid = new Solid(Color.WHITE);
 		
-		Animation random = new RandomColors(500);
+		Animation random = new RandomColors(500, 120);
 		
 		addDefault("Momentum", momentum);
 		addObject("Rainbow", rainbow);
