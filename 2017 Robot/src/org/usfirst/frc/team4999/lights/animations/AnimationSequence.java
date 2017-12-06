@@ -1,6 +1,6 @@
 package org.usfirst.frc.team4999.lights.animations;
 
-import org.usfirst.frc.team4999.lights.Color;
+import org.usfirst.frc.team4999.lights.Packet;
 
 public class AnimationSequence implements Animation {
 	
@@ -28,13 +28,13 @@ public class AnimationSequence implements Animation {
 	}
 
 	@Override
-	public Color[] animate(Color[] pixels) {
+	public Packet[] animate() {
 		if(timepassed >= times[currentidx]) {
 			timepassed = 0;
 			currentidx++;
 			currentidx = (currentidx < times.length) ? currentidx : 0;
 		}
-		return animations[currentidx].animate(pixels);
+		return animations[currentidx].animate();
 	}
 
 	@Override
