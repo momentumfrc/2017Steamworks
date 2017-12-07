@@ -12,5 +12,5 @@ public interface Display {
 	 * Display the packets
 	 * @param pixels
 	 */
-	void show(Packet[] pixels);
+	void show(Packet[] commands);
 }

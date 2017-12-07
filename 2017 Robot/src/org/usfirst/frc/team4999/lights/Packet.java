@@ -19,8 +19,6 @@ public class Packet {
 	private final byte SET_AREA = 0x03;
 	private final byte SET_STRIDE = 0x04;
 	
-	// No point in constantly recreating the show packet since its the same every time
-	private static Packet show;
 	
 	private byte command;
 	private byte[] data;
@@ -28,7 +26,7 @@ public class Packet {
 	/**
 	 * Creats a DISPLAY_FRAME packet
 	 */
-	private Packet() {
+	public Packet() {
 		command = DISPLAY_FRAME;
 		data = new byte[0];
 	}
@@ -147,16 +145,6 @@ public class Packet {
 		return B_BUFFER;
 	}
 	
-	/**
-	 * Gets the packet that shows the current frame
-	 * @return the packet
-	 */
-	public static Packet showPacket() {
-		if(show == null) {
-			show = new Packet();
-		}
-		return show;
-	}
 	
 
 }

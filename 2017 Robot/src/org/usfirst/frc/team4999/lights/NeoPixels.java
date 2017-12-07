@@ -1,7 +1,32 @@
 package org.usfirst.frc.team4999.lights;
 
 
+import java.nio.ByteBuffer;
+
 import edu.wpi.first.wpilibj.I2C;
+
+class NeoPixelsIO extends I2C {
+	
+	private final Packet displayPacket;
+
+	public NeoPixelsIO(Port port, int deviceAddress) {
+		super(port, deviceAddress);
+	}
+	
+	public boolean writePacket(Packet packet) {
+		return writeBulk(packet.fillBuffer(), packet.getPacketSize());
+	}
+	
+	public boolean sendSyncPacket() {
+		ByteBuffer packet = Packet.syncPacket();
+		return writeBulk(packet, packet.capacity());
+	}
+	
+	public boolean sendShowPacket() {
+		
+	}
+	
+}
 
 /**
  * Class to communicate with an arduino driving a strip of NeoPixel LEDs over I2C
@@ -14,8 +39,11 @@ public class NeoPixels implements Display {
 	
 	private static NeoPixels instance;
 	
+	private final int I2C_ADDRESS = 16;
+	
 	private final int SYNC_FREQ = 1000;
-	private int syncidx = 1000;
+	private int syncidx = 0;
+	
 	
 	/**
 	 * Gets an instance of NeoPixels
@@ -29,10 +57,10 @@ public class NeoPixels implements Display {
 	}
 	
 	private NeoPixels() {
-		strip = new I2C(I2C.Port.kOnboard, 16);
+		strip = new I2C(I2C.Port.kOnboard, I2C_ADDRESS);
 	}
 	
-	synchronized public void show(Packet[] packets) {
+	synchronized public void show(Packet[] commands) {
 		try {
 			// Send a sync packet every SYNC_FREQ frames
 			if(syncidx == SYNC_FREQ) 
@@ -40,7 +68,7 @@ public class NeoPixels implements Display {
 			syncidx = (++syncidx > SYNC_FREQ) ? 0 : syncidx;
 			
 			// Send each packet
-			for(Packet packet : packets) {
+			for(Packet packet : commands) {
 				strip.writeBulk(packet.fillBuffer(), packet.getPacketSize());
 			}
 			// Show the sent packets
