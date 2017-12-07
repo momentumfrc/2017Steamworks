@@ -42,11 +42,11 @@ public class Snake implements Animation {
 	int offset;
 	int speed;
 	
-	private boolean reverse = false;
+	private int increment = 1;
 	
 	public Snake(Color[] snakes, int msBetweenFrames, boolean reversed) {
 		this(snakes, msBetweenFrames);
-		this.reverse = reversed;
+		this.increment = reversed ? -1 : 1;
 	}
 	
 	public Snake(Color[] snakes, int msBetweenFrames) {
@@ -57,14 +57,15 @@ public class Snake implements Animation {
 
 	@Override
 	public Packet[] animate() {
+		
 		Packet[] out = new Packet[snakes.length];
 		
 		for(int i = 0; i < out.length; i++) {
 			out[i] = new Packet(i, snakes[(i + offset) % snakes.length], 1, snakes.length);
 		}
-		offset = (reverse) ? offset-1 : offset+1;
-		offset = (offset >= snakes.length) ? 0 : offset;
-		offset = (offset < 0) ? 0 : snakes.length - 1;
+		
+		offset = (offset + increment + snakes.length) % snakes.length;
+		// System.out.format("Offset: %d\n", offset);
 		
 		return out;
 		
@@ -83,10 +84,10 @@ public class Snake implements Animation {
 	}
 	
 	public void reverse() {
-		reverse = !reverse;
+		increment = -increment;
 	}
 	public void setReverse(boolean b) {
-		reverse = b;
+		increment = b ? -1 : 1;
 	}
 
 }

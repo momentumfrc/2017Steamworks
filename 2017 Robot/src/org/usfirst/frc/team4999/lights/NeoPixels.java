@@ -10,8 +10,8 @@ public class NeoPixels implements Display {
 	
 	private static NeoPixels instance;
 	
-	private final int SYNC_FREQ = 100;
-	private int syncidx = 0;
+	private final int SYNC_FREQ = 1000;
+	private int syncidx = 1000;
 	
 	
 	public static NeoPixels getInstance() {

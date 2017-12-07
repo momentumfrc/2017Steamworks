@@ -30,7 +30,10 @@ public class Blink implements Animation {
 	@Override
 	public Packet[] animate() {
 		Packet out[] = {new Packet(0, colors[idx], 1, 1)};
-		idx = (idx++ > colors.length) ? 0 : idx;
+		idx++;
+		if(idx >= colors.length) {
+			idx = 0;
+		}
 		return out;
 	}
 
