@@ -11,7 +11,6 @@ public interface Display {
 	/**
 	 * Display the packets
 	 * @param pixels
-	 * @return Time taken to show the data
 	 */
-	long show(Packet[] pixels);
+	void show(Packet[] pixels);
 }

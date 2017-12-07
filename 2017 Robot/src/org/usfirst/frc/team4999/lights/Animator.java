@@ -15,25 +15,20 @@ class AnimatorThread extends Thread {
 	private Display out;
 	private Animation current;
 	
+	private final long WAIT_TIMEOUT = 500;
+	
 	// Generic object. The wait() method is used to pause the run thread until the notifyAll() method is called
 	// If an animation returns -1 for the time to wait, the run thread pauses execution until a new animation is set
 	private final Object pauseLock = new Object();
 	
-	private long timeToSend = 50;
-	
-	
 	public AnimatorThread(Display out, Animation current) {
 		this.out = out;
 		this.current = current;
-		
-		// Needs to be daemon so that it doesn't block the exit of the JVM
-		this.setDaemon(true);
 	}
 	
 	public void setAnimation(Animation newAnimation) {
-		synchronized (current) {
-			this.current = newAnimation;
-		}
+		this.current = newAnimation;
+		
 		// Tells the thread to continue. 
 		synchronized (pauseLock) {
 			pauseLock.notifyAll();
@@ -42,40 +37,31 @@ class AnimatorThread extends Thread {
 	
 	public void run() {
 		while(!Thread.interrupted()){
+			// Note how long the send takes
+			long millis = System.currentTimeMillis();
+			Animation animation = current;
+			// show current frame
+			out.show(animation.animate());
+			// get how long to delay for
+			int delay = animation.getDelayUntilNextFrame();
 			
-			int delay;
-			synchronized (current) {
-				// show current frame. keep track of how long it took
-				timeToSend = out.show(current.animate());
-				if(timeToSend < 0) {
-					System.out.println("Failed to write to neopixels, suspending animation thread");
+			synchronized (pauseLock) {
+				if(delay < 0) {
 					try {
-						pauseLock.wait();
+						pauseLock.wait(WAIT_TIMEOUT);
 					} catch (InterruptedException e) {
 						break;
 					}
 					continue;
 				}
-				delay = current.getDelayUntilNextFrame();
 			}
-			synchronized (pauseLock) {
-				if(delay < 0) {
-					try {
-						pauseLock.wait();
-					} catch (InterruptedException e) {
-						break;
-					}
-				} else {
-					//System.out.format("Send took %dms, delay requested is %dms\n", timeToSend, delay);
-					delay -= timeToSend;
-					delay = (delay < 0) ? 0 : delay;
-					if (delay > 0) Timer.delay(delay / 1000.0);
-				}
-			}
+			
+			delay -= (System.currentTimeMillis() - millis);
+			if (delay > 0) Timer.delay(delay / 1000.0);
 		}
 	}
-	
 }
+	
 /**
  * Holds a runnable {@link AnimationThread}
  * @author jordan
@@ -106,7 +92,8 @@ public class Animator {
 	 */
 	public void setAnimation(Animation newAnimation) {
 		if(newAnimation == null) {
-			System.out.println("Can't set a null animation!!");
+			System.out.println("Recieved null animation! Defaulting to solid black");
+			animate.setAnimation(new Solid(Color.BLACK));
 			return;
 		}
 		animate.setAnimation(newAnimation);

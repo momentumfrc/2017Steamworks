@@ -7,7 +7,6 @@ import java.util.Vector;
 
 import org.usfirst.frc.team4999.lights.Animator;
 import org.usfirst.frc.team4999.lights.animations.*;
-import org.usfirst.frc.team4999.utils.MoPrefs;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -44,7 +43,6 @@ class LightsListener implements ITableListener {
 				animator.setAnimation(this.chooser.getSelected());
 				System.out.println("Setting animation to " + value);
 			}
-			Color.setBrightness(MoPrefs.getInstance().getBrightness());
 		}
 	}
 	

@@ -41,8 +41,6 @@ public class MoPrefs {
 	
 	static private double defaultThrottle = 1;
 	
-	static private double defaultBrightness = 0.2;
-	
 	public MoPrefs() {
 		prefs = Preferences.getInstance();
 		dprefs = new DefaultPreferences();
@@ -64,7 +62,6 @@ public class MoPrefs {
 		dprefs.addKey("XBOX_CURVE_EXP", defaultXboxCurve);
 		dprefs.addKey("XBOX_DEADZONE", defaultXboxDeadzone);
 		dprefs.addKey("THROTTLE", defaultThrottle);
-		dprefs.addKey("LIGHTS_BRIGHTNESS", defaultBrightness);
 	}
 	
 	public double getTicksPerMeter() {
@@ -125,9 +122,5 @@ public class MoPrefs {
 	
 	public double getThrottle() {
 		return prefs.getDouble("THROTTLE", defaultThrottle);
-	}
-	
-	public double getBrightness() {
-		return prefs.getDouble("LIGHTS_BRIGHTNESS", defaultBrightness);
 	}
 }

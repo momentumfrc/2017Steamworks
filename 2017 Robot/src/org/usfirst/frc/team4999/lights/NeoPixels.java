@@ -32,9 +32,8 @@ public class NeoPixels implements Display {
 		strip = new I2C(I2C.Port.kOnboard, 16);
 	}
 	
-	synchronized public long show(Packet[] packets) {
+	synchronized public void show(Packet[] packets) {
 		try {
-			long millis = System.currentTimeMillis();
 			// Send a sync packet every SYNC_FREQ frames
 			if(syncidx == SYNC_FREQ) 
 				strip.writeBulk(Packet.syncPacket(), 16); // Send synchronize packet
@@ -47,12 +46,10 @@ public class NeoPixels implements Display {
 			// Show the sent packets
 			strip.writeBulk(Packet.showPacket().fillBuffer(), Packet.showPacket().getPacketSize());
 			
-			return (System.currentTimeMillis() - millis);
 		} catch (Exception e) {
 			// The generic try-catch prevents an error in the purely cosmetic neopixels from killing the whole robot
 			System.err.println(e.getMessage());
 			System.err.println(e.getStackTrace());
-			return -1;
 		}
 		
 	}
