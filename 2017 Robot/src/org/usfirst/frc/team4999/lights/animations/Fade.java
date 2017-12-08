@@ -1,6 +1,7 @@
 package org.usfirst.frc.team4999.lights.animations;
 
 import org.usfirst.frc.team4999.lights.Color;
+import org.usfirst.frc.team4999.lights.Commands;
 import org.usfirst.frc.team4999.lights.Packet;
 
 class DifferenceCalculator {
@@ -108,7 +109,7 @@ public class Fade implements Animation {
 			hold = true;
 			current.calculateDiffs(colors[idx], STEPS);
 		}
-		return new Packet[] { new Packet(0, current.toColor(), 1, 1) };
+		return new Packet[] { Commands.setStride(0, current.toColor(), 1, 1) };
 	}
 
 	@Override

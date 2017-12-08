@@ -1,6 +1,7 @@
 package org.usfirst.frc.team4999.lights.animations;
 
 import org.usfirst.frc.team4999.lights.Color;
+import org.usfirst.frc.team4999.lights.Commands;
 import org.usfirst.frc.team4999.lights.Packet;
 
 
@@ -95,7 +96,7 @@ public class Snake implements Animation {
 		Packet[] out = new Packet[snakes.length];
 		
 		for(int i = 0; i < out.length; i++) {
-			out[i] = new Packet(i, snakes[(i + offset) % snakes.length], 1, snakes.length);
+			out[i] = Commands.setStride(i, snakes[(i + offset) % snakes.length], 1, snakes.length);
 		}
 		
 		offset = (offset + increment + snakes.length) % snakes.length;

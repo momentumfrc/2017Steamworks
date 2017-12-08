@@ -1,6 +1,7 @@
 package org.usfirst.frc.team4999.lights.animations;
 
 import org.usfirst.frc.team4999.lights.Color;
+import org.usfirst.frc.team4999.lights.Commands;
 import org.usfirst.frc.team4999.lights.Packet;
 
 public class Solid implements Animation {
@@ -46,7 +47,7 @@ public class Solid implements Animation {
 		Packet[] out = new Packet[color.length];
 		
 		for(int i = 0; i < out.length; i++) {
-			out[i] = new Packet(i, color[i % color.length], 1, color.length);
+			out[i] = Commands.setStride(i, color[i % color.length], 1, color.length);
 		}
 		return out;
 	}
