@@ -41,9 +41,9 @@ class AnimatorThread extends Thread {
 			long millis = System.currentTimeMillis();
 			Animation animation = current;
 			// show current frame
-			out.show(animation.animate());
+			out.show(animation.getNextFrame());
 			// get how long to delay for
-			int delay = animation.getDelayUntilNextFrame();
+			int delay = animation.getFrameDelayMilliseconds();
 			
 			synchronized (pauseLock) {
 				if(delay < 0) {

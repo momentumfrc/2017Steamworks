@@ -10,6 +10,11 @@ public class Blink implements Animation {
 	
 	private int idx;
 	
+	/**
+	 * Switches between colors
+	 * @param colors colors to switch between
+	 * @param waittime how long to wait before switching color
+	 */
 	public Blink(Color[] colors, int waittime) {
 		int[] waittimes = new int[colors.length];
 		for(int i = 0; i < waittimes.length; i++) {
@@ -20,6 +25,11 @@ public class Blink implements Animation {
 		idx = 0;
 	}
 	
+	/**
+	 * Switches between colors
+	 * @param colors colors to switch between
+	 * @param waittimes how long to wait for each color before switching
+	 */
 	public Blink(Color[] colors, int[] waittimes) {
 		if(colors.length != waittimes.length) throw new IllegalArgumentException("Need exactly one waittime for every color");
 		this.colors = colors;
@@ -28,17 +38,14 @@ public class Blink implements Animation {
 	}
 
 	@Override
-	public Packet[] animate() {
+	public Packet[] getNextFrame() {
 		Packet out[] = {new Packet(0, colors[idx], 1, 1)};
-		idx++;
-		if(idx >= colors.length) {
-			idx = 0;
-		}
+		idx = (idx + 1) % waittimes.length;
 		return out;
 	}
 
 	@Override
-	public int getDelayUntilNextFrame() {
+	public int getFrameDelayMilliseconds() {
 		return waittimes[idx];
 	}
 

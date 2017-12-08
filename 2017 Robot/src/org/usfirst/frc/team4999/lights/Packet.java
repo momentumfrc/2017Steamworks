@@ -16,7 +16,7 @@ public class Packet {
 	// All according to specification
 	private final byte DISPLAY_FRAME = 0x01;
 	private final byte SET_SINGLE = 0x02;
-	private final byte SET_AREA = 0x03;
+	private final byte SET_RUN = 0x03;
 	private final byte SET_STRIDE = 0x04;
 	
 	
@@ -40,11 +40,12 @@ public class Packet {
 	 */
 	public Packet(int address, Color color) {
 		command = SET_SINGLE;
+		Color dimColor = BrightnessFilter.dimColor(color);
 		data = new byte[] {
 				(byte) address, 
-				(byte) color.getDimRed(),
-				(byte) color.getDimGreen(),
-				(byte) color.getDimBlue(),
+				(byte) dimColor.getRed(),
+				(byte) dimColor.getGreen(),
+				(byte) dimColor.getBlue(),
 		};
 	}
 	/**
@@ -56,12 +57,13 @@ public class Packet {
 	 * @see #Packet(int, Color, int, int)
 	 */
 	public Packet(int address, Color color, int length) {
-		command = SET_AREA;
+		command = SET_RUN;
+		Color dimColor = BrightnessFilter.dimColor(color);
 		data = new byte[] {
 				(byte) address, 
-				(byte) color.getDimRed(),
-				(byte) color.getDimGreen(),
-				(byte) color.getDimBlue(),
+				(byte) dimColor.getRed(),
+				(byte) dimColor.getGreen(),
+				(byte) dimColor.getBlue(),
 				(byte) length
 		};
 	}
@@ -76,11 +78,12 @@ public class Packet {
 	 */
 	public Packet(int address, Color color, int length, int stride) {
 		command = SET_STRIDE;
+		Color dimColor = BrightnessFilter.dimColor(color);
 		data = new byte[] {
 				(byte) address, 
-				(byte) color.getDimRed(),
-				(byte) color.getDimGreen(),
-				(byte) color.getDimBlue(),
+				(byte) dimColor.getRed(),
+				(byte) dimColor.getGreen(),
+				(byte) dimColor.getBlue(),
 				(byte) length,
 				(byte) stride
 		};

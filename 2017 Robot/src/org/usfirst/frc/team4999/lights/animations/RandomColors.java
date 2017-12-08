@@ -7,6 +7,11 @@ public class RandomColors implements Animation {
 	
 	private int delay, repeat;
 	
+	/**
+	 * Creates a pattern of random colors and repeates it every repeat steps
+	 * @param delay how long to wait before creating a new random pattern. -1 indicates only set one pattern
+	 * @param repeat how long to make the pattern of random colors
+	 */
 	public RandomColors(int delay, int repeat) {
 		this.delay = delay;
 		this.repeat = repeat;
@@ -18,7 +23,7 @@ public class RandomColors implements Animation {
 	}
 	
 	@Override
-	public Packet[] animate() {
+	public Packet[] getNextFrame() {
 		Packet[] out = new Packet[repeat];
 		for(int i = 0; i < out.length; i++) {
 			Color paint = new Color(randomRGB(), randomRGB(), randomRGB());
@@ -28,7 +33,7 @@ public class RandomColors implements Animation {
 	}
 
 	@Override
-	public int getDelayUntilNextFrame() {
+	public int getFrameDelayMilliseconds() {
 		return delay;
 	}
 

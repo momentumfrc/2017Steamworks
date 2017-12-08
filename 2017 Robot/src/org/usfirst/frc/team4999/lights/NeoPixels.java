@@ -8,9 +8,10 @@ import edu.wpi.first.wpilibj.I2C;
 class NeoPixelsIO extends I2C {
 	
 	private final Packet displayPacket;
-
+	
 	public NeoPixelsIO(Port port, int deviceAddress) {
 		super(port, deviceAddress);
+		displayPacket = new Packet();
 	}
 	
 	public boolean writePacket(Packet packet) {
@@ -23,7 +24,7 @@ class NeoPixelsIO extends I2C {
 	}
 	
 	public boolean sendShowPacket() {
-		
+		return writePacket(displayPacket);
 	}
 	
 }
@@ -35,7 +36,7 @@ class NeoPixelsIO extends I2C {
  */
 public class NeoPixels implements Display {
 	
-	private I2C strip;
+	private NeoPixelsIO strip;
 	
 	private static NeoPixels instance;
 	
@@ -57,22 +58,23 @@ public class NeoPixels implements Display {
 	}
 	
 	private NeoPixels() {
-		strip = new I2C(I2C.Port.kOnboard, I2C_ADDRESS);
+		strip = new NeoPixelsIO(I2C.Port.kOnboard, I2C_ADDRESS);
 	}
 	
 	synchronized public void show(Packet[] commands) {
 		try {
 			// Send a sync packet every SYNC_FREQ frames
-			if(syncidx == SYNC_FREQ) 
-				strip.writeBulk(Packet.syncPacket(), 16); // Send synchronize packet
-			syncidx = (++syncidx > SYNC_FREQ) ? 0 : syncidx;
+			if(++syncidx >= SYNC_FREQ) {
+				strip.sendSyncPacket();
+				syncidx = 0;
+			}
 			
 			// Send each packet
 			for(Packet packet : commands) {
-				strip.writeBulk(packet.fillBuffer(), packet.getPacketSize());
+				strip.writePacket(packet);
 			}
 			// Show the sent packets
-			strip.writeBulk(Packet.showPacket().fillBuffer(), Packet.showPacket().getPacketSize());
+			strip.sendShowPacket();
 			
 		} catch (Exception e) {
 			// The generic try-catch prevents an error in the purely cosmetic neopixels from killing the whole robot

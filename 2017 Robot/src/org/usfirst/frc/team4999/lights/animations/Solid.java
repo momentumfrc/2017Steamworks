@@ -7,6 +7,10 @@ public class Solid implements Animation {
 	
 	Color[] color;
 	
+	/**
+	 * Loops through the colors of the rainbow
+	 * @return the solid animation
+	 */
 	public static Solid rainbow() {
 		Color[] rainbow = {
 				Color.RED,
@@ -19,16 +23,24 @@ public class Solid implements Animation {
 		return new Solid(rainbow);
 	}
 	
+	/**
+	 * Fills with a pattern of colors
+	 * @param colors the pattern to paint
+	 */
 	public Solid(Color[] colors) {
 		this.color = colors;
 	}
 	
+	/**
+	 * Fills with a single color
+	 * @param color the color to fill
+	 */
 	public Solid(Color color) {
 		this.color = new Color[]{color};
 	}
 
 	@Override
-	public Packet[] animate() {
+	public Packet[] getNextFrame() {
 		Packet[] out = new Packet[color.length];
 		
 		for(int i = 0; i < out.length; i++) {
@@ -38,7 +50,7 @@ public class Solid implements Animation {
 	}
 
 	@Override
-	public int getDelayUntilNextFrame() {
+	public int getFrameDelayMilliseconds() {
 		return -1;
 	}
 

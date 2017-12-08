@@ -8,10 +8,10 @@ public interface Animation {
 	 * @param pixels Current state of pixels
 	 * @return The new state of pixels
 	 */
-	Packet[] animate();
+	Packet[] getNextFrame();
 	/**
-	 * Gets time to wait before calling animate. Returns -1 to indicate animate() should only be called once
+	 * Gets time to wait before calling getNextFrame. Returns -1 to indicate getNextFrame() should only be called once
 	 * @return The delay to wait for in milliseconds
 	 */
-	int getDelayUntilNextFrame();
+	int getFrameDelayMilliseconds();
 }
