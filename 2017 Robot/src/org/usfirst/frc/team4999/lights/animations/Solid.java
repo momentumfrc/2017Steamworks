@@ -5,6 +5,8 @@ import org.usfirst.frc.team4999.lights.Packet;
 
 public class Solid implements Animation {
 	
+	private static int DELAY = 500;
+	
 	Color[] color;
 	
 	/**
@@ -51,7 +53,7 @@ public class Solid implements Animation {
 
 	@Override
 	public int getFrameDelayMilliseconds() {
-		return -1;
+		return DELAY;
 	}
 
 }

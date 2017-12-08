@@ -15,12 +15,6 @@ class AnimatorThread extends Thread {
 	private Display out;
 	private Animation current;
 	
-	private final long WAIT_TIMEOUT = 500;
-	
-	// Generic object. The wait() method is used to pause the run thread until the notifyAll() method is called
-	// If an animation returns -1 for the time to wait, the run thread pauses execution until a new animation is set
-	private final Object pauseLock = new Object();
-	
 	public AnimatorThread(Display out, Animation current) {
 		this.out = out;
 		this.current = current;
@@ -28,34 +22,23 @@ class AnimatorThread extends Thread {
 	
 	public void setAnimation(Animation newAnimation) {
 		this.current = newAnimation;
-		
-		// Tells the thread to continue. 
-		synchronized (pauseLock) {
-			pauseLock.notifyAll();
-		}
 	}
 	
 	public void run() {
 		while(!Thread.interrupted()){
 			// Note how long the send takes
 			long millis = System.currentTimeMillis();
+			// Make a local reference to the current animation
+			// This way, if current is overwritten by setAnimation mid-loop, the code is using a local reference that isn't overwritten
 			Animation animation = current;
 			// show current frame
 			out.show(animation.getNextFrame());
 			// get how long to delay for
 			int delay = animation.getFrameDelayMilliseconds();
 			
-			synchronized (pauseLock) {
-				if(delay < 0) {
-					try {
-						pauseLock.wait(WAIT_TIMEOUT);
-					} catch (InterruptedException e) {
-						break;
-					}
-					continue;
-				}
-			}
+			if(delay < 0 ) System.out.println("Animation returned a delay less than 0... interpreting as no delay");
 			
+			// Account for transmission time before delaying
 			delay -= (System.currentTimeMillis() - millis);
 			if (delay > 0) Timer.delay(delay / 1000.0);
 		}
