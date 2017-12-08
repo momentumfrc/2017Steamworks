@@ -8,19 +8,24 @@ import edu.wpi.first.wpilibj.I2C;
 class NeoPixelsIO extends I2C {
 	
 	private final Packet displayPacket;
+	private final ByteBuffer buffer;
+	
+	private final int MAX_PACKET_SIZE = 16;
 	
 	public NeoPixelsIO(Port port, int deviceAddress) {
 		super(port, deviceAddress);
 		displayPacket = new Packet();
+		buffer = ByteBuffer.allocateDirect(MAX_PACKET_SIZE);
 	}
 	
 	public boolean writePacket(Packet packet) {
-		return writeBulk(packet.fillBuffer(), packet.getPacketSize());
+		packet.fillBuffer(buffer);
+		return writeBulk(buffer, packet.getPacketSize());
 	}
 	
 	public boolean sendSyncPacket() {
-		ByteBuffer packet = Packet.syncPacket();
-		return writeBulk(packet, packet.capacity());
+		Packet.syncPacket(buffer);
+		return writeBulk(buffer, buffer.capacity());
 	}
 	
 	public boolean sendShowPacket() {

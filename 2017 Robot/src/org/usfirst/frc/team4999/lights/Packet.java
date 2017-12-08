@@ -9,9 +9,6 @@ import java.nio.ByteBuffer;
  *
  */
 public class Packet {
-	// The max size of a packet is 16 bytes
-	// Before a packet is sent, B_BUFFER is filled with that packet's data. B_BUFFER is then passed to the I2C writeBulk() method
-	private static final ByteBuffer B_BUFFER = ByteBuffer.allocateDirect(16);
 	
 	// All according to specification
 	private final byte DISPLAY_FRAME = 0x01;
@@ -123,29 +120,27 @@ public class Packet {
 	}
 	
 	/**
-	 * Fills the ByteBuffer with the packet, then returns a reference to the ByteBuffer
-	 * @return A reference to a ByteBuffer containing this packet's data
+	 * Fills the ByteBuffer with the packet data
+	 * @param buffer The buffer to fill with packet data
 	 */
-	public ByteBuffer fillBuffer() {
-		B_BUFFER.rewind();
-		B_BUFFER.put((byte) getDataSize());
-		B_BUFFER.put(command);
-		if(data.length > 0) B_BUFFER.put(data);
-		B_BUFFER.rewind();
-		return B_BUFFER;
+	public void fillBuffer(ByteBuffer buffer) {
+		buffer.rewind();
+		buffer.put((byte) getDataSize());
+		buffer.put(command);
+		if(data.length > 0) buffer.put(data);
+		buffer.rewind();
 	}
 	
 	/**
 	 * Fills the ByteBuffer with a synchronization packet
-	 * @return A reference to a ByteBuffer filled with 0xFF
+	 * @param buffer The buffer to fill with the synchronization packet
 	 */
-	public static ByteBuffer syncPacket() {
-		B_BUFFER.rewind();
-		while(B_BUFFER.hasRemaining()) {
-			B_BUFFER.put((byte)0xFF);
+	public static void syncPacket(ByteBuffer buffer) {
+		buffer.rewind();
+		while(buffer.hasRemaining()) {
+			buffer.put((byte)0xFF);
 		}
-		B_BUFFER.rewind();
-		return B_BUFFER;
+		buffer.rewind();
 	}
 	
 	
