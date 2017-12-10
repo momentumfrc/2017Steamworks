@@ -96,7 +96,7 @@ public class Snake implements Animation {
 		Packet[] out = new Packet[snakes.length];
 		
 		for(int i = 0; i < out.length; i++) {
-			out[i] = Commands.setStride(i, snakes[(i + offset) % snakes.length], 1, snakes.length);
+			out[i] = Commands.makeStride(i, snakes[(i + offset) % snakes.length], 1, snakes.length);
 		}
 		
 		offset = (offset + increment + snakes.length) % snakes.length;

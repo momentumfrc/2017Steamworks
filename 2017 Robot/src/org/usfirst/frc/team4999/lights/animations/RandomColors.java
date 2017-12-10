@@ -28,7 +28,7 @@ public class RandomColors implements Animation {
 		Packet[] out = new Packet[repeat];
 		for(int i = 0; i < out.length; i++) {
 			Color paint = new Color(randomRGB(), randomRGB(), randomRGB());
-			out[i] = Commands.setStride(i, paint, 1, repeat );
+			out[i] = Commands.makeStride(i, paint, 1, repeat );
 		}
 		return out;
 	}

@@ -47,7 +47,7 @@ public class Solid implements Animation {
 		Packet[] out = new Packet[color.length];
 		
 		for(int i = 0; i < out.length; i++) {
-			out[i] = Commands.setStride(i, color[i % color.length], 1, color.length);
+			out[i] = Commands.makeStride(i, color[i % color.length], 1, color.length);
 		}
 		return out;
 	}

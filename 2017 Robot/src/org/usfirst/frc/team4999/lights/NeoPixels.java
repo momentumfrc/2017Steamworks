@@ -57,8 +57,8 @@ public class NeoPixels implements Display {
 	private NeoPixels() {
 		strip = new NeoPixelsIO(I2C.Port.kOnboard, I2C_ADDRESS);
 		
-		syncPacket = Commands.syncPacket();
-		showPacket = Commands.showPacket();
+		syncPacket = Commands.makeSyncPacket();
+		showPacket = Commands.makeShowPacket();
 	}
 	
 	synchronized public void show(Packet[] commands) {

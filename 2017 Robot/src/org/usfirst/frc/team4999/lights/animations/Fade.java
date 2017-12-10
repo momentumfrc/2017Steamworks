@@ -109,7 +109,7 @@ public class Fade implements Animation {
 			hold = true;
 			current.calculateDiffs(colors[idx], STEPS);
 		}
-		return new Packet[] { Commands.setStride(0, current.toColor(), 1, 1) };
+		return new Packet[] { Commands.makeStride(0, current.toColor(), 1, 1) };
 	}
 
 	@Override

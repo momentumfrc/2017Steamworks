@@ -40,7 +40,7 @@ public class Blink implements Animation {
 
 	@Override
 	public Packet[] getNextFrame() {
-		Packet out[] =  {Commands.setStride(0, colors[idx], 1, 1)};
+		Packet out[] =  {Commands.makeStride(0, colors[idx], 1, 1)};
 		idx = (idx + 1) % waittimes.length;
 		return out;
 	}
