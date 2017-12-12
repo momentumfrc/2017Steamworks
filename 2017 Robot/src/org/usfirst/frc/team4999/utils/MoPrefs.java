@@ -7,6 +7,14 @@ public class MoPrefs {
 	Preferences prefs;
 	DefaultPreferences dprefs;
 	
+	static private MoPrefs instance;
+	
+	static public MoPrefs getInstance() {
+		if(instance == null)
+			instance = new MoPrefs();
+		return instance;
+	}
+	
 	static private double defaultTicksPerMeter = 187;
 	static private double defaultMoveErrGain = 1;
 	static private double defaultAutoSpeedLimit = 0.25;

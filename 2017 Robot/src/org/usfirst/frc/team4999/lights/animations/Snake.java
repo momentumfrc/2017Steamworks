@@ -1,30 +1,69 @@
 package org.usfirst.frc.team4999.lights.animations;
 
 import org.usfirst.frc.team4999.lights.Color;
+import org.usfirst.frc.team4999.lights.Commands;
+import org.usfirst.frc.team4999.lights.Packet;
 
 
 public class Snake implements Animation {
 	
+	/**
+	 * Make a snake with a foreground and background colors
+	 * @param primary the foreground color
+	 * @param background the background color
+	 * @param head how many pixels long the solid head should be
+	 * @param tail how many pixels long the tail should be. The tail fades into the background
+	 * @param spaceBetween how many pixels of background color there are between snakes
+	 * @param msBetweenFrames how often to update the animation
+	 * @return the snake animation
+	 */
 	public static Snake twoColorSnake(Color primary, Color background, int head, int tail, int spaceBetween, int msBetweenFrames) {
 		return twoColorSnake(primary, background, head, tail, spaceBetween, msBetweenFrames, false);
 	}
 	
+	/**
+	 * Make a snake with a foreground and background colors
+	 * @param primary the foreground color
+	 * @param background the background color
+	 * @param head how many pixels long the solid head should be
+	 * @param tail how many pixels long the tail should be. The tail fades into the background
+	 * @param spaceBetween how many pixels of background color there are between snakes
+	 * @param msBetweenFrames how often to update the animation
+	 * @param reversed whether to go backwards
+	 * @return the snake animation
+	 */
 	public static Snake twoColorSnake(Color primary, Color background, int head, int tail, int spaceBetween, int msBetweenFrames, boolean reversed) {
 		Color[] snake = new Color[head+tail+spaceBetween];
+		// create the head
 		for(int i = 0; i < head; i++) {
 			snake[i] = primary;
 		}
+		// create the tail
 		for(int i = head; i < head+tail; i++) {
 			snake[i] = blendInto(background, primary, (i+1 - head)/(double)(tail+1));
 		}
+		// create the background frames
 		for(int i = head+tail; i < snake.length; i++) {
 			snake[i] = background;
+		}
+		// reverse the snake if it's going in the reverse direction
+		if(reversed) {
+			for(int i = 0; i < snake.length/2; i++) {
+				Color tmp = snake[i];
+				snake[i] = snake[snake.length - i - 1];
+				snake[snake.length - i - 1] = tmp;
+			}
 		}
 		Snake s = new Snake(snake, msBetweenFrames);
 		s.setReverse(reversed);
 		return s;
 	}
 	
+	/**
+	 * Creates a rainbow-colored snake
+	 * @param msBetweenFrames how often to update the animation
+	 * @return the snake
+	 */
 	public static Snake rainbowSnake(int msBetweenFrames) {
 		Color[] snake = {
 				Color.RED,
@@ -37,15 +76,12 @@ public class Snake implements Animation {
 		return new Snake(snake, msBetweenFrames);
 	}
 	
-	Color[] snakes;
-	int offset;
-	int speed;
-	
-	private boolean reverse = false;
+	private Color[] snakes;
+	private int offset, speed, increment = 1;
 	
 	public Snake(Color[] snakes, int msBetweenFrames, boolean reversed) {
 		this(snakes, msBetweenFrames);
-		this.reverse = reversed;
+		this.increment = reversed ? -1 : 1;
 	}
 	
 	public Snake(Color[] snakes, int msBetweenFrames) {
@@ -55,22 +91,22 @@ public class Snake implements Animation {
 	}
 
 	@Override
-	public Color[] animate(Color[] pixels) {
-		Color[] out = pixels.clone();
+	public Packet[] getNextFrame() {
+		
+		Packet[] out = new Packet[snakes.length];
 		
 		for(int i = 0; i < out.length; i++) {
-			out[i] = snakes[(i + offset) % snakes.length];
+			out[i] = Commands.makeStride(i, snakes[(i + offset) % snakes.length], 1, snakes.length);
 		}
-		offset = (reverse) ? offset-1 : offset+1;
-		offset = (offset >= snakes.length) ? 0 : offset;
-		offset = (offset < 0) ? 0 : snakes.length - 1;
+		
+		offset = (offset + increment + snakes.length) % snakes.length;
 		
 		return out;
 		
 	}
 
 	@Override
-	public int getDelayUntilNextFrame() {
+	public int getFrameDelayMilliseconds() {
 		return speed;
 	}
 	
@@ -82,10 +118,10 @@ public class Snake implements Animation {
 	}
 	
 	public void reverse() {
-		reverse = !reverse;
+		increment = -increment;
 	}
 	public void setReverse(boolean b) {
-		reverse = b;
+		increment = b ? -1 : 1;
 	}
 
 }

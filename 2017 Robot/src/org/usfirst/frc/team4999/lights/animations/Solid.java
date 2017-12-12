@@ -1,11 +1,19 @@
 package org.usfirst.frc.team4999.lights.animations;
 
 import org.usfirst.frc.team4999.lights.Color;
+import org.usfirst.frc.team4999.lights.Commands;
+import org.usfirst.frc.team4999.lights.Packet;
 
 public class Solid implements Animation {
 	
+	private static int DELAY = 500;
+	
 	Color[] color;
 	
+	/**
+	 * Loops through the colors of the rainbow
+	 * @return the solid animation
+	 */
 	public static Solid rainbow() {
 		Color[] rainbow = {
 				Color.RED,
@@ -18,27 +26,35 @@ public class Solid implements Animation {
 		return new Solid(rainbow);
 	}
 	
+	/**
+	 * Fills with a pattern of colors
+	 * @param colors the pattern to paint
+	 */
 	public Solid(Color[] colors) {
 		this.color = colors;
 	}
 	
+	/**
+	 * Fills with a single color
+	 * @param color the color to fill
+	 */
 	public Solid(Color color) {
 		this.color = new Color[]{color};
 	}
 
 	@Override
-	public Color[] animate(Color[] pixels) {
-		Color[] out = pixels.clone();
+	public Packet[] getNextFrame() {
+		Packet[] out = new Packet[color.length];
 		
 		for(int i = 0; i < out.length; i++) {
-			out[i] = color[i % color.length];
+			out[i] = Commands.makeStride(i, color[i % color.length], 1, color.length);
 		}
 		return out;
 	}
 
 	@Override
-	public int getDelayUntilNextFrame() {
-		return -1;
+	public int getFrameDelayMilliseconds() {
+		return DELAY;
 	}
 
 }

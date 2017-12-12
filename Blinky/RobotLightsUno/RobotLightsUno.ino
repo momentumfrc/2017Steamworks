@@ -1,37 +1,41 @@
 #include <Wire.h>
 #include <Adafruit_NeoPixel.h>
-//#include <Serial.h>
 #ifdef __AVR__
-  #include <avr/power.h>
+#include <avr/power.h>
 #endif
 
 /*
- * I2C controlled NeoPixel driver
- * 
- * Receives bytestream over I2C and compiles RGB values for NeoPixel strip.
- * 
- * I2C address: 16
- * I2C register: 0x01
- * 
- * Reserved values:
- * - register address: 0x01
- * - start of frame: 0xfd
- * - end of frame: 0xfe
- * 
- * All other values can be used for RGB display.
- * 
- * Display protocol:
- * - Send one byte at a time from master using single-byte write to I2C device 16, register 0x01
- * - Begin frame by sending value 0xfd
- * - Send all RGB values in sequence: R, G, B, R, G, B, etc (using single-byte write as above)
- *   - Note: RGB values must be sanitized of reserved values before sending:
- *     - 0x01 should be pushed to 0x00
- *     - 0xfd and 0xfe should be pushed to 0xff.
- * - End frame and trigger display by sending value 0xfe
- * 
- * NeoPixels will hold the last value they received.  There is no required refresh rate.
- * 
- */
+   I2C controlled NeoPixel driver
+
+   Receives command packets over I2C and allows painting RGB values into NeoPixel strip.
+
+   I2C address: 16
+
+   Packet format:
+   - B0 : payload size
+   - B1-15 : payload  (Max payload is 15 bytes)
+
+   Command payload format:
+   - B0 : command id
+   - B1-14 : command data (varies by command)
+
+   Commands:
+   - 0x01 : <empty> : show current image
+   - 0x02 : pixel address ; RGB : set single pixel at address with value RGB
+   - 0x03 : start address ; RGB ; length : set "length" pixels starting at "start" with value RGB
+   - 0x04 : start address ; RGB ; length ; stride : set "length" pixels starting at "start" with value RGB.  Repeat every "stride" pixels.
+
+   Error rejection/correction:
+   - Invalid packets will be rejected and packet parsing will begin again with next byte in stream.
+
+   Display protocol:
+   - At beginning of frame, send >= 16 0xff bytes to force resync
+   - Send paint commands to fill image buffer.  Unpainted pixels will retain prior contents.
+   - Send "show current image" command
+
+   NeoPixels will hold the last value they received.  There is no required refresh rate.
+
+*/
 
 #define PIN 1
 
@@ -57,8 +61,8 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(120, PIN, NEO_GRB + NEO_KHZ800);
 // and minimize distance between Arduino and first pixel.  Avoid connecting
 // on a live circuit...if you must, connect GND first.
 
-int ix = 0;
-uint32_t pixel = 0;
+const int MAX_PAYLOAD = 15;
+uint8_t payload[MAX_PAYLOAD];
 
 void setup() {
   strip.begin();
@@ -79,35 +83,92 @@ void loop() {
 }
 
 void onReceive(int howMany) {
+  static int payloadIx = 0, payloadLen = 0;
   while (Wire.available())
   {
-    uint32_t b = Wire.read();
-    if (b == 0x01)
-    {
-      // eat address byte
+    uint8_t b = Wire.read();
+    if (payloadLen == 0) {
+      // start of packet state
+      if (b > MAX_PAYLOAD) {
+        // re-sync
+      }
+      else {
+        // begin new payload
+        payloadIx = 0;
+        payloadLen = b;
+      }
     }
-    else if (b == 0xfd)
-    {
-      ix = 0;
-    }
-    else if (b == 0xfe)
-    {
-      strip.show();
-    }
-    else
-    {
-      if (ix < strip.numPixels()*3)
-      {
-        //pixel is RGB in big-endian order
-        pixel |= b << (2 - ix%3)*8;
-        ++ix;
-        if (ix%3 == 0)
-        {
-          strip.setPixelColor(ix/3 - 1, pixel);
-          pixel = 0;
-        }
+    else {
+      // in-packet state
+      // receive payload byte
+      payload[payloadIx++] = b;
+      if (payloadIx == payloadLen) {
+        parsePayload(payloadLen);
+        payloadLen = 0;
       }
     }
   }
+}
+
+// param: len is the total size of the payload, including the command.
+// Each command is responsible for checking the payload size for a match.
+// In the event of a mismatch, do nothing and discard the payload.
+//
+void parsePayload(int len) {
+  int command = payload[0];
+  int address = payload[1];
+  uint32_t rgb = getRGB(&payload[2]);
+
+  switch (command) {
+    case 1: // display current strip contents
+      if (len == 1)
+        strip.show();
+      break;
+
+    case 2: // set single pixel
+      if (len == 5)
+        paintPattern(address, rgb, 1, 0);
+      break;
+
+    case 3: // set run of pixels
+      if (len == 6) {
+        int count = payload[5];
+        paintPattern(address, rgb, count, 0);
+      }
+      break;
+
+    case 4: // set run of pixels with stride
+      if (len == 7) {
+        int count = payload[5];
+        int stride = payload[6];
+        paintPattern(address, rgb, count, stride);
+      }
+      break;
+
+    default: // unrecognized command
+      break;
+  }
+}
+
+uint32_t getRGB(uint8_t rgb[]) {
+  uint32_t red = rgb[0];
+  uint32_t green = rgb[1];
+  uint32_t blue = rgb[2];
+
+  // pack RGB in big-endian order
+  return (red << 16) | (green << 8) | blue;
+}
+
+// stride of 0 will paint once and exit (instead of infinite loop)
+// stride >0 will repeat pattern until end of strip
+void paintPattern(int address, uint32_t rgb, int count, int stride) {
+  do {
+    for (int i = 0; i < count; ++i) {
+      int pixel = address + i;
+      if (pixel < strip.numPixels())
+        strip.setPixelColor(pixel, rgb);
+    }
+    address += stride;
+  } while (address < strip.numPixels() && stride > 0);
 }
 
