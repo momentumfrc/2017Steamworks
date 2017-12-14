@@ -67,6 +67,7 @@ public class Animator {
 	 */
 	public Animator(Display pixels) {
 		animate = new AnimatorThread(pixels, new Solid(Color.BLACK));
+		animate.start();
 	}
 	
 	/**

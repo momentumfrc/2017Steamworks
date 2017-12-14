@@ -12,7 +12,7 @@ public class BrightnessFilter implements ITableListener {
 	
 	private static BrightnessFilter instance;
 	
-	private final String key = "Brightness";
+	private final String key = "BRIGHTNESS";
 	private final Preferences prefs;
 	
 	private BrightnessFilter() {

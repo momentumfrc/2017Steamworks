@@ -77,9 +77,9 @@ public class LightsChooser extends SendableChooser<Animation> {
 	private LightsListener list;
 	
 	// Some basic animations
-	public final Animation blinkRed = new Blink(new Color[] {Color.RED, Color.BLACK}, 150);
-	public final Animation whiteSnake = new Snake(new Color[] {Color.WHITE, Color.BLACK, Color.BLACK}, 150);
-	public final Animation reverseWhiteSnake = new Snake(new Color[] {Color.WHITE, Color.BLACK, Color.BLACK}, 10, true);
+	public final Animation blinkRed = new Blink(new Color[] {Color.RED, Color.BLACK}, 70);
+	public final Animation whiteSnake = new Snake(new Color[] {Color.WHITE, Color.BLACK, Color.BLACK}, 50);
+	public final Animation reverseWhiteSnake = new Snake(new Color[] {Color.WHITE, Color.BLACK, Color.BLACK}, 50, true);
 	
 	public LightsChooser() {
 		super();
@@ -92,16 +92,16 @@ public class LightsChooser extends SendableChooser<Animation> {
 		}, 5000);
 		
 		AnimationSequence rainbow = new AnimationSequence(new Animation[] {
-				Snake.rainbowSnake(150),
+				Snake.rainbowSnake(70),
 				Fade.RainbowFade(50, 20),
-				Snake.rainbowSnake(300),
-				Fade.RainbowFade(500, 0)
-		}, new int[] {5000, 9000, 1000, 12000});
+				Snake.rainbowSnake(150),
+				Fade.RainbowFade(200, 0)
+		}, new int[] {5000, 5000, 1000, 12000});
 		
 		AnimationSequence christmas = new AnimationSequence(new Animation[] {
 				Snake.twoColorSnake(Color.RED, Color.WHITE, 2, 0, 4, 250),
 				new Fade(new Color[] {Color.RED, new Color(60,141,13), Color.WHITE}, 0, 250),
-				new Snake(new Color[] {new Color(255,223,0), new Color(60,141,13), new Color(45,100,13), new Color(45,100,13), new Color(39,84,14), new Color(39,84,14) }, 250)
+				new Snake(new Color[] {new Color(255,223,0), new Color(60,141,13), new Color(45,100,13), new Color(45,100,13), new Color(39,84,14), new Color(39,84,14) }, 150)
 		}, 5000);
 		
 		Animation solid = new Solid(Color.WHITE);
