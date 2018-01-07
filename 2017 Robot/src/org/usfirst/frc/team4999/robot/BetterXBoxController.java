@@ -3,7 +3,6 @@ package org.usfirst.frc.team4999.robot;
 import java.util.HashSet;
 import java.util.HashMap;
 
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 /**
  * Stores the hand requested, and the value of the rumble

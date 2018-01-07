@@ -3,15 +3,17 @@ package org.usfirst.frc.team4999.robot.choosers;
 import org.usfirst.frc.team4999.utils.MoPrefs;
 import org.usfirst.frc.team4999.utils.MomentumPIDController;
 
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.TableEntryListener;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.tables.ITable;
-import edu.wpi.first.wpilibj.tables.ITableListener;
 
 
 public class TurnPIDChooser extends SendableChooser<TurnPIDChooser.TurnPIDMode>{
 	
 	public static enum TurnPIDMode { carpet, cement, tile, preferences };
+	
+	private String NAME = "PIDModeChooser";
 	
 	private double[] carpetVals = { 0.08, 0.01, 0.08 };
 	private double[] cementVals = { 0, 0, 0 };
@@ -21,32 +23,21 @@ public class TurnPIDChooser extends SendableChooser<TurnPIDChooser.TurnPIDMode>{
 	
 	private MomentumPIDController controller;
 	
-	public TurnPIDChooser() {
-		super();
+	public TurnPIDChooser(MomentumPIDController controller) {
+		
 		addDefault("Carpet", TurnPIDMode.carpet);
 		addObject("Cement", TurnPIDMode.cement);
 		addObject("Tile", TurnPIDMode.tile);
 		addObject("Preferences Values", TurnPIDMode.preferences);
-		SmartDashboard.putData("PIDModeChooser", this);
-	}
-	
-	public TurnPIDChooser(MomentumPIDController controller) {
-		this();
+		
 		this.controller = controller;
 		
-		ITable table = getTable();
+		SmartDashboard.putData(NAME, this);
+		NetworkTableInstance.getDefault().getTable("SmartDashboard").getSubTable(NAME).getEntry("selected").addListener((notification) -> {
+			System.out.println("Updating PID Values...");
+			updatePIDController();
+		},TableEntryListener.kUpdate|TableEntryListener.kImmediate);
 		
-		ITableListener listener = new ITableListener() {
-			@Override
-			public void valueChanged(ITable source, String key, Object value, boolean isNew) {
-				if(key == "selected") {
-					System.out.println("Updating PID Values...");
-					updatePIDController();
-				}
-			}
-		};
-		
-		table.addTableListener("selected",listener, true);
 		updatePIDController();
 	}
 	
@@ -93,12 +84,7 @@ public class TurnPIDChooser extends SendableChooser<TurnPIDChooser.TurnPIDMode>{
 		}
 	}
 	
-	public void updatePIDController(MomentumPIDController controller) {
-		controller.setPID(getP(), getI(), getD());
-	}
 	public void updatePIDController() {
-		if(controller == null) 
-			return;
 		controller.setPID(getP(), getI(), getD());
 	}
 }

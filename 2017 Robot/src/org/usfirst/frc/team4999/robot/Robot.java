@@ -1,7 +1,6 @@
 
 package org.usfirst.frc.team4999.robot;
 
-import org.usfirst.frc.team4999.lights.Animator;
 import org.usfirst.frc.team4999.lights.BrightnessFilter;
 import org.usfirst.frc.team4999.robot.choosers.*;
 import org.usfirst.frc.team4999.utils.MoPrefs;
@@ -112,7 +111,7 @@ public class Robot extends IterativeRobot {
 		lightchooser = new LightsChooser();
 		
 		pdp = new PowerDistributionPanel();
-		LiveWindow.addSensor("Robot Power", "PDP", pdp);
+		LiveWindow.add(pdp);
 		
 		BrightnessFilter.register();
 		

@@ -1,12 +1,11 @@
 package org.usfirst.frc.team4999.lights;
 
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.TableEntryListener;
 import edu.wpi.first.wpilibj.Preferences;
-import edu.wpi.first.wpilibj.networktables.NetworkTable;
-import edu.wpi.first.wpilibj.tables.ITable;
-import edu.wpi.first.wpilibj.tables.ITableListener;
 
 
-public class BrightnessFilter implements ITableListener {
+public class BrightnessFilter {
 	
 	private static double brightness = 0.2;
 	
@@ -20,16 +19,13 @@ public class BrightnessFilter implements ITableListener {
 		
 		if(!prefs.containsKey(key))
 			prefs.putDouble(key, brightness);
-		NetworkTable.getTable("Preferences").addTableListener(key, this, true);
+		NetworkTableInstance.getDefault().getTable("Preferences").getEntry(key).addListener((notification) -> {
+			brightness = truncate(notification.value.getDouble());
+		}, TableEntryListener.kUpdate|TableEntryListener.kImmediate);
 		
 	}
 	
-	@Override
-	public void valueChanged(ITable source, String key, Object value, boolean isNew) {
-		if(key == this.key && value instanceof Double ) {
-			brightness = truncate((double) value);
-		}
-	}
+
 	
 	private double truncate(double in) {
 		if(in > 1) return 1;

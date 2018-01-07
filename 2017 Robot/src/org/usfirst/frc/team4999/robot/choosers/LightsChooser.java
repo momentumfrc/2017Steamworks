@@ -8,64 +8,10 @@ import java.util.Vector;
 import org.usfirst.frc.team4999.lights.Animator;
 import org.usfirst.frc.team4999.lights.animations.*;
 
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.TableEntryListener;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.tables.ITable;
-import edu.wpi.first.wpilibj.tables.ITableListener;
-
-/**
- * Informs the Animator when the selected animation on the SmartDashboard is changed
- * @author jordan
- *
- */
-class LightsListener implements ITableListener {
-	
-	private Animator animator;
-	private SendableChooser<Animation> chooser;
-	
-	// The animationTable registers keys to animations
-	HashMap<String, Animation> animationTable;
-	// The animations Vector holds the keys of registered animations, in the order that they are registered
-	Vector<String> animations;
-	
-	public LightsListener(SendableChooser<Animation> chooser) {
-		animator = new Animator();
-		animations = new Vector<String>();
-		animationTable = new HashMap<String, Animation>();
-		this.chooser = chooser;
-		animator.setAnimation(this.chooser.getSelected());
-	}
-	
-	@Override
-	public void valueChanged(ITable source, String key, Object value, boolean isNew) {
-		if(key.equals("selected")) {
-			if( animations.isEmpty()) {
-				animator.setAnimation(this.chooser.getSelected());
-				System.out.println("Setting animation to " + value);
-			}
-		}
-	}
-	
-	public void pushAnimation(String key, Animation a) {
-		// Prevent duplicate entries
-		if(animations.contains(key))
-			return;
-		animationTable.put(key, a);
-		animations.add(key);
-		animator.setAnimation(animationTable.get(animations.lastElement()));
-	}
-	
-	public void popAnimation(String key) {
-		animations.removeElement(key);
-		animationTable.remove(key);
-		if(animations.isEmpty()) {
-			animator.setAnimation(chooser.getSelected());
-		} else {
-			animator.setAnimation(animationTable.get(animations.lastElement()));
-		}
-	}
-	
-}
 
 /**
  * Manages the current animation of the {@link NeoPixels}
@@ -74,7 +20,15 @@ class LightsListener implements ITableListener {
  */
 public class LightsChooser extends SendableChooser<Animation> {
 	
-	private LightsListener list;
+	private final String NAME = "Lights Chooser";
+	
+	private Animator animator;
+	private SendableChooser<Animation> chooser;
+	
+	// The animationTable registers keys to animations
+	HashMap<String, Animation> animationTable;
+	// The animations Vector holds the keys of registered animations, in the order that they are registered
+	Vector<String> animations;
 	
 	// Some basic animations
 	public final Animation blinkRed = new Blink(new Color[] {Color.RED, Color.BLACK}, 70);
@@ -114,10 +68,19 @@ public class LightsChooser extends SendableChooser<Animation> {
 		addObject("Solid White", solid);
 		addObject("Random", random);
 		
-		SmartDashboard.putData("Lights Chooser", this);
+		SmartDashboard.putData(NAME, this);
 		
-		list = new LightsListener(this);
-		this.getTable().addTableListener("selected", list, true);
+		animator = new Animator();
+		animations = new Vector<String>();
+		animationTable = new HashMap<String, Animation>();
+		animator.setAnimation(getSelected());
+		
+		NetworkTableInstance.getDefault().getTable("SmartDashboard").getSubTable(NAME).getEntry("selected").addListener((notification) -> {
+			if(animations.isEmpty()) {
+				animator.setAnimation(this.chooser.getSelected());
+				System.out.println("Setting animation to " + notification.value.getString());
+			}
+		},TableEntryListener.kUpdate|TableEntryListener.kImmediate);
 		
 	}
 	
@@ -130,7 +93,12 @@ public class LightsChooser extends SendableChooser<Animation> {
 	 * @param a The animation to register
 	 */
 	public void pushAnimation(String key, Animation a) {
-		list.pushAnimation(key, a);
+		// Prevent duplicate entries
+		if(animations.contains(key))
+			return;
+		animationTable.put(key, a);
+		animations.add(key);
+		animator.setAnimation(animationTable.get(animations.lastElement()));
 	}
 	/**
 	 * Removes an animation from the stack of animations.
@@ -138,7 +106,13 @@ public class LightsChooser extends SendableChooser<Animation> {
 	 * @param key The unique key of the animation to remove
 	 */
 	public void popAnimation(String key) {
-		list.popAnimation(key);
+		animations.removeElement(key);
+		animationTable.remove(key);
+		if(animations.isEmpty()) {
+			animator.setAnimation(chooser.getSelected());
+		} else {
+			animator.setAnimation(animationTable.get(animations.lastElement()));
+		}
 	}
 	
 }

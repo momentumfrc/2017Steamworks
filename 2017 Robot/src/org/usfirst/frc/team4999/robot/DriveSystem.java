@@ -1,11 +1,10 @@
 package org.usfirst.frc.team4999.robot;
 
-import org.usfirst.frc.analog.adis16448.ADIS16448_IMU;
+import com.analog.adis16448.frc.ADIS16448_IMU;
 import org.usfirst.frc.team4999.utils.DefaultPreferences;
 import org.usfirst.frc.team4999.utils.MoPrefs;
 import org.usfirst.frc.team4999.utils.MomentumPIDController;
 
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.PIDSource;
@@ -15,8 +14,6 @@ import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.command.Subsystem;
-import edu.wpi.first.wpilibj.livewindow.LiveWindow;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 /**
  * Implements the PIDOutput interface to turn the robot
  * @author jordan
@@ -140,22 +137,23 @@ public class DriveSystem extends Subsystem {
 				new turnInterface(this)
 		);
 		
-		initLiveWindow();
+		setChildren();
 		
 		turnCont.setAbsoluteTolerance(moprefs.getTurnPIDTolerance());
 		turnCont.setOutputRange(-1,1);
 	}
 	
-	private void initLiveWindow() {
-		LiveWindow.addActuator("Drive System", "LeftFront Motor", leftFront);
-		LiveWindow.addActuator("Drive System", "RightFront Motor", rightFront);
-		LiveWindow.addActuator("Drive System", "LeftBack Motor", leftBack);
-		LiveWindow.addActuator("Drive System", "RightBack Motor", rightBack);
-		LiveWindow.addActuator("Drive System", "Turn PID", turnCont);
-		LiveWindow.addSensor("Drive System", "ADIS", adis);
-		LiveWindow.addSensor("Drive System", "Left Encoder", left);
-		LiveWindow.addSensor("Drive System", "Right Encoder", right);
+	private void setChildren() {
+		addChild("Left Front Motor", leftFront);
+		addChild("Right Front Motor", rightFront);
+		addChild("Left Back Motor", leftBack);
+		addChild("Right Back Motor", rightBack);
+		addChild("Turn PID", turnCont);
+		addChild("ADIS", adis);
+		addChild("Left Encoder", left);
+		addChild("Right Encoder", right);
 	}
+	
 
 	public void writeTurnPIDValues() {
 		prefs.putDouble("AUTO_TURN_KP", turnCont.getP());
