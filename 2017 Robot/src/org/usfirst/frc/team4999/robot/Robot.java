@@ -63,7 +63,7 @@ public class Robot extends IterativeRobot {
 	AutoModeChooser autoMode;
 	DriveModeChooser driveMode;
 	
-	PowerDistributionPanel pdp;
+	//PowerDistributionPanel pdp;
 	
 	LightsChooser lightchooser;
 	
@@ -110,8 +110,8 @@ public class Robot extends IterativeRobot {
 		driveMode = new DriveModeChooser();
 		lightchooser = new LightsChooser();
 		
-		pdp = new PowerDistributionPanel();
-		LiveWindow.add(pdp);
+		//pdp = new PowerDistributionPanel();
+		//LiveWindow.add(pdp);
 		
 		BrightnessFilter.register();
 		

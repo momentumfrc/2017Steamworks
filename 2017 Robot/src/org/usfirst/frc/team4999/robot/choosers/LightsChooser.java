@@ -23,7 +23,6 @@ public class LightsChooser extends SendableChooser<Animation> {
 	private final String NAME = "Lights Chooser";
 	
 	private Animator animator;
-	private SendableChooser<Animation> chooser;
 	
 	// The animationTable registers keys to animations
 	HashMap<String, Animation> animationTable;
@@ -77,7 +76,7 @@ public class LightsChooser extends SendableChooser<Animation> {
 		
 		NetworkTableInstance.getDefault().getTable("SmartDashboard").getSubTable(NAME).getEntry("selected").addListener((notification) -> {
 			if(animations.isEmpty()) {
-				animator.setAnimation(this.chooser.getSelected());
+				animator.setAnimation(getSelected());
 				System.out.println("Setting animation to " + notification.value.getString());
 			}
 		},TableEntryListener.kUpdate|TableEntryListener.kImmediate);
@@ -109,7 +108,7 @@ public class LightsChooser extends SendableChooser<Animation> {
 		animations.removeElement(key);
 		animationTable.remove(key);
 		if(animations.isEmpty()) {
-			animator.setAnimation(chooser.getSelected());
+			animator.setAnimation(getSelected());
 		} else {
 			animator.setAnimation(animationTable.get(animations.lastElement()));
 		}
