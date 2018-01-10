@@ -3,6 +3,7 @@ package org.usfirst.frc.team4999.robot;
 
 import org.usfirst.frc.team4999.lights.BrightnessFilter;
 import org.usfirst.frc.team4999.robot.choosers.*;
+import org.usfirst.frc.team4999.utils.ControllerWrapper;
 import org.usfirst.frc.team4999.utils.MoPrefs;
 
 import edu.wpi.cscore.UsbCamera;
@@ -10,10 +11,10 @@ import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.PowerDistributionPanel;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.VictorSP;
-import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -34,6 +35,7 @@ public class Robot extends IterativeRobot {
 	// Controllers used to receive input from the driver.
 	private BetterFlightStick flightStick;
 	private BetterXBoxController xboxController;
+	private ControllerWrapper f310;
 	
 	// Motors
 	private VictorSP winch;
@@ -67,6 +69,7 @@ public class Robot extends IterativeRobot {
 	
 	LightsChooser lightchooser;
 	
+	String throttleKey = "Throttle";
 
 	/**
 	 * This method is run once when the robot is turned on.
@@ -88,12 +91,12 @@ public class Robot extends IterativeRobot {
 		piston = new DoubleSolenoid(2,0);
 		
 		// xboxcontroller for other controller
-		 xboxController = new BetterXBoxController(0);
+		xboxController = new BetterXBoxController(0);
 		
+		f310 = new ControllerWrapper(new Joystick(2));
+		 
 		// Flight stick for user input
 		flightStick = new BetterFlightStick(1);
-		flightStick.setDeadzoneY(0.15);
-		flightStick.setDeadzoneTwist(0.20);
 		
 		// Start the timer so that it's ready to count
 		gear = new Timer();
@@ -114,6 +117,11 @@ public class Robot extends IterativeRobot {
 		//LiveWindow.add(pdp);
 		
 		BrightnessFilter.register();
+		
+		if(!SmartDashboard.containsKey(throttleKey)) {
+			SmartDashboard.putNumber(throttleKey, 1);
+			SmartDashboard.setPersistent(throttleKey);
+		}
 		
 		
 	}
@@ -170,51 +178,63 @@ public class Robot extends IterativeRobot {
 		xboxController.setCurveX(Hand.kRight, moprefs.getXboxCurve());
 		xboxController.setDeadzoneY(Hand.kLeft, moprefs.getXboxDeadzone());
 		xboxController.setCurveY(Hand.kLeft, moprefs.getXboxCurve());
+		
+		flightStick.setDeadzoneY(0.15);
+		flightStick.setDeadzoneTwist(0.20);
+		
+		f310.setDeadzone(4, moprefs.getXboxDeadzone());
+		f310.setDeadzone(1, moprefs.getXboxDeadzone());
+		f310.setCurve(4, moprefs.getXboxCurve());
+		f310.setCurve(1, moprefs.getXboxCurve());
 	}
 	
 	public void teleopPeriodic() {
 		double speedLimiter;
 		switch(driveMode.getSelected()) { // get the selected controlelr
-			case tankDrive:
+			case XBOX:
 				// get the position of the sticks on the xbox controller
 				moveRequest = xboxController.getY(BetterXBoxController.Hand.kLeft);
 				turnRequest = xboxController.getX(BetterXBoxController.Hand.kRight);
 				
+				speedLimiter = SmartDashboard.getNumber(throttleKey, 1);
 				break;
-			case arcadeDrive:
+			case F310:
+				moveRequest = f310.getRawAxis(1);
+				turnRequest = f310.getRawAxis(4);
+				
+				speedLimiter = SmartDashboard.getNumber(throttleKey, 1);
+			case FLIGHTSTICK:
 			default:
 				
 				// The input from the driver. Deadzones are used to make the robot less twitchy.
 				moveRequest = -flightStick.getCalibratedY();
 				turnRequest = flightStick.getCalibratedTwist();
+				
+				speedLimiter = (-flightStick.getThrottle() + 1) / 2;
 		}
 		
 		// Allow the driver to switch back and front.
 		moveRequest = (isInverted)? -moveRequest: moveRequest;
 		
-		// Throttle
-		// speedLimiter = (-flightStick.getThrottle() + 1) / 2;
-		speedLimiter = moprefs.getThrottle();
-		
 		// Write the move and turn request calculated to the drive system
 		drive.arcadeDrive(moveRequest, turnRequest, speedLimiter);	
 		
 		// Drive the winch
-		if(xboxController.getBumper(Hand.kLeft) || flightStick.getRawButton(5)) {
+		if(xboxController.getBumper(Hand.kLeft) || flightStick.getRawButton(5) || f310.isFirstPush(5)) {
 			xboxController.removeRumble("Winch Right");
 			xboxController.addRumble("Winch Left", RumbleType.kLeftRumble, 0.5);
 			
 			lightchooser.pushAnimation("winch F", lightchooser.whiteSnake);
 			
 			winch.set(1);
-		} else if(xboxController.getBumper(Hand.kRight) || flightStick.getRawButton(3)){
+		} else if(xboxController.getBumper(Hand.kRight) || flightStick.getRawButton(3) || f310.isFirstPush(6)){
 			xboxController.removeRumble("Winch Left");
 			xboxController.addRumble("Winch Right", RumbleType.kRightRumble, 0.5);
 			
 			lightchooser.pushAnimation("winch F", lightchooser.whiteSnake);
 			
 			winch.set(0.5);
-		} else if(xboxController.getYButton() || flightStick.getRawButton(6)) {
+		} else if(xboxController.getYButton() || flightStick.getRawButton(6) || f310.isFirstPush(4)) {
 			xboxController.addRumble("Winch Left", RumbleType.kLeftRumble, 0.5);
 			xboxController.addRumble("Winch Right", RumbleType.kRightRumble, 0.5);
 			
@@ -232,13 +252,13 @@ public class Robot extends IterativeRobot {
 		}
 		
 		// Switch front and back on the push of button 2 or X.
-		if(flightStick.isFirstPush(2) || xboxController.isFirstPushX()){
+		if(flightStick.isFirstPush(2) || xboxController.isFirstPushX() || f310.isFirstPush(3)){
 			isInverted = !isInverted;
 		}
 		
 		
 		// Drive the gear.
-		if( (flightStick.getRawButton(1) && (flightStick.getRawButton(7) || flightStick.getRawButton(8)) ) || xboxController.getBButton()){
+		if( (flightStick.getRawButton(1) && (flightStick.getRawButton(7) || flightStick.getRawButton(8)) ) || xboxController.getBButton() || f310.controller.getRawButton(2)){
 			xboxController.addRumble("Gear", RumbleType.kRightRumble, 0.9);
 			gear.reset();
 			lightchooser.pushAnimation("Gear", lightchooser.blinkRed);
