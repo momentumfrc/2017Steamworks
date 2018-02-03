@@ -30,9 +30,10 @@ public class LightsChooser extends SendableChooser<Animation> {
 	Vector<String> animations;
 	
 	// Some basic animations
-	public final Animation blinkRed = new Blink(new Color[] {Color.RED, Color.BLACK}, 70);
+	public final Animation blinkRed = new Blink(new Color[] {Color.RED, Color.BLACK}, 50);
 	public final Animation whiteSnake = new Snake(new Color[] {Color.WHITE, Color.BLACK, Color.BLACK}, 50);
 	public final Animation reverseWhiteSnake = new Snake(new Color[] {Color.WHITE, Color.BLACK, Color.BLACK}, 50, true);
+	public final Animation blinkGreen = new Blink(new Color[] {Color.GREEN, Color.BLACK}, 50);
 	
 	public LightsChooser() {
 		super();

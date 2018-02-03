@@ -53,6 +53,14 @@ public class ControllerWrapper {
 		return value;
 	}
 	
+	public double processValue(int axis, double value) {
+		if(deadzones.containsKey(axis))
+			value = deadzone(value, deadzones.get(axis));
+		if(curves.containsKey(axis))
+			value = expCurve(value, curves.get(axis));
+		return value;
+	}
+	
 	/**
 	 * Sets a deadzone on the controller
 	 * @param axis The axis to set the deadzone on
@@ -78,7 +86,7 @@ public class ControllerWrapper {
 	 * @param pow The curve to be set
 	 * @return The processed value
 	 */
-	private double expCurve(double input, double pow) {
+	public double expCurve(double input, double pow) {
 		if(input == 0)
 			return input;
 		double powed = Math.pow(Math.abs(input), pow);
@@ -88,7 +96,7 @@ public class ControllerWrapper {
 			return -powed;
 	}
 	
-	private double deadzone(double input, double deadzone) {
+	public double deadzone(double input, double deadzone) {
 		if(Math.abs(input) < deadzone) {
 			return 0;
 		} else if(input < 0) {
@@ -99,7 +107,7 @@ public class ControllerWrapper {
 		return 0;
 	}
 	
-	private double map(double input, double minIn, double maxIn, double minOut, double maxOut) {
+	public double map(double input, double minIn, double maxIn, double minOut, double maxOut) {
 		return minOut + (maxOut - minOut) * ((input - minIn) / (maxIn - minIn));
 	}
 

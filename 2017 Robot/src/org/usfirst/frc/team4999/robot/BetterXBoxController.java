@@ -78,7 +78,11 @@ public class BetterXBoxController extends XboxController {
 	 */
 	@Override
 	public double getRawAxis(int axis) {
-		return wrap.getRawAxis(axis);
+		return wrap.processValue(axis, super.getRawAxis(axis));
+	}
+	
+	public double getRawRawAxis(int axis) {
+		return super.getRawAxis(axis);
 	}
 	
 	/**

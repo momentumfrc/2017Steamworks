@@ -174,18 +174,22 @@ public class Robot extends IterativeRobot {
 	public void teleopInit() {
 		// Get the deadzone and curves set in the robot preferences 
 		// This allows us to fine tune the feel of the robot according to the driver's preferences
-		xboxController.setDeadzoneX(Hand.kRight, moprefs.getXboxDeadzone());
-		xboxController.setCurveX(Hand.kRight, moprefs.getXboxCurve());
-		xboxController.setDeadzoneY(Hand.kLeft, moprefs.getXboxDeadzone());
-		xboxController.setCurveY(Hand.kLeft, moprefs.getXboxCurve());
+		
+		double dedzne = 0.1;
+		double crv = 2.5;
+		
+		xboxController.setDeadzoneX(Hand.kRight, dedzne);
+		xboxController.setCurveX(Hand.kRight, crv);
+		xboxController.setDeadzoneY(Hand.kLeft, dedzne);
+		xboxController.setCurveY(Hand.kLeft, crv);
 		
 		flightStick.setDeadzoneY(0.15);
 		flightStick.setDeadzoneTwist(0.20);
 		
-		f310.setDeadzone(4, moprefs.getXboxDeadzone());
-		f310.setDeadzone(1, moprefs.getXboxDeadzone());
-		f310.setCurve(4, moprefs.getXboxCurve());
-		f310.setCurve(1, moprefs.getXboxCurve());
+		f310.setDeadzone(4, dedzne);
+		f310.setDeadzone(1, crv);
+		f310.setCurve(4, dedzne);
+		f310.setCurve(1, crv);
 	}
 	
 	public void teleopPeriodic() {
@@ -196,13 +200,22 @@ public class Robot extends IterativeRobot {
 				moveRequest = xboxController.getY(BetterXBoxController.Hand.kLeft);
 				turnRequest = xboxController.getX(BetterXBoxController.Hand.kRight);
 				
+				if(xboxController.isFirstPushX())
+					isInverted = !isInverted;
+				
+				
+				
 				speedLimiter = SmartDashboard.getNumber(throttleKey, 1);
 				break;
 			case F310:
 				moveRequest = f310.getRawAxis(1);
 				turnRequest = f310.getRawAxis(4);
 				
+				if(f310.isFirstPush(3))
+					isInverted = !isInverted;
+				
 				speedLimiter = SmartDashboard.getNumber(throttleKey, 1);
+				break;
 			case FLIGHTSTICK:
 			default:
 				
@@ -210,68 +223,40 @@ public class Robot extends IterativeRobot {
 				moveRequest = -flightStick.getCalibratedY();
 				turnRequest = flightStick.getCalibratedTwist();
 				
+				if(flightStick.isFirstPush(2))
+					isInverted = !isInverted;
+				
+				if(flightStick.getRawButton(5))
+					lightchooser.pushAnimation("WS", lightchooser.whiteSnake);
+				else
+					lightchooser.popAnimation("WS");
+				
+				if(flightStick.getRawButton(3))
+					lightchooser.pushAnimation("RWS", lightchooser.reverseWhiteSnake);
+				else
+					lightchooser.popAnimation("RWS");
+				
+				if(flightStick.getRawButton(6))
+					lightchooser.pushAnimation("BG", lightchooser.blinkGreen);
+				else
+					lightchooser.popAnimation("BG");
+				
+				if(flightStick.getRawButton(4))
+					lightchooser.pushAnimation("BR", lightchooser.blinkRed);
+				else
+					lightchooser.popAnimation("BR");
+				
 				speedLimiter = (-flightStick.getThrottle() + 1) / 2;
+				break;
 		}
 		
 		// Allow the driver to switch back and front.
 		moveRequest = (isInverted)? -moveRequest: moveRequest;
 		
 		// Write the move and turn request calculated to the drive system
+		//System.out.format("Move: %.2f, Turn: %.2f, Speed: %.2f\n", moveRequest, turnRequest, speedLimiter);
 		drive.arcadeDrive(moveRequest, turnRequest, speedLimiter);	
 		
-		// Drive the winch
-		if(xboxController.getBumper(Hand.kLeft) || flightStick.getRawButton(5) || f310.isFirstPush(5)) {
-			xboxController.removeRumble("Winch Right");
-			xboxController.addRumble("Winch Left", RumbleType.kLeftRumble, 0.5);
-			
-			lightchooser.pushAnimation("winch F", lightchooser.whiteSnake);
-			
-			winch.set(1);
-		} else if(xboxController.getBumper(Hand.kRight) || flightStick.getRawButton(3) || f310.isFirstPush(6)){
-			xboxController.removeRumble("Winch Left");
-			xboxController.addRumble("Winch Right", RumbleType.kRightRumble, 0.5);
-			
-			lightchooser.pushAnimation("winch F", lightchooser.whiteSnake);
-			
-			winch.set(0.5);
-		} else if(xboxController.getYButton() || flightStick.getRawButton(6) || f310.isFirstPush(4)) {
-			xboxController.addRumble("Winch Left", RumbleType.kLeftRumble, 0.5);
-			xboxController.addRumble("Winch Right", RumbleType.kRightRumble, 0.5);
-			
-			lightchooser.pushAnimation("winch R", lightchooser.reverseWhiteSnake);
-			
-			winch.set(-0.25);
-		} else {
-			xboxController.removeRumble("Winch Right");
-			xboxController.removeRumble("Winch Left");
-			
-			lightchooser.popAnimation("winch F");
-			lightchooser.popAnimation("winch R");
-			
-			winch.set(0);
-		}
-		
-		// Switch front and back on the push of button 2 or X.
-		if(flightStick.isFirstPush(2) || xboxController.isFirstPushX() || f310.isFirstPush(3)){
-			isInverted = !isInverted;
-		}
-		
-		
-		// Drive the gear.
-		if( (flightStick.getRawButton(1) && (flightStick.getRawButton(7) || flightStick.getRawButton(8)) ) || xboxController.getBButton() || f310.controller.getRawButton(2)){
-			xboxController.addRumble("Gear", RumbleType.kRightRumble, 0.9);
-			gear.reset();
-			lightchooser.pushAnimation("Gear", lightchooser.blinkRed);
-			piston.set(DoubleSolenoid.Value.kForward);
-		} else if(piston.get() == DoubleSolenoid.Value.kForward) {
-			xboxController.setRumble(RumbleType.kRightRumble, 0.6);
-			xboxController.addRumble("Gear", RumbleType.kRightRumble, 0.6);
-		}
-		if(gear.hasPeriodPassed(0.75)){
-			xboxController.removeRumble("Gear");
-			lightchooser.popAnimation("Gear");
-			piston.set(DoubleSolenoid.Value.kReverse);
-		}
 	}
 	
 	public void testInit(){
