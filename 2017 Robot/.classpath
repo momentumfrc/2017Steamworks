@@ -11,5 +11,6 @@
 	<classpathentry exported="true" kind="var" path="opencv" sourcepath="opencv.sources"/>
 	<classpathentry exported="true" kind="var" path="cscore" sourcepath="cscore.sources"/>
 	<classpathentry kind="var" path="wpiutil" sourcepath="wpiutil.sources"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Blinky-Lights"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
